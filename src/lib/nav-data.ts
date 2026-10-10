@@ -100,6 +100,7 @@ export const FRAGRANCE_MEGA: MegaGroup[] = [
       },
       { label: "Men's Fragrance", href: '/shop?category=mens-fragrance' },
       { label: "Men's Grooming", href: '/shop?category=mens-grooming' },
+      { label: 'Home Fragrance', href: '/shop?category=home-fragrance' },
       { label: "Women's Fragrance", href: '/shop?category=womens-fragrance' },
     ],
   },
