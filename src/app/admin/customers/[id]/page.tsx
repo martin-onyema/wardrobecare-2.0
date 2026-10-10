@@ -25,7 +25,6 @@ import { CustomerNotes } from '@/components/admin/customer-notes'
 import { OrderStatusBadge } from '@/components/admin/order-status-badge'
 import { formatNGN, formatDate, formatDateShort } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Customer',

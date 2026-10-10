@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/table'
 import { CategoryActions } from '@/components/admin/category-actions'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Categories',

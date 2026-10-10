@@ -4,7 +4,6 @@ import { getMyPermissionCodes } from '@/lib/permissions'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { ShippingZoneForm } from '@/components/admin/forms/shipping-zone-form'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'New Shipping Zone',

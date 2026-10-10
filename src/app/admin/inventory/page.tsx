@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/table'
 import { AdjustStockDialog } from '@/components/admin/inventory-actions'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Inventory',

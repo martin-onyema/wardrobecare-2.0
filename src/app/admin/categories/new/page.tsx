@@ -5,7 +5,6 @@ import { db } from '@/lib/db'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { CategoryForm } from '@/components/admin/forms/category-form'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'New Category',

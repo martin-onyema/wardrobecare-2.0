@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { ShippingZoneCard } from '@/components/admin/shipping-zone-card'
 import { NIGERIAN_STATES } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Shipping',

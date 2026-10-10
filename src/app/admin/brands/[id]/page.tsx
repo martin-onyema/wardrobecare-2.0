@@ -6,7 +6,6 @@ import { db } from '@/lib/db'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { BrandForm } from '@/components/admin/forms/brand-form'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Edit Brand',

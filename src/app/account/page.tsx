@@ -11,7 +11,6 @@ import { db } from '@/lib/db'
 import { formatNGN, formatDate } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 
-export const dynamic = 'force-dynamic'
 import {
   Package,
   Heart,

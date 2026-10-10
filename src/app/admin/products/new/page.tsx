@@ -5,7 +5,6 @@ import { getAllCategories } from '@/lib/queries'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { ProductForm } from '@/components/admin/product-form'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'New Product',

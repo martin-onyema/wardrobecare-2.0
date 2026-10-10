@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/table'
 import { BrandActions } from '@/components/admin/brand-actions'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Brands',

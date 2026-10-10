@@ -19,7 +19,6 @@ import {
 import { ReviewsActions } from '@/components/admin/reviews-actions'
 import { formatDateShort } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Reviews',

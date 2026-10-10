@@ -12,7 +12,6 @@ import { ProductsTable } from '@/components/admin/products-table'
 import { AdminHeaderToolbar } from '@/components/admin/admin-header-toolbar'
 import { AdminSearchTrigger } from '@/components/admin/admin-search-trigger'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Products',

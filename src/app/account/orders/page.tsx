@@ -11,7 +11,6 @@ import { formatNGN, formatDate } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Package, ArrowRight, ExternalLink } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'My Orders',
   robots: { index: false, follow: false },

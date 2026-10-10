@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge'
 import { ServiceEnquiryActions } from '@/components/admin/service-enquiry-actions'
 import { formatNGN } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Service Enquiry Detail',

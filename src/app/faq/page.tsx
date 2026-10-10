@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/accordion'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'FAQs',
   description: 'Common questions about shopping with Wardrobecare Clothing.',

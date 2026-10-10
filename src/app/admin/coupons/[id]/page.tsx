@@ -6,7 +6,6 @@ import { db } from '@/lib/db'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { CouponForm } from '@/components/admin/forms/coupon-form'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Edit Coupon',

@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { NotificationItem } from '@/components/admin/notification-item'
 import { MarkAllReadButton } from '@/components/admin/notification-item'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Notifications',

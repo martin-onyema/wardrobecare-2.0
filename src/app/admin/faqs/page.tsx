@@ -19,7 +19,6 @@ import {
 import { FaqActions } from '@/components/admin/faq-actions'
 import { truncate } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'FAQs',

@@ -8,7 +8,6 @@ import { AdminLayout } from '@/components/admin/admin-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { GenerateReportButton } from '@/components/admin/generate-report-button'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Reports',

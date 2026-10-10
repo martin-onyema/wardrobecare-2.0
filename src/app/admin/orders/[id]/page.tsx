@@ -20,7 +20,6 @@ import { TrackingForm } from '@/components/admin/forms/tracking-form'
 import { OrderStatusBadge } from '@/components/admin/order-status-badge'
 import { formatNGN, formatDate, formatDateShort } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Order Detail',

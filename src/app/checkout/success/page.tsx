@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { db } from '@/lib/db'
 import { formatNGN, whatsappLink } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 

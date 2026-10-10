@@ -19,7 +19,6 @@ import {
 import { CampaignActions } from '@/components/admin/campaign-actions'
 import { formatDateShort, formatNGN } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Campaigns',

@@ -8,7 +8,6 @@ import { getProductBySlug, getRelatedProducts, getAdminSettings } from '@/lib/qu
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
 type Params = Promise<{ slug: string }>
 
 export async function generateMetadata({ params }: { params: Params }) {

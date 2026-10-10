@@ -9,7 +9,6 @@ import { TheEdit } from '@/components/home/the-edit'
 import { NewArrivals } from '@/components/home/new-arrivals'
 import { InstagramSection } from '@/components/home/instagram-section'
 
-export const dynamic = 'force-dynamic'
 import {
   getCategories,
   getNewArrivals,

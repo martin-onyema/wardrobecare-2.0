@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/table'
 import { SERVICES } from '@/lib/services-data'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Service Enquiries',

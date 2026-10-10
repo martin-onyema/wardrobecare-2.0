@@ -7,7 +7,6 @@ import { ProfileForm } from '@/components/account/profile-form'
 import { requireUser } from '@/lib/session'
 import { db } from '@/lib/db'
 
-export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'My Profile',
   robots: { index: false, follow: false },

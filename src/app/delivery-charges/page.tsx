@@ -8,7 +8,6 @@ import { DELIVERY_ZONE_GROUPS } from '@/lib/delivery-zones'
 import { getAdminSettings } from '@/lib/queries'
 import { formatNGN } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Delivery Charges by Location',
   description:

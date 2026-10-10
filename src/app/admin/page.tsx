@@ -41,7 +41,6 @@ import { AdminHeaderToolbar } from '@/components/admin/admin-header-toolbar'
 import { AdminSearchTrigger } from '@/components/admin/admin-search-trigger'
 import { db } from '@/lib/db'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Dashboard',

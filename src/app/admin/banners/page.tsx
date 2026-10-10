@@ -19,7 +19,6 @@ import {
 import { BannerActions } from '@/components/admin/banner-actions'
 import { formatDateShort } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Banners',

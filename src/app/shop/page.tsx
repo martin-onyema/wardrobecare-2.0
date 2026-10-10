@@ -8,7 +8,6 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Shop All',
   description: 'Browse the full Wardrobecare collection — distinguished men\'s fashion curated for everyday confidence.',

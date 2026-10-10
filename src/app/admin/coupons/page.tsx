@@ -20,7 +20,6 @@ import {
 import { CouponActions } from '@/components/admin/coupon-actions'
 import { formatDate, formatNGN } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Coupons',

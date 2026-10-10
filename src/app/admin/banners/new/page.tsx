@@ -4,7 +4,6 @@ import { getMyPermissionCodes } from '@/lib/permissions'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { BannerForm } from '@/components/admin/forms/banner-form'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'New Banner',

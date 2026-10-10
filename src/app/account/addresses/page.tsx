@@ -7,7 +7,6 @@ import { AddressManager } from '@/components/account/address-manager'
 import { requireUser } from '@/lib/session'
 import { db } from '@/lib/db'
 
-export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'My Addresses',
   robots: { index: false, follow: false },

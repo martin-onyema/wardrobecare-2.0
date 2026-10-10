@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/table'
 import { formatDate, formatDateShort } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Staff',
