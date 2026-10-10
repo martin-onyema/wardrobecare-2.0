@@ -146,3 +146,4 @@ export const NAV_ITEMS: NavItem[] = [
   // icons off-screen (verified at 1280px). It is featured inside the Services
   // dropdown panel instead, plus the mobile menu and footer.
 ]
+// navbar update trigger
