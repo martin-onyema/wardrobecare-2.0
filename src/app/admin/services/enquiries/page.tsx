@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { requireStaffWithPermission } from '@/lib/permissions'
 import { getMyPermissionCodes } from '@/lib/permissions'

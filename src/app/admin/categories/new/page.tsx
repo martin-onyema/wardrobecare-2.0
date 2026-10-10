@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { requireAdmin } from '@/lib/session'
 import { getMyPermissionCodes } from '@/lib/permissions'
 import { db } from '@/lib/db'

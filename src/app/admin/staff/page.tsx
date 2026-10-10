@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { UserPlus, Pencil } from 'lucide-react'
 import { requireAdmin } from '@/lib/session'

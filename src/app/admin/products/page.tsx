@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import type { ProductStatus } from '@prisma/client'
 import Link from 'next/link'
 import { Plus, Search } from 'lucide-react'

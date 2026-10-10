@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import {
   ShoppingBag, Package, Users, Boxes, CreditCard, Undo2, Ticket, ScrollText,
 } from 'lucide-react'

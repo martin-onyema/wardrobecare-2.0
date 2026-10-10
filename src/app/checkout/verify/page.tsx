@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { verifyPayment } from '@/actions/store'
 import { db } from '@/lib/db'
 import { redirect } from 'next/navigation'
