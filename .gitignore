@@ -69,4 +69,3 @@ bun.lock
 
 # Don't commit database files
 db/
-public/products/
