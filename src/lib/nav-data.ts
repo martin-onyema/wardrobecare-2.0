@@ -55,12 +55,7 @@ export const CLOTHING_MEGA: MegaGroup[] = [
   {
     label: 'Essentials',
     links: [
-      { label: 'Shop All Bottoms', href: '/bottoms', emphasized: true },
-      { label: 'Jeans', href: '/shop?category=jeans' },
-      { label: 'Chinos', href: '/shop?category=chinos' },
-      { label: 'Trousers', href: '/shop?category=trousers' },
-      { label: 'Joggers', href: '/shop?category=joggers' },
-      { label: 'Shorts', href: '/shop?category=shorts' },
+      { label: 'Bottoms', href: '/bottoms' },
       { label: 'Innerwear', href: '/shop?category=innerwear' },
     ],
   },
