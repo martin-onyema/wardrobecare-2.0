@@ -18,6 +18,7 @@
  *                        store's supportEmail setting is empty.
  */
 
+import { sendGmail, gmailConfigured } from '@/lib/gmail'
 const RESEND_ENDPOINT = 'https://api.resend.com/emails'
 const SEND_TIMEOUT_MS = 5000
 
@@ -409,6 +410,18 @@ export async function notifyAdminNewOrder(
       ${button(`${baseUrl()}/admin/orders`, 'OPEN ADMIN CONSOLE')}
     `,
   })
+  
+  // Try Gmail first (works with any recipient), then fall back to Resend
+  if (gmailConfigured()) {
+    const result = await sendGmail({
+      to: target,
+      subject: `🔔 New order ${order.orderNumber} — ${naira(order.total)}`,
+      html,
+    })
+    if (result.ok) return { ok: true }
+  }
+  
+  // Fall back to Resend
   return sendEmail({
     to: target,
     subject: `🔔 New order ${order.orderNumber} — ${naira(order.total)}`,
