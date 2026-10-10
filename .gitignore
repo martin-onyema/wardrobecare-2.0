@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js build output
+.next/
+out/
+
+# Production
+build/
+
+# Database (local SQLite — don't commit)
+db/
+*.db
+*.db-journal
+
+# Environment variables (secrets — NEVER commit)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Prisma generated client (regenerated on install)
+node_modules/.prisma/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Vercel
+.vercel
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Lock files (keep bun.lock for reproducible installs)
+# package-lock.json
+# bun.lock
+
+# Scripts output / temp files
+scripts/search/
+scripts/orig/
+scripts/sheets/
+scripts/wc-data/
+scripts/*.json
+scripts/*.txt
+scripts/*.out
+scripts/*.html
+scripts/*.png
+scripts/*.jpg
+scripts/search/
+/tmp/
+
+# Don't commit lock files (Vercel uses npm)
+bun.lock
+
+# Don't commit database files
+db/
