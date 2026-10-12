@@ -61,6 +61,16 @@ const NAV_LINKS: NavLink[] = [
           { label: 'Shorts', href: '/shop?category=shorts' },
         ],
       },
+      {
+        label: 'Essentials',
+        links: [
+          { label: 'Boxers Shorts', href: '/shop?category=boxers-shorts' },
+          { label: 'Boxers Brief', href: '/shop?category=boxers-brief' },
+          { label: 'Underwear T-Shirts', href: '/shop?category=underwear-tshirts' },
+          { label: 'Singlets', href: '/shop?category=singlets' },
+          { label: 'Grooming Kits', href: '/shop?category=grooming-kits' },
+        ],
+      },
     ],
   },
   {
@@ -101,17 +111,6 @@ const NAV_LINKS: NavLink[] = [
       { label: 'Unisex', href: '/shop?category=unisex-fragrance' },
       { label: 'Body Care', href: '/shop?category=body-care' },
       { label: 'Home Fragrance', href: '/shop?category=home-fragrance' },
-    ],
-  },
-  {
-    label: 'Essentials',
-    href: '/shop?category=essentials',
-    children: [
-      { label: 'Boxers Shorts', href: '/shop?category=boxers-shorts' },
-      { label: 'Boxers Brief', href: '/shop?category=boxers-brief' },
-      { label: 'Underwear T-Shirts', href: '/shop?category=underwear-tshirts' },
-      { label: 'Singlets', href: '/shop?category=singlets' },
-      { label: 'Grooming Kits', href: '/shop?category=grooming-kits' },
     ],
   },
 ]
@@ -282,7 +281,7 @@ export function Navbar() {
               </div>
 
               {NAV_LINKS.map((link) => (
-                link.children ? (
+                (link.children || link.groups) ? (
                   <div
                     key={link.label}
                     className="relative"
@@ -311,12 +310,15 @@ export function Navbar() {
                       <div className="absolute top-full left-0 pt-3 z-50">
                         <div className={cn(
                           'bg-background border border-foreground/12 shadow-[0_24px_60px_-24px_rgba(18,17,16,0.25)]',
-                          link.groups ? 'w-[780px]' : 'w-[460px]'
+                          link.groups ? (link.groups.length >= 5 ? 'w-[920px]' : 'w-[760px]') : 'w-[460px]'
                         )}>
                           <div className="p-6">
                             <p className="eyebrow text-foreground/50 mb-4 pb-2.5 border-b border-foreground/10">{link.label}</p>
                             {link.groups ? (
-                              <div className="grid grid-cols-3 gap-x-8">
+                              <div className={cn(
+                                'grid gap-x-8',
+                                link.groups.length >= 5 ? 'grid-cols-5' : link.groups.length === 4 ? 'grid-cols-4' : 'grid-cols-3'
+                              )}>
                                 {link.groups.map((group) => (
                                   <div key={group.label}>
                                     <p className="text-[10px] uppercase tracking-[0.2em] text-rust mb-3">{group.label}</p>

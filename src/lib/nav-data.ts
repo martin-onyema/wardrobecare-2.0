@@ -27,32 +27,55 @@ export type NavItem = {
   panelAlign?: 'left' | 'right'
 }
 
-/** Clothing + Bottoms merged into a single section, as two dropdown groups. */
+/** Clothing + Bottoms + Essentials merged into a single mega-menu, grouped like the desktop navbar. */
 export const CLOTHING_MEGA: MegaGroup[] = [
   {
-    label: 'Shop Clothing',
+    label: 'Formal Wear',
     links: [
       { label: 'Shop All Clothing', href: '/clothing', emphasized: true },
-      { label: 'Blazers', href: '/shop?category=blazers' },
-      { label: 'Casual Shirts', href: '/shop?category=casual-shirts' },
-      { label: 'Formal / Office Shirts', href: '/shop?category=formal-shirts' },
-      { label: 'Hoodies & Sweatshirts', href: '/shop?category=hoodies-sweatshirts' },
-      { label: 'Innerwear', href: '/shop?category=innerwear' },
-      { label: 'Jackets', href: '/shop?category=jackets' },
-      { label: 'Polo Shirts', href: '/shop?category=polo-shirts' },
       { label: 'Suits', href: '/shop?category=suits' },
+      { label: 'Blazers', href: '/shop?category=blazers' },
+      { label: 'Tuxedo / Dinner Jacket', href: '/shop?category=tuxedo-dinner-jacket' },
+      { label: 'Waistcoat & Vest', href: '/shop?category=waistcoat-vest' },
+    ],
+  },
+  {
+    label: 'Shirts',
+    links: [
+      { label: 'Dress Shirts', href: '/shop?category=dress-shirts' },
+      { label: 'Casual Shirts', href: '/shop?category=casual-shirts' },
+      { label: 'Polo Shirts', href: '/shop?category=polo-shirts' },
       { label: 'T-Shirts', href: '/shop?category=t-shirts' },
     ],
   },
   {
-    label: 'Shop Bottoms',
+    label: 'Layers',
     links: [
-      { label: 'Shop All Bottoms', href: '/bottoms', emphasized: true },
-      { label: 'Chinos', href: '/shop?category=chinos' },
-      { label: 'Jeans', href: '/shop?category=jeans' },
+      { label: 'Jackets', href: '/shop?category=jackets' },
+      { label: 'Long Sleeve / Sweatshirts', href: '/shop?category=long-sleeve-sweatshirts' },
+      { label: 'Sweaters / Cardigan', href: '/shop?category=sweaters-cardigan' },
+      { label: 'Hoodies', href: '/shop?category=hoodies-sweatshirts' },
+    ],
+  },
+  {
+    label: 'Bottoms',
+    links: [
+      { label: 'Formal Trousers', href: '/shop?category=formal-trousers' },
+      { label: 'Chinos Trousers', href: '/shop?category=chinos' },
+      { label: 'Casual Trousers', href: '/shop?category=casual-trousers' },
+      { label: 'Jeans Trousers', href: '/shop?category=jeans' },
       { label: 'Joggers', href: '/shop?category=joggers' },
       { label: 'Shorts', href: '/shop?category=shorts' },
-      { label: 'Trousers', href: '/shop?category=trousers' },
+    ],
+  },
+  {
+    label: 'Essentials',
+    links: [
+      { label: 'Boxers Shorts', href: '/shop?category=boxers-shorts' },
+      { label: 'Boxers Brief', href: '/shop?category=boxers-brief' },
+      { label: 'Underwear T-Shirts', href: '/shop?category=underwear-tshirts' },
+      { label: 'Singlets', href: '/shop?category=singlets' },
+      { label: 'Grooming Kits', href: '/shop?category=grooming-kits' },
     ],
   },
 ]
