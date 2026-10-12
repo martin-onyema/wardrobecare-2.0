@@ -8,7 +8,6 @@ db/
 download/
 upload/
 tool-results/
-public/products/
 scripts/search/
 scripts/orig/
 scripts/sheets/

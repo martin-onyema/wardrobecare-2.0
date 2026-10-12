@@ -50,18 +50,17 @@ const NAV_LINKS: NavLink[] = [
           { label: 'Hoodies', href: '/shop?category=hoodies-sweatshirts' },
         ],
       },
-    ],
-  },
-  {
-    label: 'Bottoms',
-    href: '/bottoms',
-    children: [
-      { label: 'Formal Trousers', href: '/shop?category=formal-trousers' },
-      { label: 'Chinos Trousers', href: '/shop?category=chinos' },
-      { label: 'Casual Trousers', href: '/shop?category=casual-trousers' },
-      { label: 'Jeans Trousers', href: '/shop?category=jeans' },
-      { label: 'Joggers', href: '/shop?category=joggers' },
-      { label: 'Shorts', href: '/shop?category=shorts' },
+      {
+        label: 'Bottoms',
+        links: [
+          { label: 'Formal Trousers', href: '/shop?category=formal-trousers' },
+          { label: 'Chinos Trousers', href: '/shop?category=chinos' },
+          { label: 'Casual Trousers', href: '/shop?category=casual-trousers' },
+          { label: 'Jeans Trousers', href: '/shop?category=jeans' },
+          { label: 'Joggers', href: '/shop?category=joggers' },
+          { label: 'Shorts', href: '/shop?category=shorts' },
+        ],
+      },
     ],
   },
   {
@@ -102,6 +101,17 @@ const NAV_LINKS: NavLink[] = [
       { label: 'Unisex', href: '/shop?category=unisex-fragrance' },
       { label: 'Body Care', href: '/shop?category=body-care' },
       { label: 'Home Fragrance', href: '/shop?category=home-fragrance' },
+    ],
+  },
+  {
+    label: 'Essentials',
+    href: '/shop?category=essentials',
+    children: [
+      { label: 'Boxers Shorts', href: '/shop?category=boxers-shorts' },
+      { label: 'Boxers Brief', href: '/shop?category=boxers-brief' },
+      { label: 'Underwear T-Shirts', href: '/shop?category=underwear-tshirts' },
+      { label: 'Singlets', href: '/shop?category=singlets' },
+      { label: 'Grooming Kits', href: '/shop?category=grooming-kits' },
     ],
   },
 ]
@@ -301,7 +311,7 @@ export function Navbar() {
                       <div className="absolute top-full left-0 pt-3 z-50">
                         <div className={cn(
                           'bg-background border border-foreground/12 shadow-[0_24px_60px_-24px_rgba(18,17,16,0.25)]',
-                          link.groups ? 'w-[640px]' : 'w-[460px]'
+                          link.groups ? 'w-[780px]' : 'w-[460px]'
                         )}>
                           <div className="p-6">
                             <p className="eyebrow text-foreground/50 mb-4 pb-2.5 border-b border-foreground/10">{link.label}</p>
