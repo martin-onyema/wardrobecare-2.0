@@ -13,6 +13,11 @@
  * (/<slug>) — editorial landings that organise each sub-menu into its own
  * section (see lib/category-hubs.ts) — while the mega-menu links deep into
  * /shop?category=<slug> for the full filtered grids.
+ *
+ * IMPORTANT: keep these mega arrays in sync with NAV_LINKS in
+ * src/components/layout/navbar.tsx. The desktop navbar reads from NAV_LINKS
+ * (hardcoded) while the mobile menu reads from this file. They must mirror
+ * each other so mobile and desktop show the same subcategories.
  */
 
 export type MegaLink = { label: string; href: string; emphasized?: boolean }
@@ -27,7 +32,7 @@ export type NavItem = {
   panelAlign?: 'left' | 'right'
 }
 
-/** Clothing + Bottoms + Essentials merged into a single mega-menu, grouped like the desktop navbar. */
+/** Clothing — 5 grouped columns mirroring the desktop navbar (Formal Wear / Shirts / Layers / Bottoms / Essentials). */
 export const CLOTHING_MEGA: MegaGroup[] = [
   {
     label: 'Formal Wear',
@@ -80,55 +85,64 @@ export const CLOTHING_MEGA: MegaGroup[] = [
   },
 ]
 
-/** Footwear section — one dropdown group. */
+/** Footwear section — one dropdown group mirroring the desktop navbar. */
 export const FOOTWEAR_MEGA: MegaGroup[] = [
   {
     label: 'Shop Footwear',
     links: [
-      { label: 'Shop All Footwear', href: '/shop?category=footwear', emphasized: true },
-      { label: 'Casual Shoes', href: '/shop?category=casual-shoes' },
+      { label: 'Shop All Footwear', href: '/footwear', emphasized: true },
       { label: 'Dress Shoes', href: '/shop?category=dress-shoes' },
+      { label: 'Casual Shoes', href: '/shop?category=casual-shoes' },
       { label: 'Exotic Shoes', href: '/shop?category=exotic-shoes' },
       { label: 'Loafers', href: '/shop?category=loafers' },
+      { label: 'Sneakers', href: '/shop?category=sneakers' },
+      { label: 'Slippers', href: '/shop?category=slippers' },
+      { label: 'Slide', href: '/shop?category=slide' },
     ],
   },
 ]
 
-/** Accessories section — one dropdown group. */
+/** Accessories section — one dropdown group mirroring the desktop navbar. */
 export const ACCESSORIES_MEGA: MegaGroup[] = [
   {
     label: 'Shop Accessories',
     links: [
-      { label: 'Shop All Accessories', href: '/shop?category=accessories', emphasized: true },
+      { label: 'Shop All Accessories', href: '/accessories', emphasized: true },
       { label: 'Belts', href: '/shop?category=belts' },
-      { label: 'Caps & Hats', href: '/shop?category=caps-hats' },
-      { label: 'Pocket Squares', href: '/shop?category=pocket-squares' },
-      { label: 'Socks', href: '/shop?category=socks' },
-      { label: 'Sunglasses', href: '/shop?category=sunglasses' },
+      { label: 'Wallets', href: '/shop?category=wallets-purses' },
       { label: 'Ties', href: '/shop?category=ties' },
-      { label: 'Wallets & Purses', href: '/shop?category=wallets-purses' },
+      { label: 'Pocket Squares', href: '/shop?category=pocket-squares' },
+      { label: 'Suspenders', href: '/shop?category=suspenders' },
+      { label: 'Cufflinks', href: '/shop?category=cufflinks' },
+      { label: 'Wrist Watches', href: '/shop?category=wrist-watches' },
+      { label: 'Caps & Hats', href: '/shop?category=caps-hats' },
+      { label: 'Sunglasses & Frames', href: '/shop?category=sunglasses-frames' },
+      { label: 'Socks', href: '/shop?category=socks' },
     ],
   },
 ]
 
-/** Fragrance & Grooming section — one dropdown group. */
+/** Fragrance & Grooming section — one dropdown group mirroring the desktop navbar. */
 export const FRAGRANCE_MEGA: MegaGroup[] = [
   {
     label: 'Shop Fragrance & Grooming',
     links: [
       {
         label: 'Shop All Fragrance & Grooming',
-        href: '/shop?category=fragrance-grooming',
+        href: '/fragrance-grooming',
         emphasized: true,
       },
-      { label: "Men's Fragrance", href: '/shop?category=mens-fragrance' },
-      { label: "Men's Grooming", href: '/shop?category=mens-grooming' },
-      { label: "Women's Fragrance", href: '/shop?category=womens-fragrance' },
+      { label: 'Men', href: '/shop?category=mens-fragrance' },
+      { label: 'Women', href: '/shop?category=womens-fragrance' },
+      { label: 'Unisex', href: '/shop?category=unisex-fragrance' },
+      { label: 'Body Care', href: '/shop?category=body-care' },
+      { label: 'Home Fragrance', href: '/shop?category=home-fragrance' },
     ],
   },
 ]
 
-/** Desktop navbar — items with `mega` render a dropdown automatically. */
+/** Desktop navbar — items with `mega` render a dropdown automatically.
+ *  Mobile menu reads from the same mega arrays so subcategories stay in sync. */
 export const NAV_ITEMS: NavItem[] = [
   { label: 'New Arrivals', href: '/shop?sort=newest' },
   {
