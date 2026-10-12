@@ -19,3 +19,4 @@ scripts/*.html
 scripts/*.png
 scripts/*.jpg
 tests/
+public/products/
