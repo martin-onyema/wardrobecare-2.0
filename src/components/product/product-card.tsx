@@ -38,8 +38,12 @@ export function ProductCard({ product, className, priority, showQuickAdd = true 
   const image = product.images[0]?.url
   const hoverImage = product.images[1]?.url
   const sizes = product.variants?.map((v) => v.size) ?? []
-  // Respect the explicit outOfStock flag from the admin; otherwise infer from variants
-  const inStock = (product.outOfStock !== true) && (!product.variants?.length || product.variants.some((v) => v.stock > 0))
+  // The "Sold Out" badge only respects the explicit admin-set outOfStock flag.
+  // Variant stock still gates add-to-cart (see handleQuickAdd below), but we
+  // never auto-flag a product as sold out just because all variants have
+  // stock = 0 — the admin may simply not track inventory, in which case
+  // stock defaults to 0 and the product should remain visible & purchasable.
+  const inStock = product.outOfStock !== true
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -48,7 +52,10 @@ export function ProductCard({ product, className, priority, showQuickAdd = true 
       toast.error('Out of stock')
       return
     }
-    const firstInStock = product.variants?.find((v) => v.stock > 0)
+    // If at least one variant has stock > 0, pick the first in-stock one.
+    // If none has tracked stock, treat as "stock not tracked" and add anyway.
+    const hasTrackedStock = product.variants?.some((v) => v.stock > 0) ?? false
+    const firstInStock = hasTrackedStock ? product.variants?.find((v) => v.stock > 0) : product.variants?.[0]
     addToCart({
       productId: product.id,
       variantId: undefined,

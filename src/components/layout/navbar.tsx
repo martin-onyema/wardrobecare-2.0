@@ -309,26 +309,32 @@ export function Navbar() {
                     {openKey === link.label && (
                       <div className="absolute top-full left-0 pt-3 z-50">
                         <div className={cn(
-                          'bg-background border border-foreground/12 shadow-[0_24px_60px_-24px_rgba(18,17,16,0.25)]',
-                          link.groups ? (link.groups.length >= 5 ? 'w-[920px]' : 'w-[760px]') : 'w-[460px]'
+                          'bg-background border border-foreground/12 shadow-[0_24px_60px_-24px_rgba(18,17,16,0.25)] max-w-[calc(100vw-1.5rem)]',
+                          link.groups
+                            ? (link.groups.length >= 5
+                                ? 'w-[760px]'
+                                : link.groups.length === 4
+                                  ? 'w-[640px]'
+                                  : 'w-[520px]')
+                            : 'w-[440px]'
                         )}>
-                          <div className="p-6">
-                            <p className="eyebrow text-foreground/50 mb-4 pb-2.5 border-b border-foreground/10">{link.label}</p>
+                          <div className="p-5">
+                            <p className="eyebrow text-foreground/50 mb-3.5 pb-2.5 border-b border-foreground/10">{link.label}</p>
                             {link.groups ? (
                               <div className={cn(
-                                'grid gap-x-8',
+                                'grid gap-x-5',
                                 link.groups.length >= 5 ? 'grid-cols-5' : link.groups.length === 4 ? 'grid-cols-4' : 'grid-cols-3'
                               )}>
                                 {link.groups.map((group) => (
                                   <div key={group.label}>
-                                    <p className="text-[10px] uppercase tracking-[0.2em] text-rust mb-3">{group.label}</p>
-                                    <ul className="space-y-1">
+                                    <p className="text-[9px] uppercase tracking-[0.18em] text-rust mb-2.5 whitespace-nowrap">{group.label}</p>
+                                    <ul className="space-y-0.5">
                                       {group.links.map((child) => (
                                         <li key={child.href}>
                                           <Link
                                             href={child.href}
                                             onClick={closeNow}
-                                            className="group flex items-center justify-between py-2 text-sm text-foreground/75 hover:text-foreground transition-colors"
+                                            className="group flex items-center justify-between py-1.5 text-[13px] text-foreground/75 hover:text-foreground transition-colors"
                                           >
                                             <span className="group-hover:translate-x-0.5 transition-transform duration-300">{child.label}</span>
                                             <span className="text-foreground/30 group-hover:text-foreground transition-colors" aria-hidden>→</span>

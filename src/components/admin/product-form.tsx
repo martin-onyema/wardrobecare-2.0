@@ -137,7 +137,7 @@ export function ProductForm({
   const [restoring, setRestoring] = useState(false)
   const [archiving, setArchiving] = useState(false)
   const [imagesText, setImagesText] = useState(
-    (product?.images ?? []).map((i) => i.url).join('\n') ?? '',
+    product?.images.map((i) => i.url).join('\n') ?? '',
   )
   const [uploading, setUploading] = useState(false)
 
@@ -202,8 +202,8 @@ export function ProductForm({
   }
 
   const [variants, setVariants] = useState<VariantInput[]>(
-    product?.variants?.length
-      ? product?.variants?.map((v) => ({
+    product?.variants.length
+      ? product.variants.map((v) => ({
           id: v.id,
           size: v.size ?? '',
           sku: v.sku ?? '',
@@ -217,7 +217,7 @@ export function ProductForm({
             size: 'S',
             sku: '',
             price: '',
-            stock: '0',
+            stock: '10',
             lowStockThreshold: '5',
             imageUrl: '',
           },
@@ -237,7 +237,7 @@ export function ProductForm({
         size: '',
         sku: '',
         price: '',
-        stock: '0',
+        stock: '10',
         lowStockThreshold: '5',
         imageUrl: '',
       },
