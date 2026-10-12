@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { ChatWidget } from "@/components/chat/chat-widget";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -78,6 +79,7 @@ export default function RootLayout({
         </Providers>
         <Toaster />
         <SonnerToaster position="top-center" />
+        <Analytics />
       </body>
     </html>
   );
