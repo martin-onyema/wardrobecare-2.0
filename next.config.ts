@@ -12,14 +12,6 @@ const nextConfig: NextConfig = {
     "localhost",
     "localhost:3000",
   ],
-  serverActions: {
-    allowedOrigins: [
-      "preview-*.space-z.ai",
-      "*.space-z.ai",
-      "*.fcapp.run",
-      "localhost:3000",
-    ],
-  },
   images: {
     unoptimized: true,
     remotePatterns: [
