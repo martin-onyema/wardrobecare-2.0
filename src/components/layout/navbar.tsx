@@ -12,7 +12,8 @@ import { useSession } from 'next-auth/react'
 import { SERVICE_GROUPS } from '@/lib/services-data'
 
 type NavChild = { label: string; href: string }
-type NavLink = { label: string; href: string; children?: NavChild[] }
+type NavGroup = { label: string; links: NavChild[] }
+type NavLink = { label: string; href: string; children?: NavChild[]; groups?: NavGroup[] }
 
 // The top-level retail links now point to their dedicated category pages.
 // Dropdown children continue to point to the filtered shop grids.
@@ -21,19 +22,34 @@ const NAV_LINKS: NavLink[] = [
   {
     label: 'Clothing',
     href: '/clothing',
-    children: [
-      { label: 'Suits', href: '/shop?category=suits' },
-      { label: 'Blazers', href: '/shop?category=blazers' },
-      { label: 'Jackets', href: '/shop?category=jackets' },
-      { label: 'Tuxedo / Dinner Jacket', href: '/shop?category=tuxedo-dinner-jacket' },
-      { label: 'Waistcoat & Vest', href: '/shop?category=waistcoat-vest' },
-      { label: 'Dress Shirts', href: '/shop?category=dress-shirts' },
-      { label: 'Casual Shirts', href: '/shop?category=casual-shirts' },
-      { label: 'Polo Shirts', href: '/shop?category=polo-shirts' },
-      { label: 'T-Shirts', href: '/shop?category=t-shirts' },
-      { label: 'Long Sleeve / Sweatshirts', href: '/shop?category=long-sleeve-sweatshirts' },
-      { label: 'Sweaters / Cardigan', href: '/shop?category=sweaters-cardigan' },
-      { label: 'Hoodies', href: '/shop?category=hoodies-sweatshirts' },
+    groups: [
+      {
+        label: 'Formal Wear',
+        links: [
+          { label: 'Suits', href: '/shop?category=suits' },
+          { label: 'Blazers', href: '/shop?category=blazers' },
+          { label: 'Tuxedo / Dinner Jacket', href: '/shop?category=tuxedo-dinner-jacket' },
+          { label: 'Waistcoat & Vest', href: '/shop?category=waistcoat-vest' },
+        ],
+      },
+      {
+        label: 'Shirts',
+        links: [
+          { label: 'Dress Shirts', href: '/shop?category=dress-shirts' },
+          { label: 'Casual Shirts', href: '/shop?category=casual-shirts' },
+          { label: 'Polo Shirts', href: '/shop?category=polo-shirts' },
+          { label: 'T-Shirts', href: '/shop?category=t-shirts' },
+        ],
+      },
+      {
+        label: 'Layers',
+        links: [
+          { label: 'Jackets', href: '/shop?category=jackets' },
+          { label: 'Long Sleeve / Sweatshirts', href: '/shop?category=long-sleeve-sweatshirts' },
+          { label: 'Sweaters / Cardigan', href: '/shop?category=sweaters-cardigan' },
+          { label: 'Hoodies', href: '/shop?category=hoodies-sweatshirts' },
+        ],
+      },
     ],
   },
   {
@@ -283,23 +299,50 @@ export function Navbar() {
 
                     {openKey === link.label && (
                       <div className="absolute top-full left-0 pt-3 z-50">
-                        <div className="w-[460px] bg-background border border-foreground/12 shadow-[0_24px_60px_-24px_rgba(18,17,16,0.25)]">
+                        <div className={cn(
+                          'bg-background border border-foreground/12 shadow-[0_24px_60px_-24px_rgba(18,17,16,0.25)]',
+                          link.groups ? 'w-[640px]' : 'w-[460px]'
+                        )}>
                           <div className="p-6">
                             <p className="eyebrow text-foreground/50 mb-4 pb-2.5 border-b border-foreground/10">{link.label}</p>
-                            <ul className="grid grid-cols-2 gap-x-6">
-                              {link.children.map((child) => (
-                                <li key={child.href}>
-                                  <Link
-                                    href={child.href}
-                                    onClick={closeNow}
-                                    className="group flex items-center justify-between py-2 text-sm text-foreground/75 hover:text-foreground transition-colors"
-                                  >
-                                    <span className="group-hover:translate-x-0.5 transition-transform duration-300">{child.label}</span>
-                                    <span className="text-foreground/30 group-hover:text-foreground transition-colors" aria-hidden>→</span>
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
+                            {link.groups ? (
+                              <div className="grid grid-cols-3 gap-x-8">
+                                {link.groups.map((group) => (
+                                  <div key={group.label}>
+                                    <p className="text-[10px] uppercase tracking-[0.2em] text-rust mb-3">{group.label}</p>
+                                    <ul className="space-y-1">
+                                      {group.links.map((child) => (
+                                        <li key={child.href}>
+                                          <Link
+                                            href={child.href}
+                                            onClick={closeNow}
+                                            className="group flex items-center justify-between py-2 text-sm text-foreground/75 hover:text-foreground transition-colors"
+                                          >
+                                            <span className="group-hover:translate-x-0.5 transition-transform duration-300">{child.label}</span>
+                                            <span className="text-foreground/30 group-hover:text-foreground transition-colors" aria-hidden>→</span>
+                                          </Link>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <ul className="grid grid-cols-2 gap-x-6">
+                                {link.children?.map((child) => (
+                                  <li key={child.href}>
+                                    <Link
+                                      href={child.href}
+                                      onClick={closeNow}
+                                      className="group flex items-center justify-between py-2 text-sm text-foreground/75 hover:text-foreground transition-colors"
+                                    >
+                                      <span className="group-hover:translate-x-0.5 transition-transform duration-300">{child.label}</span>
+                                      <span className="text-foreground/30 group-hover:text-foreground transition-colors" aria-hidden>→</span>
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
                           </div>
                           <div className="px-6 py-3.5 border-t border-foreground/10 flex items-center justify-between">
                             <p className="text-xs text-foreground/60">Everything in {link.label.toLowerCase()}.</p>
