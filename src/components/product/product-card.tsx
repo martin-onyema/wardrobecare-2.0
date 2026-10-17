@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, Eye, ShoppingBag } from 'lucide-react'
+import { Heart, Eye, ShoppingBag, Pencil } from 'lucide-react'
 import { useWishlistStore } from '@/lib/stores/wishlist-store'
 import { useCartStore } from '@/lib/stores/cart-store'
 import { useUIStore } from '@/lib/stores/ui-store'
 import { formatNGN, effectivePrice } from '@/lib/format'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useSession } from 'next-auth/react'
 
 type ProductCardProps = {
   product: {
@@ -32,6 +33,8 @@ export function ProductCard({ product, className, priority, showQuickAdd = true 
   const { add: addToCart } = useCartStore()
   const setQuickView = useUIStore((s) => s.setQuickView)
   const setCartOpen = useUIStore((s) => s.setCartOpen)
+  const { data: session } = useSession()
+  const isAdmin = (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.isAdmin === true
 
   const price = effectivePrice(product.price, product.salePrice)
   const inWishlist = hasWishlist(product.id)
@@ -101,7 +104,10 @@ export function ProductCard({ product, className, priority, showQuickAdd = true 
               fill
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
               priority={priority}
-              className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.04]"
+              className={cn(
+                'object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.04]',
+                !inStock && 'grayscale-[40%] opacity-90',
+              )}
             />
           )}
           {hoverImage && (
@@ -116,14 +122,30 @@ export function ProductCard({ product, className, priority, showQuickAdd = true 
 
           {/* Sale badge */}
           {product.salePrice && product.salePrice < product.price && (
-            <span className="absolute top-3 left-3 bg-foreground text-background text-[9px] uppercase tracking-[0.15em] px-2 py-1">
+            <span className="absolute top-3 left-3 bg-foreground text-background text-[9px] uppercase tracking-[0.15em] px-2 py-1 font-medium">
               Sale
             </span>
           )}
           {!inStock && (
-            <span className="absolute top-3 left-3 bg-muted text-foreground text-[9px] uppercase tracking-[0.15em] px-2 py-1">
-              Sold Out
-            </span>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="bg-foreground/95 text-background text-base md:text-lg font-bold uppercase tracking-[0.18em] px-5 py-2.5 shadow-lg">
+                Sold Out
+              </span>
+            </div>
+          )}
+
+          {/* Admin inline-edit button — only visible to signed-in admins */}
+          {isAdmin && (
+            <Link
+              href={`/admin/products/${product.id}`}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+              className="absolute top-3 left-1/2 -translate-x-1/2 bg-foreground text-background text-[9px] uppercase tracking-[0.15em] px-3 py-1.5 font-medium flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-rust z-10"
+              aria-label="Edit product"
+              title="Edit product (admin)"
+            >
+              <Pencil className="h-3 w-3" strokeWidth={1.8} />
+              Edit
+            </Link>
           )}
 
           {/* Hover actions */}
@@ -165,11 +187,11 @@ export function ProductCard({ product, className, priority, showQuickAdd = true 
               {product.category.name}
             </p>
           )}
-          <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:underline underline-offset-2">
+          <h3 className={cn('text-sm font-medium leading-snug line-clamp-2 group-hover:underline underline-offset-2', !inStock && 'text-muted-foreground')}>
             {product.name}
           </h3>
           <div className="flex items-baseline gap-2 mt-1.5">
-            <span className="text-sm tabular-nums">{formatNGN(price)}</span>
+            <span className={cn('text-sm tabular-nums', !inStock && 'text-muted-foreground')}>{formatNGN(price)}</span>
             {product.salePrice && product.salePrice < product.price && (
               <span className="text-xs text-muted-foreground line-through tabular-nums">
                 {formatNGN(product.price)}

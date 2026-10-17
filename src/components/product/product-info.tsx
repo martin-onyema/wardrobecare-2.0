@@ -46,8 +46,6 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
   // Compute initial size from product on first render — no effect needed
   const [selectedSize, setSelectedSize] = useState<string | null>(() => {
     if (product.variants.length > 0) {
-      // Prefer the first in-stock variant, but fall back to the first variant
-      // overall so customers see a pre-selected size even when stock is 0.
       const firstAvailable = product.variants.find((v) => v.stock > 0)
       return firstAvailable?.size ?? product.variants[0]?.size ?? null
     }
@@ -64,16 +62,10 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
   const selectedVariant = product.variants.find((v) => v.size === selectedSize)
   const price = effectivePrice(product.price, product.salePrice)
   const isOnSale = product.salePrice && product.salePrice < product.price
-  // The "Sold Out" badge only respects the explicit admin-set outOfStock flag.
-  // We never auto-flag a product as sold out just because all variants have
-  // stock = 0 — the admin may simply not track inventory.
-  const inStock = product.outOfStock !== true
-  // Variant stock gates add-to-cart ONLY when the admin actually tracks
-  // inventory (at least one variant has stock > 0). When every variant is
-  // 0, we treat the product as "stock not tracked" and allow add-to-cart.
-  const hasTrackedStock = product.variants.some((v) => v.stock > 0)
-  const selectedInStock = inStock && (!hasTrackedStock || (selectedVariant ? selectedVariant.stock > 0 : true))
-  const maxQuantity = selectedVariant?.stock && selectedVariant.stock > 0 ? selectedVariant.stock : 99
+  // Respect the explicit admin-set outOfStock flag; otherwise infer from variants
+  const inStock = (product.outOfStock !== true) && (!product.variants.length || product.variants.some((v) => v.stock > 0))
+  const selectedInStock = (product.outOfStock !== true) && (selectedVariant ? selectedVariant.stock > 0 : inStock)
+  const maxQuantity = selectedVariant?.stock ?? 99
   const inWishlist = hasWishlist(product.id)
 
   const handleAddToCart = () => {
@@ -195,16 +187,16 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
 
       {/* Status */}
       <div className="flex items-center gap-3 text-xs">
-        <span className={cn(
-          'inline-flex items-center gap-1.5',
-          inStock ? 'text-foreground' : 'text-muted-foreground',
-        )}>
-          <span className={cn(
-            'h-1.5 w-1.5 rounded-full',
-            inStock ? 'bg-green-600' : 'bg-muted-foreground',
-          )} />
-          {inStock ? 'In Stock' : 'Sold Out'}
-        </span>
+        {inStock ? (
+          <span className="inline-flex items-center gap-1.5 text-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
+            In Stock
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 bg-foreground text-background px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em]">
+            Sold Out
+          </span>
+        )}
         <span className="text-muted-foreground">SKU: {selectedVariant?.sku ?? product.sku}</span>
       </div>
 
@@ -280,16 +272,32 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
         <button
           onClick={handleAddToCart}
           disabled={!inStock}
-          className="w-full py-4 bg-foreground text-background text-[11px] uppercase tracking-[0.2em] hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+          className={cn(
+            "w-full py-4 text-[11px] uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-2",
+            inStock
+              ? "bg-foreground text-background hover:bg-foreground/90"
+              : "bg-muted text-muted-foreground cursor-not-allowed",
+          )}
         >
-          <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
-          Add to Bag
+          {inStock ? (
+            <>
+              <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
+              Add to Bag
+            </>
+          ) : (
+            <span className="font-bold tracking-[0.22em]">Sold Out</span>
+          )}
         </button>
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={handleBuyNow}
             disabled={!inStock}
-            className="py-3.5 border border-foreground text-[11px] uppercase tracking-[0.2em] hover:bg-foreground hover:text-background transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className={cn(
+              "py-3.5 border text-[11px] uppercase tracking-[0.2em] transition-colors",
+              inStock
+                ? "border-foreground hover:bg-foreground hover:text-background"
+                : "border-muted text-muted-foreground cursor-not-allowed",
+            )}
           >
             Buy Now
           </button>

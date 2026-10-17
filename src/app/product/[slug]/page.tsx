@@ -6,6 +6,7 @@ import { ProductCard } from '@/components/product/product-card'
 import { getProductBySlug, getRelatedProducts, getAdminSettings } from '@/lib/queries'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { getCurrentStaffUser } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
 type Params = Promise<{ slug: string }>
@@ -30,10 +31,14 @@ export default async function ProductPage({ params }: { params: Params }) {
   const product = await getProductBySlug(slug)
   if (!product || !product.published) notFound()
 
-  const [related, settings] = await Promise.all([
+  // Run admin check + related products + settings in parallel.
+  // getCurrentStaffUser() returns null if not signed in or not staff — no redirect.
+  const [related, settings, staffUser] = await Promise.all([
     getRelatedProducts(product.id, product.categoryId, 4),
     getAdminSettings(),
+    getCurrentStaffUser(),
   ])
+  const isAdmin = !!staffUser
 
   const productJsonLd = {
     '@context': 'https://schema.org',
@@ -62,6 +67,29 @@ export default async function ProductPage({ params }: { params: Params }) {
       <Navbar />
       <main className="bg-background min-h-screen">
         <div className="mx-auto max-w-[1600px] px-6 lg:px-10 py-8 md:py-12">
+          {/* Admin quick-edit bar — only visible to signed-in staff */}
+          {isAdmin && (
+            <div className="mb-6 flex items-center justify-between bg-foreground text-background px-4 py-3 text-xs">
+              <div className="flex items-center gap-2 uppercase tracking-[0.18em]">
+                <span className="inline-block w-1.5 h-1.5 bg-rust rounded-full" aria-hidden />
+                Admin mode
+              </div>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/admin/products"
+                  className="text-background/80 hover:text-background underline-offset-2 hover:underline"
+                >
+                  Product list
+                </Link>
+                <Link
+                  href={`/admin/products/${product.id}`}
+                  className="bg-background text-foreground px-3 py-1.5 uppercase tracking-[0.15em] font-medium hover:bg-rust hover:text-background transition-colors flex items-center gap-1.5"
+                >
+                  Edit this product
+                </Link>
+              </div>
+            </div>
+          )}
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
             <ProductGallery images={product.images} name={product.name} />
             <ProductInfo product={product as any} settings={settings} />
