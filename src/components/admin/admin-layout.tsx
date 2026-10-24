@@ -34,6 +34,7 @@ import {
   ChevronDown,
   ChevronRight,
   ConciergeBell,
+  ClipboardList,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
@@ -84,6 +85,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Sales',
     items: [
       { label: 'Orders', href: '/admin/orders', icon: ShoppingCart, permission: 'order.view' },
+      { label: 'Order Console', href: '/admin/orders/console', icon: ClipboardList, permission: 'order.view' },
       { label: 'Coupons', href: '/admin/coupons', icon: Ticket, permission: 'coupon.manage' },
       { label: 'Shipping', href: '/admin/shipping', icon: Truck, permission: 'shipping.manage' },
     ],

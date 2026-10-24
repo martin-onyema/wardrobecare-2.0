@@ -96,6 +96,9 @@ export default async function AdminOrdersPage({
       permissions={perms}
       headerExtras={
         <div className="flex items-center gap-1">
+          <Button asChild variant="outline" size="sm">
+            <Link href="/admin/orders/console">Console view</Link>
+          </Button>
           <AdminSearchTrigger />
           <AdminHeaderToolbar notifications={notifs} />
         </div>

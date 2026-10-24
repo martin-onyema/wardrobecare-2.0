@@ -56,6 +56,7 @@ model User {
   passwordResets PasswordReset[] @relation("PasswordResetUser")
   customerNotes  CustomerNote[]  @relation("CustomerNoteCustomer")
   customerNotesAuthored CustomerNote[] @relation("CustomerNoteAuthor")
+  orderNotesAuthored   OrderNote[]   @relation("OrderNoteAuthor")
   auditLogs     AuditLog[]      @relation("AuditLogActor")
   notifications Notification[]  @relation("NotificationRecipient")
   inventoryAdjustments InventoryAdjustment[]
@@ -484,6 +485,7 @@ model Order {
   items           OrderItem[]
   payments        Payment[]
   statusHistory   OrderStatusHistory[]
+  orderNotes      OrderNote[]
   refunds         Refund[]
 
   // WhatsApp
@@ -553,6 +555,26 @@ model OrderStatusHistory {
   createdAt DateTime    @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Staff notes timeline on an order — cloned from CustomerNote shape.
+// Additive: existing orders simply have zero notes. Backwards-compatible.
+// ────────────────────────────────────────────────────────────────────
+model OrderNote {
+  id        String   @id @default(cuid())
+  orderId   String
+  authorId  String
+  body      String
+  pinned    Boolean  @default(false)
+
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  author  User  @relation("OrderNoteAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orderId])
 }
