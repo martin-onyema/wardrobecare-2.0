@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useTransition } from 'react'
+import { useState, useMemo, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -138,16 +138,12 @@ export function OrderConsole({
   const router = useRouter()
   const [filter, setFilter] = useState<(typeof FILTER_CHIPS)[number]>('All')
   const [query, setQuery] = useState('')
-  const [selectedId, setSelectedId] = useState<string | null>(
-    focusId ?? orders[0]?.id ?? null,
-  )
-
-  // If the URL has ?id= and it matches an order, select it.
-  useEffect(() => {
-    if (focusId && orders.some((o) => o.id === focusId)) {
-      setSelectedId(focusId)
-    }
-  }, [focusId, orders])
+  const [userSelectedId, setUserSelectedId] = useState<string | null>(null)
+  // If the URL has ?id= and it matches an order, prefer it (URL wins).
+  // Otherwise fall back to the user's last manual selection, then the
+  // first order. Computed during render — no setState-in-effect.
+  const focusMatch = focusId && orders.some((o) => o.id === focusId) ? focusId : null
+  const selectedId = focusMatch ?? userSelectedId ?? orders[0]?.id ?? null
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -216,7 +212,7 @@ export function OrderConsole({
                   <li key={o.id}>
                     <button
                       type="button"
-                      onClick={() => setSelectedId(o.id)}
+                      onClick={() => setUserSelectedId(o.id)}
                       className={
                         'w-full text-left p-3.5 transition-colors ' +
                         (isSelected
@@ -276,12 +272,16 @@ function OrderDetailPanel({
   const [saving, startSave] = useTransition()
   const [status, setStatus] = useState(order.status)
   const [statusNote, setStatusNote] = useState('')
-
-  // Reset local status when the order changes
-  useEffect(() => {
+  // Reset local status when the order changes (React 19 "adjust state
+  // during render" pattern — keeps the lint rule happy without an effect
+  // that triggers cascading renders).
+  // https://react.dev/reference/react/useState#storing-information-from-previous-renders
+  const [prevOrderId, setPrevOrderId] = useState(order.id)
+  if (order.id !== prevOrderId) {
+    setPrevOrderId(order.id)
     setStatus(order.status)
     setStatusNote('')
-  }, [order.id, order.status])
+  }
 
   // Print panel state — ephemeral (no persistence; matches the mockup)
   const [copies, setCopies] = useState({ file: true, ship: true, cust: true })

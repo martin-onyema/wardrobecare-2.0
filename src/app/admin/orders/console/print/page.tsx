@@ -465,7 +465,6 @@ function SheetTable({
               <td className="td-img">
                 {it.productImage ? (
                   <div className="thumb">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={it.productImage} alt={it.productName} />
                   </div>
                 ) : (
