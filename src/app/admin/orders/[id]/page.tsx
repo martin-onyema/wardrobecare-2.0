@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/table'
 import { TrackingForm } from '@/components/admin/forms/tracking-form'
 import { OrderStatusBadge } from '@/components/admin/order-status-badge'
+import { OrderPrintActions } from '@/components/admin/orders/order-print-actions'
 import { formatNGN, formatDate, formatDateShort } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -64,9 +65,12 @@ export default async function AdminOrderDetailPage({
       description={`${order.customerName} · ${formatNGN(order.total)} · placed ${formatDateShort(order.createdAt)}`}
       permissions={perms}
       actions={
-        <Button asChild size="sm" variant="outline">
-          <Link href="/admin/orders">Back to orders</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <OrderPrintActions orderId={order.id} />
+          <Button asChild size="sm" variant="outline">
+            <Link href="/admin/orders">Back to orders</Link>
+          </Button>
+        </div>
       }
     >
       <div className="flex flex-col gap-6">

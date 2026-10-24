@@ -172,20 +172,26 @@ function FileCopySheet({
 
       <div className="sheet-three">
         <SheetBox title="Customer">
-          <strong>{order.customerName}</strong><br />
-          {order.phone}<br />
-          {order.email}
+          <strong>{order.customerName || '—'}</strong><br />
+          {order.phone || 'No phone'}<br />
+          {order.email || 'No email'}
           {order.whatsappNumber && <><br />WhatsApp: {order.whatsappNumber}</>}
         </SheetBox>
         <SheetBox title="Delivery">
-          {areaLabel}<br />
-          {order.address}
-          {order.deliveryInstructions && <><br /><em>“{order.deliveryInstructions}”</em></>}
+          {areaLabel || 'No address on file'}<br />
+          {order.address || '—'}
+          {order.deliveryInstructions ? (
+            <>
+              <br />
+              <em>&ldquo;{order.deliveryInstructions}&rdquo;</em>
+            </>
+          ) : null}
         </SheetBox>
         <SheetBox title="Payment">
           {formatPaymentMethod(order.paymentMethod)}<br />
           Ref: <span className="mono">{payment?.reference ?? '—'}</span><br />
           Status: <span className="uppercase">{order.paymentStatus}</span>
+          {order.couponCode && <><br />Coupon: <span className="mono">{order.couponCode}</span></>}
         </SheetBox>
       </div>
 
@@ -201,6 +207,9 @@ function FileCopySheet({
           <div><span>Discount</span><span className="mono">−{formatNGN(order.discount)}</span></div>
         )}
         <div><span>Delivery</span><span className="mono">{formatNGN(order.deliveryFee)}</span></div>
+        {order.tax > 0 && (
+          <div><span>Tax</span><span className="mono">{formatNGN(order.tax)}</span></div>
+        )}
         <div className="grand"><span>Total</span><span className="mono">{formatNGN(order.total)}</span></div>
       </div>
 
@@ -213,13 +222,13 @@ function FileCopySheet({
       <div className="mt-3">
         <strong>Staff notes:</strong>
         {notes.length === 0 ? (
-          <div className="text-muted">—</div>
+          <div className="text-muted">No staff notes recorded for this order.</div>
         ) : (
           <ul className="staff-notes">
             {notes.map((n) => (
               <li key={n.id}>
                 <span className="text-muted">[{formatDate(n.createdAt)}]</span>{' '}
-                <strong>{n.author.name ?? 'Staff'}</strong>: {n.body}
+                <strong>{n.author?.name ?? 'Staff'}</strong>: {n.body}
                 {n.pinned && <em className="text-muted"> · pinned</em>}
               </li>
             ))}
@@ -264,15 +273,17 @@ function ShippingCopySheet({
 
       <div className="sheet-three">
         <SheetBox title="DELIVER TO">
-          <strong className="text-lg">{order.customerName}</strong><br />
-          {order.address}<br />
-          {areaLabel}<br />
-          <strong>{order.phone}</strong>
+          <strong className="text-lg">{order.customerName || '—'}</strong><br />
+          {order.address || 'No address on file'}<br />
+          {areaLabel || '—'}<br />
+          <strong>{order.phone || 'No phone'}</strong>
+          {order.whatsappNumber && <><br />WhatsApp: {order.whatsappNumber}</>}
         </SheetBox>
         <SheetBox title="Zone &amp; window">
-          {areaLabel}<br />
+          {areaLabel || '—'}<br />
           Placed: {formatDate(order.createdAt)}<br />
           {order.trackingNumber && <>Tracking: <span className="mono">{order.trackingNumber}</span></>}
+          {!order.trackingNumber && <span className="text-muted">No tracking yet</span>}
         </SheetBox>
       </div>
 
@@ -289,8 +300,13 @@ function ShippingCopySheet({
         hidePrices
       />
 
+      {order.deliveryInstructions && (
+        <div className="mt-3 sheet-instr">
+          <strong>Delivery instructions:</strong> {order.deliveryInstructions}
+        </div>
+      )}
       {order.notes && (
-        <div className="mt-3">
+        <div className="mt-2">
           <strong>Customer note:</strong> {order.notes}
         </div>
       )}
@@ -326,7 +342,6 @@ function CustomerCopySheet({
   subtotal: number
   includeImages: boolean
 }) {
-  const saved = items.reduce((s, it) => s + (it.unitPrice < it.totalPrice / it.quantity ? 0 : 0), 0)
   const paidLabel =
     order.paymentStatus === 'SUCCESS' ? 'PAID' :
     order.paymentMethod === 'CASH_ON_DELIVERY' ? 'Pay on delivery' :
@@ -338,16 +353,18 @@ function CustomerCopySheet({
 
       <div className="sheet-three">
         <SheetBox title="Billed to">
-          <strong>{order.customerName}</strong><br />
-          {order.phone}
+          <strong>{order.customerName || '—'}</strong><br />
+          {order.phone || 'No phone'}
         </SheetBox>
         <SheetBox title="Delivering to">
-          {order.address}<br />
-          {areaLabel}
+          {order.address || 'No address'}<br />
+          {areaLabel || '—'}
         </SheetBox>
         <SheetBox title="Payment">
           {formatPaymentMethod(order.paymentMethod)}<br />
           <strong>{paidLabel}</strong>
+          {payment?.reference && <><br /><span className="mono small">Ref: {payment.reference}</span></>}
+          {order.couponCode && <><br />Coupon: <span className="mono">{order.couponCode}</span></>}
         </SheetBox>
       </div>
 
@@ -363,6 +380,9 @@ function CustomerCopySheet({
           <div><span>You saved</span><span className="mono">{formatNGN(order.discount)}</span></div>
         )}
         <div><span>Delivery</span><span className="mono">{formatNGN(order.deliveryFee)}</span></div>
+        {order.tax > 0 && (
+          <div><span>Tax</span><span className="mono">{formatNGN(order.tax)}</span></div>
+        )}
         <div className="grand"><span>Total</span><span className="mono">{formatNGN(order.total)}</span></div>
       </div>
 
@@ -413,6 +433,19 @@ function SheetTable({
   columns: ('unit' | 'qty' | 'total' | 'check')[]
   hidePrices?: boolean
 }) {
+  if (!items || items.length === 0) {
+    return (
+      <table className="sheet-items">
+        <tbody>
+          <tr>
+            <td className="text-muted" style={{ padding: '14px 6px', fontStyle: 'italic' }}>
+              No items recorded for this order.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    )
+  }
   return (
     <table className="sheet-items">
       <thead>
@@ -510,6 +543,7 @@ const PRINT_CSS = `
 .print-root .sign-row { display: flex; gap: 30px; margin-top: 24px; font-size: 11px; }
 .print-root .sign-row > div { flex: 1; border-top: 1px solid #121110; padding-top: 4px; }
 .print-root .cod-box { border: 3px solid #121110; padding: 8px 12px; font-size: 15px; font-weight: 800; margin: 10px 0; text-align: center; }
+.print-root .sheet-instr { border-left: 3px solid #121110; padding: 6px 10px; background: #f7f6f3; font-size: 11px; }
 .print-root .sheet-foot { font-size: 10px; color: #444; margin-top: 14px; border-top: 1px solid #c7c4be; padding-top: 6px; line-height: 1.5; }
 .print-root .staff-notes { margin-top: 4px; padding-left: 16px; font-size: 11px; }
 .print-root .staff-notes li { margin-bottom: 4px; }
