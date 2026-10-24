@@ -103,7 +103,7 @@ export const NIGERIAN_STATES = [
 export function calculateDeliveryFee(
   subtotal: number,
   defaultFee: number = 2500,
-  freeThreshold: number = 50000,
+  freeThreshold: number = 500000,
 ): number {
   if (subtotal >= freeThreshold) return 0
   return defaultFee

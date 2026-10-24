@@ -159,8 +159,8 @@ export function CartDrawer() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground mb-4">
-                {subtotal < 50000
-                  ? `Add ${formatNGN(50000 - subtotal)} more for complimentary delivery.`
+                {subtotal < 500000
+                  ? `Add ${formatNGN(500000 - subtotal)} more for complimentary delivery.`
                   : 'You qualify for complimentary delivery.'}
               </p>
               <div className="grid grid-cols-2 gap-3">

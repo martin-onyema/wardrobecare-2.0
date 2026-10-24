@@ -61,7 +61,7 @@ export function SettingsForm({ initial }: { initial: Settings | null }) {
     String(initial?.defaultDeliveryFee ?? 2500),
   )
   const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(
-    String(initial?.freeDeliveryThreshold ?? 50000),
+    String(initial?.freeDeliveryThreshold ?? 500000),
   )
   const [emailProvider, setEmailProvider] = useState(initial?.emailProvider ?? '')
   const [emailFrom, setEmailFrom] = useState(initial?.emailFrom ?? '')

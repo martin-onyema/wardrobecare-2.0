@@ -12,8 +12,7 @@ import { useSession } from 'next-auth/react'
 import { SERVICE_GROUPS } from '@/lib/services-data'
 
 type NavChild = { label: string; href: string }
-type NavGroup = { label: string; links: NavChild[] }
-type NavLink = { label: string; href: string; children?: NavChild[]; groups?: NavGroup[] }
+type NavLink = { label: string; href: string; children?: NavChild[] }
 
 // The top-level retail links now point to their dedicated category pages.
 // Dropdown children continue to point to the filtered shop grids.
@@ -22,68 +21,27 @@ const NAV_LINKS: NavLink[] = [
   {
     label: 'Clothing',
     href: '/clothing',
-    groups: [
-      {
-        label: 'Formal Wear',
-        links: [
-          { label: 'Suits', href: '/shop?category=suits' },
-          { label: 'Blazers', href: '/shop?category=blazers' },
-          { label: 'Tuxedo / Dinner Jacket', href: '/shop?category=tuxedo-dinner-jacket' },
-          { label: 'Waistcoat & Vest', href: '/shop?category=waistcoat-vest' },
-        ],
-      },
-      {
-        label: 'Shirts',
-        links: [
-          { label: 'Dress Shirts', href: '/shop?category=dress-shirts' },
-          { label: 'Casual Shirts', href: '/shop?category=casual-shirts' },
-          { label: 'Polo Shirts', href: '/shop?category=polo-shirts' },
-          { label: 'T-Shirts', href: '/shop?category=t-shirts' },
-        ],
-      },
-      {
-        label: 'Layers',
-        links: [
-          { label: 'Jackets', href: '/shop?category=jackets' },
-          { label: 'Long Sleeve / Sweatshirts', href: '/shop?category=long-sleeve-sweatshirts' },
-          { label: 'Sweaters / Cardigan', href: '/shop?category=sweaters-cardigan' },
-          { label: 'Hoodies', href: '/shop?category=hoodies-sweatshirts' },
-        ],
-      },
-      {
-        label: 'Bottoms',
-        links: [
-          { label: 'Formal Trousers', href: '/shop?category=formal-trousers' },
-          { label: 'Chinos Trousers', href: '/shop?category=chinos' },
-          { label: 'Casual Trousers', href: '/shop?category=casual-trousers' },
-          { label: 'Jeans Trousers', href: '/shop?category=jeans' },
-          { label: 'Joggers', href: '/shop?category=joggers' },
-          { label: 'Shorts', href: '/shop?category=shorts' },
-        ],
-      },
-      {
-        label: 'Essentials',
-        links: [
-          { label: 'Boxers Shorts', href: '/shop?category=boxers-shorts' },
-          { label: 'Boxers Brief', href: '/shop?category=boxers-brief' },
-          { label: 'Underwear T-Shirts', href: '/shop?category=underwear-tshirts' },
-          { label: 'Singlets', href: '/shop?category=singlets' },
-          { label: 'Grooming Kits', href: '/shop?category=grooming-kits' },
-        ],
-      },
+    children: [
+      { label: 'Blazers', href: '/shop?category=blazers' },
+      { label: 'Bottoms', href: '/bottoms' },
+      { label: 'Casual Shirts', href: '/shop?category=casual-shirts' },
+      { label: 'Formal / Office Shirts', href: '/shop?category=formal-shirts' },
+      { label: 'Hoodies & Sweatshirts', href: '/shop?category=hoodies-sweatshirts' },
+      { label: 'Innerwear', href: '/shop?category=innerwear' },
+      { label: 'Jackets', href: '/shop?category=jackets' },
+      { label: 'Polo Shirts', href: '/shop?category=polo-shirts' },
+      { label: 'Suits', href: '/shop?category=suits' },
+      { label: 'T-Shirts', href: '/shop?category=t-shirts' },
     ],
   },
   {
     label: 'Footwear',
     href: '/footwear',
     children: [
-      { label: 'Dress Shoes', href: '/shop?category=dress-shoes' },
       { label: 'Casual Shoes', href: '/shop?category=casual-shoes' },
+      { label: 'Dress Shoes', href: '/shop?category=dress-shoes' },
       { label: 'Exotic Shoes', href: '/shop?category=exotic-shoes' },
       { label: 'Loafers', href: '/shop?category=loafers' },
-      { label: 'Sneakers', href: '/shop?category=sneakers' },
-      { label: 'Slippers', href: '/shop?category=slippers' },
-      { label: 'Slide', href: '/shop?category=slide' },
     ],
   },
   {
@@ -91,26 +49,21 @@ const NAV_LINKS: NavLink[] = [
     href: '/accessories',
     children: [
       { label: 'Belts', href: '/shop?category=belts' },
-      { label: 'Wallets', href: '/shop?category=wallets-purses' },
-      { label: 'Ties', href: '/shop?category=ties' },
-      { label: 'Pocket Squares', href: '/shop?category=pocket-squares' },
-      { label: 'Suspenders', href: '/shop?category=suspenders' },
-      { label: 'Cufflinks', href: '/shop?category=cufflinks' },
-      { label: 'Wrist Watches', href: '/shop?category=wrist-watches' },
       { label: 'Caps & Hats', href: '/shop?category=caps-hats' },
-      { label: 'Sunglasses & Frames', href: '/shop?category=sunglasses-frames' },
+      { label: 'Pocket Squares', href: '/shop?category=pocket-squares' },
       { label: 'Socks', href: '/shop?category=socks' },
+      { label: 'Sunglasses', href: '/shop?category=sunglasses' },
+      { label: 'Ties', href: '/shop?category=ties' },
+      { label: 'Wallets & Purses', href: '/shop?category=wallets-purses' },
     ],
   },
   {
     label: 'Fragrance & Grooming',
     href: '/fragrance-grooming',
     children: [
-      { label: 'Men', href: '/shop?category=mens-fragrance' },
-      { label: 'Women', href: '/shop?category=womens-fragrance' },
-      { label: 'Unisex', href: '/shop?category=unisex-fragrance' },
-      { label: 'Body Care', href: '/shop?category=body-care' },
-      { label: 'Home Fragrance', href: '/shop?category=home-fragrance' },
+      { label: "Men's Fragrance", href: '/shop?category=mens-fragrance' },
+      { label: "Men's Grooming", href: '/shop?category=mens-grooming' },
+      { label: "Women's Fragrance", href: '/shop?category=womens-fragrance' },
     ],
   },
 ]
@@ -191,7 +144,7 @@ export function Navbar() {
                 Personal shopping via WhatsApp
                 <span className="hidden xl:inline text-foreground/40">
                   <span className="mx-2.5 text-foreground/30" aria-hidden>·</span>
-                  Complimentary delivery over ₦50,000
+                  Complimentary delivery over ₦500,000
                 </span>
               </span>
             </div>
@@ -281,7 +234,7 @@ export function Navbar() {
               </div>
 
               {NAV_LINKS.map((link) => (
-                (link.children || link.groups) ? (
+                link.children ? (
                   <div
                     key={link.label}
                     className="relative"
@@ -308,59 +261,23 @@ export function Navbar() {
 
                     {openKey === link.label && (
                       <div className="absolute top-full left-0 pt-3 z-50">
-                        <div className={cn(
-                          'bg-background border border-foreground/12 shadow-[0_24px_60px_-24px_rgba(18,17,16,0.25)] max-w-[calc(100vw-1.5rem)]',
-                          link.groups
-                            ? (link.groups.length >= 5
-                                ? 'w-[760px]'
-                                : link.groups.length === 4
-                                  ? 'w-[640px]'
-                                  : 'w-[520px]')
-                            : 'w-[440px]'
-                        )}>
-                          <div className="p-5">
-                            <p className="eyebrow text-foreground/50 mb-3.5 pb-2.5 border-b border-foreground/10">{link.label}</p>
-                            {link.groups ? (
-                              <div className={cn(
-                                'grid gap-x-5',
-                                link.groups.length >= 5 ? 'grid-cols-5' : link.groups.length === 4 ? 'grid-cols-4' : 'grid-cols-3'
-                              )}>
-                                {link.groups.map((group) => (
-                                  <div key={group.label}>
-                                    <p className="text-[9px] uppercase tracking-[0.18em] text-rust mb-2.5 whitespace-nowrap">{group.label}</p>
-                                    <ul className="space-y-0.5">
-                                      {group.links.map((child) => (
-                                        <li key={child.href}>
-                                          <Link
-                                            href={child.href}
-                                            onClick={closeNow}
-                                            className="group flex items-center justify-between py-1.5 text-[13px] text-foreground/75 hover:text-foreground transition-colors"
-                                          >
-                                            <span className="group-hover:translate-x-0.5 transition-transform duration-300">{child.label}</span>
-                                            <span className="text-foreground/30 group-hover:text-foreground transition-colors" aria-hidden>→</span>
-                                          </Link>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <ul className="grid grid-cols-2 gap-x-6">
-                                {link.children?.map((child) => (
-                                  <li key={child.href}>
-                                    <Link
-                                      href={child.href}
-                                      onClick={closeNow}
-                                      className="group flex items-center justify-between py-2 text-sm text-foreground/75 hover:text-foreground transition-colors"
-                                    >
-                                      <span className="group-hover:translate-x-0.5 transition-transform duration-300">{child.label}</span>
-                                      <span className="text-foreground/30 group-hover:text-foreground transition-colors" aria-hidden>→</span>
-                                    </Link>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
+                        <div className="w-[460px] bg-background border border-foreground/12 shadow-[0_24px_60px_-24px_rgba(18,17,16,0.25)]">
+                          <div className="p-6">
+                            <p className="eyebrow text-foreground/50 mb-4 pb-2.5 border-b border-foreground/10">{link.label}</p>
+                            <ul className="grid grid-cols-2 gap-x-6">
+                              {link.children.map((child) => (
+                                <li key={child.href}>
+                                  <Link
+                                    href={child.href}
+                                    onClick={closeNow}
+                                    className="group flex items-center justify-between py-2 text-sm text-foreground/75 hover:text-foreground transition-colors"
+                                  >
+                                    <span className="group-hover:translate-x-0.5 transition-transform duration-300">{child.label}</span>
+                                    <span className="text-foreground/30 group-hover:text-foreground transition-colors" aria-hidden>→</span>
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                           <div className="px-6 py-3.5 border-t border-foreground/10 flex items-center justify-between">
                             <p className="text-xs text-foreground/60">Everything in {link.label.toLowerCase()}.</p>

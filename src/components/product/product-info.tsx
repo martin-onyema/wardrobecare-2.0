@@ -413,8 +413,8 @@ export function ProductInfo({
         <div className="flex items-start gap-3">
           <Truck className="h-4 w-4 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
           <div>
-            <p className="text-foreground">Nationwide Delivery</p>
-            <p>Lagos 1–2 days · Other states 2–5 days. Complimentary over ₦50,000.</p>
+            <p className="text-foreground">Cash on Delivery</p>
+            <p>Lagos 1hr–3 days · Other states up to 7 days. Complimentary over ₦500,000.</p>
           </div>
         </div>
         <div className="flex items-start gap-3">

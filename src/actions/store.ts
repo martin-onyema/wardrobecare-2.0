@@ -213,7 +213,7 @@ export async function createOrder(formData: FormData | Record<string, any>): Pro
   const deliveryFee = calculateDeliveryFee(
     subtotal - discount,
     settings?.defaultDeliveryFee ?? 2500,
-    settings?.freeDeliveryThreshold ?? 50000,
+    settings?.freeDeliveryThreshold ?? 500000,
   )
 
   const total = Math.max(0, subtotal - discount + deliveryFee)

@@ -11,7 +11,7 @@ export async function GET() {
     storeName: s?.storeName ?? 'Wardrobecare Clothing',
     storeTagline: s?.storeTagline ?? "Your #1 Personal Shopper for distinguished men's fashion.",
     defaultDeliveryFee: s?.defaultDeliveryFee ?? 2500,
-    freeDeliveryThreshold: s?.freeDeliveryThreshold ?? 50000,
+    freeDeliveryThreshold: s?.freeDeliveryThreshold ?? 500000,
     paystackPublicKey: s?.paystackPublicKey ?? process.env.PAYSTACK_PUBLIC_KEY ?? 'pk_test_x',
     paystackEnabled: s?.paystackEnabled ?? true,
   })

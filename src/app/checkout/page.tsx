@@ -306,9 +306,9 @@ export default function CheckoutPage() {
                   <span className="text-muted-foreground">Delivery</span>
                   <span className="tabular-nums">{deliveryFee === 0 ? 'Complimentary' : formatNGN(deliveryFee)}</span>
                 </div>
-                {subtotal < 50000 && (
+                {subtotal < 500000 && (
                   <p className="text-[10px] text-muted-foreground">
-                    Add {formatNGN(50000 - subtotal)} more for complimentary delivery.
+                    Add {formatNGN(500000 - subtotal)} more for complimentary delivery.
                   </p>
                 )}
                 <div className="flex justify-between text-base font-medium pt-3 border-t border-border">

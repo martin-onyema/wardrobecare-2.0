@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Delivery Charges by Location',
   description:
-    'Wardrobecare delivery fees across Lagos, listed by named area — five Lagos Island tiers and six Lagos Mainland tiers, collected on delivery. Complimentary delivery on retail orders over ₦50,000.',
+    'Wardrobecare delivery fees across Lagos, listed by named area — five Lagos Island tiers and six Lagos Mainland tiers, collected on delivery. Complimentary delivery on retail orders over ₦500,000.',
   alternates: { canonical: '/delivery-charges' },
   openGraph: {
     title: 'Delivery Charges by Location',
@@ -57,7 +57,7 @@ const NOTES = [
 
 export default async function DeliveryChargesPage() {
   const settings = await getAdminSettings().catch(() => null)
-  const freeThreshold = settings?.freeDeliveryThreshold ?? 50000
+  const freeThreshold = settings?.freeDeliveryThreshold ?? 500000
   const totalZones = DELIVERY_ZONE_GROUPS.reduce((n, g) => n + g.zones.length, 0)
 
   return (
