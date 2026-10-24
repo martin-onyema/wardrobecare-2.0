@@ -10,6 +10,7 @@ import { useWishlistStore } from '@/lib/stores/wishlist-store'
 import { useUIStore } from '@/lib/stores/ui-store'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { colorToCss, isKnownColor } from '@/lib/order-colors'
 
 type Variant = {
   id: string
@@ -18,6 +19,7 @@ type Variant = {
   price: number | null
   stock: number
   sku: string | null
+  imageUrl: string | null
 }
 
 type ProductInfoProps = {
@@ -34,20 +36,38 @@ type ProductInfoProps = {
     care: string | null
     sku: string
     outOfStock?: boolean
+    featured?: boolean
+    createdAt?: string
     category: { name: string; slug: string; parent?: { name: string; slug: string } | null }
+    brand?: { name: string; slug: string } | null
     variants: Variant[]
     images: { url: string }[]
   }
   settings: { whatsappNumber?: string | null } | null
+  selectedColor: string | null
+  onColorChange: (color: string | null) => void
+  showColorSelector: boolean
+  distinctColors: string[]
 }
 
-export function ProductInfo({ product, settings }: ProductInfoProps) {
+export function ProductInfo({
+  product,
+  settings,
+  selectedColor,
+  onColorChange,
+  showColorSelector,
+  distinctColors,
+}: ProductInfoProps) {
   const router = useRouter()
   // Compute initial size from product on first render — no effect needed
+  // If a colour is selected, default to the first in-stock size within that colour
   const [selectedSize, setSelectedSize] = useState<string | null>(() => {
     if (product.variants.length > 0) {
-      const firstAvailable = product.variants.find((v) => v.stock > 0)
-      return firstAvailable?.size ?? product.variants[0]?.size ?? null
+      const colourVariants = selectedColor
+        ? product.variants.filter((v) => v.color === selectedColor)
+        : product.variants
+      const firstAvailable = colourVariants.find((v) => v.stock > 0)
+      return firstAvailable?.size ?? colourVariants[0]?.size ?? product.variants[0]?.size ?? null
     }
     return null
   })
@@ -59,14 +79,33 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
   const hasWishlist = useWishlistStore((s) => s.has)
   const setCartOpen = useUIStore((s) => s.setCartOpen)
 
-  const selectedVariant = product.variants.find((v) => v.size === selectedSize)
+  // Filter variants by selected colour if the colour selector is active
+  const colourFilteredVariants = showColorSelector && selectedColor
+    ? product.variants.filter((v) => v.color === selectedColor)
+    : product.variants
+
+  const selectedVariant = colourFilteredVariants.find((v) => v.size === selectedSize) ?? product.variants.find((v) => v.size === selectedSize)
   const price = effectivePrice(product.price, product.salePrice)
+  // Use variant price override if set, otherwise product price
+  const effectiveVariantPrice = selectedVariant?.price ?? null
+  const displayPrice = effectiveVariantPrice !== null ? effectiveVariantPrice : price
   const isOnSale = product.salePrice && product.salePrice < product.price
   // Respect the explicit admin-set outOfStock flag; otherwise infer from variants
   const inStock = (product.outOfStock !== true) && (!product.variants.length || product.variants.some((v) => v.stock > 0))
   const selectedInStock = (product.outOfStock !== true) && (selectedVariant ? selectedVariant.stock > 0 : inStock)
   const maxQuantity = selectedVariant?.stock ?? 99
   const inWishlist = hasWishlist(product.id)
+
+  // New arrival: product was created within the last 30 days OR is featured
+  const isNewArrival = product.featured || (product.createdAt && Date.now() - new Date(product.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000)
+
+  function handleColorChange(color: string) {
+    onColorChange(color)
+    // Reset size to first available within the new colour
+    const colourVariants = product.variants.filter((v) => v.color === color)
+    const firstAvailable = colourVariants.find((v) => v.stock > 0)
+    setSelectedSize(firstAvailable?.size ?? colourVariants[0]?.size ?? null)
+  }
 
   const handleAddToCart = () => {
     if (product.variants.length > 0 && !selectedSize) {
@@ -84,7 +123,7 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
       quantity,
       name: product.name,
       slug: product.slug,
-      price,
+      price: displayPrice,
       originalPrice: isOnSale ? product.price : undefined,
       image: product.images[0]?.url ?? undefined,
       sku: selectedVariant?.sku ?? product.sku,
@@ -109,14 +148,11 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
       quantity,
       name: product.name,
       slug: product.slug,
-      price,
+      price: displayPrice,
       originalPrice: isOnSale ? product.price : undefined,
       image: product.images[0]?.url ?? undefined,
       sku: selectedVariant?.sku ?? product.sku,
     })
-    // Defer navigation one tick so the persist middleware commits the new cart
-    // to localStorage BEFORE the route change. With router.push there is no
-    // full reload, so the in-memory cart state is preserved as well.
     setTimeout(() => {
       router.push('/checkout')
     }, 50)
@@ -124,7 +160,7 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
 
   const handleWhatsApp = () => {
     const phone = settings?.whatsappNumber || '2348000000000'
-    const msg = `Hello Wardrobecare, I'd like to order:\n\n*${product.name}*\nSize: ${selectedSize ?? 'N/A'}\nQuantity: ${quantity}\nPrice: ${formatNGN(price * quantity)}\nSKU: ${selectedVariant?.sku ?? product.sku}\n\nPlease confirm availability.`
+    const msg = `Hello Wardrobecare, I'd like to order:\n\n*${product.name}*\nColour: ${selectedColor ?? 'N/A'}\nSize: ${selectedSize ?? 'N/A'}\nQuantity: ${quantity}\nPrice: ${formatNGN(displayPrice * quantity)}\nSKU: ${selectedVariant?.sku ?? product.sku}\n\nPlease confirm availability.`
     window.open(whatsappLink(phone, msg), '_blank')
   }
 
@@ -135,7 +171,7 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
       size: selectedSize ?? undefined,
       name: product.name,
       slug: product.slug,
-      price,
+      price: displayPrice,
       image: product.images[0]?.url ?? undefined,
     })
     toast.success(inWishlist ? 'Removed from wishlist' : 'Added to wishlist')
@@ -145,28 +181,49 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
     <div className="lg:sticky lg:top-32 lg:self-start space-y-6">
       {/* Breadcrumb */}
       <nav className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-        <Link href="/shop" className="hover:text-foreground">Shop</Link>
+        <Link href="/" className="hover:text-foreground">Home</Link>
         <span className="mx-2">/</span>
+        <Link href="/shop" className="hover:text-foreground">Shop</Link>
         {product.category.parent && (
           <>
+            <span className="mx-2">/</span>
             <Link href={`/shop?category=${product.category.parent.slug}`} className="hover:text-foreground">
               {product.category.parent.name}
             </Link>
-            <span className="mx-2">/</span>
           </>
         )}
+        <span className="mx-2">/</span>
         <Link href={`/shop?category=${product.category.slug}`} className="hover:text-foreground">
           {product.category.name}
         </Link>
       </nav>
 
-      {/* Title + price */}
+      {/* Category eyebrow + new arrival label */}
+      <div className="flex items-center gap-3">
+        {product.category && (
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+            {product.category.parent ? `${product.category.parent.name} · ` : ''}{product.category.name}
+          </p>
+        )}
+        {isNewArrival && (
+          <span className="text-[10px] uppercase tracking-[0.15em] bg-foreground text-background px-2 py-0.5">
+            New
+          </span>
+        )}
+      </div>
+
+      {/* Title + brand + price */}
       <div>
         <h1 className="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.05] tracking-[-0.02em]">
           {product.name}
         </h1>
+        {product.brand && (
+          <p className="text-sm text-muted-foreground mt-2">
+            by <Link href={`/shop?brand=${product.brand.slug}`} className="hover:text-foreground underline underline-offset-4">{product.brand.name}</Link>
+          </p>
+        )}
         <div className="flex items-baseline gap-3 mt-4">
-          <span className="text-xl tabular-nums">{formatNGN(price)}</span>
+          <span className="text-xl tabular-nums">{formatNGN(displayPrice)}</span>
           {isOnSale && (
             <>
               <span className="text-base text-muted-foreground line-through tabular-nums">
@@ -200,6 +257,38 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
         <span className="text-muted-foreground">SKU: {selectedVariant?.sku ?? product.sku}</span>
       </div>
 
+      {/* Colour selector — only shown when there are 2+ distinct colours */}
+      {showColorSelector && distinctColors.length > 0 && (
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
+            Colour {selectedColor && <span className="text-foreground ml-1">— {selectedColor}</span>}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {distinctColors.map((color) => (
+              <button
+                key={color}
+                onClick={() => handleColorChange(color)}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2 text-sm border transition-all',
+                  selectedColor === color
+                    ? 'border-foreground bg-secondary/60'
+                    : 'border-border hover:border-foreground/40',
+                )}
+                title={color}
+              >
+                {isKnownColor(color) && (
+                  <span
+                    className="inline-block w-4 h-4 rounded-full border border-foreground/20 shrink-0"
+                    style={{ background: colorToCss(color) }}
+                  />
+                )}
+                <span>{color}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Sizes */}
       {product.variants.length > 0 && (
         <div>
@@ -215,7 +304,8 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {product.variants.map((v) => (
+            {/* Show only sizes available in the selected colour (or all sizes if no colour filter) */}
+            {(showColorSelector && selectedColor ? colourFilteredVariants : product.variants).map((v) => (
               <button
                 key={v.id}
                 onClick={() => setSelectedSize(v.size)}
@@ -357,6 +447,33 @@ export function ProductInfo({ product, settings }: ProductInfoProps) {
         {product.care && (
           <DetailRow label="Care" value={product.care} />
         )}
+      </div>
+
+      {/* Consultation CTA — links to the existing Wardrobe & Style Consultation
+          and Personal Shopping services */}
+      <div className="pt-6 border-t border-border">
+        <div className="bg-secondary/40 p-6 border border-border">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-3">
+            Not sure of your size?
+          </p>
+          <p className="text-sm leading-relaxed mb-4">
+            Book a Wardrobe &amp; Style Consultation and we&apos;ll help you decide — or add it to a Personal Shopping brief.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              href="/services/wardrobe-consultation"
+              className="flex-1 text-center py-3 text-[11px] uppercase tracking-[0.2em] bg-foreground text-background hover:bg-foreground/90 transition-colors"
+            >
+              Book a Consultation
+            </Link>
+            <Link
+              href="/services/personal-shopping"
+              className="flex-1 text-center py-3 text-[11px] uppercase tracking-[0.2em] border border-foreground hover:bg-foreground hover:text-background transition-colors"
+            >
+              Personal Shopping
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )

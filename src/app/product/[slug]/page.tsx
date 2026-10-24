@@ -3,10 +3,11 @@ import { Footer } from '@/components/layout/footer'
 import { ProductGallery } from '@/components/product/product-gallery'
 import { ProductInfo } from '@/components/product/product-info'
 import { ProductCard } from '@/components/product/product-card'
+import { ProductDetail } from '@/components/product/product-detail'
 import { getProductBySlug, getRelatedProducts, getAdminSettings } from '@/lib/queries'
+import { getCurrentStaffUser } from '@/lib/session'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getCurrentStaffUser } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
 type Params = Promise<{ slug: string }>
@@ -15,13 +16,30 @@ export async function generateMetadata({ params }: { params: Params }) {
   const { slug } = await params
   const product = await getProductBySlug(slug)
   if (!product) return { title: 'Product Not Found' }
+
+  // Use SEO fields if they exist, otherwise fall back to name/description
+  const title = product.seoTitle ?? product.name
+  const description = product.seoDescription ?? product.description.slice(0, 160)
+  const keywords = product.seoKeywords ?? undefined
+  const canonical = product.canonicalUrl ?? `/product/${product.slug}`
+  const ogImage = product.ogImage ?? product.images[0]?.url
+
   return {
-    title: product.name,
-    description: product.description.slice(0, 160),
+    title,
+    description,
+    keywords,
+    alternates: { canonical },
     openGraph: {
-      title: product.name,
-      description: product.description.slice(0, 160),
-      images: product.images.map((img) => ({ url: img.url, alt: img.altText ?? product.name })),
+      title,
+      description,
+      type: 'website',
+      images: ogImage ? [{ url: ogImage, alt: product.name }] : product.images.map((img) => ({ url: img.url, alt: img.altText ?? product.name })),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ogImage ? [ogImage] : product.images.map((img) => img.url),
     },
   }
 }
@@ -32,7 +50,6 @@ export default async function ProductPage({ params }: { params: Params }) {
   if (!product || !product.published) notFound()
 
   // Run admin check + related products + settings in parallel.
-  // getCurrentStaffUser() returns null if not signed in or not staff — no redirect.
   const [related, settings, staffUser] = await Promise.all([
     getRelatedProducts(product.id, product.categoryId, 4),
     getAdminSettings(),
@@ -40,22 +57,35 @@ export default async function ProductPage({ params }: { params: Params }) {
   ])
   const isAdmin = !!staffUser
 
-  const productJsonLd = {
+  // Enhanced JSON-LD: uses real brand name, outOfStock flag, aggregateRating
+  const productJsonLd: Record<string, any> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     description: product.description,
     image: product.images.map((img) => img.url),
     sku: product.sku,
-    brand: { '@type': 'Brand', name: 'Wardrobecare Clothing' },
+    brand: { '@type': 'Brand', name: product.brand?.name ?? 'Wardrobecare Clothing' },
+    url: `https://wardrobecare.com.ng/product/${product.slug}`,
     offers: {
       '@type': 'Offer',
       price: product.salePrice ?? product.price,
       priceCurrency: 'NGN',
-      availability: product.variants.some((v) => v.stock > 0)
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
+      availability: (product.outOfStock === true)
+        ? 'https://schema.org/OutOfStock'
+        : product.variants.some((v) => v.stock > 0)
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
     },
+  }
+
+  // Add aggregateRating if the product has reviews
+  if (product.rating > 0 && product.reviewCount > 0) {
+    productJsonLd.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: product.rating,
+      reviewCount: product.reviewCount,
+    }
   }
 
   return (
@@ -90,10 +120,7 @@ export default async function ProductPage({ params }: { params: Params }) {
               </div>
             </div>
           )}
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
-            <ProductGallery images={product.images} name={product.name} />
-            <ProductInfo product={product as any} settings={settings} />
-          </div>
+          <ProductDetail product={product as any} settings={settings} />
         </div>
 
         {/* Related */}

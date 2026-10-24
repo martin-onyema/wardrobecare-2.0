@@ -212,6 +212,7 @@ export async function getProductBySlug(slug: string) {
       images: { orderBy: { position: 'asc' } },
       variants: true,
       category: { include: { parent: true } },
+      brand: true,
       reviews: { where: { published: true }, orderBy: { createdAt: 'desc' } },
     },
   })
@@ -272,11 +273,13 @@ export async function getRelatedProducts(productId: string, categoryId: string, 
     where: {
       categoryId,
       published: true,
+      status: 'ACTIVE',
       id: { not: productId },
     },
+    orderBy: { createdAt: 'desc' },
     take: limit,
     include: {
-      images: { orderBy: { position: 'asc' }, take: 1 },
+      images: { orderBy: { position: 'asc' }, take: 2 },
       variants: true,
       category: true,
     },
