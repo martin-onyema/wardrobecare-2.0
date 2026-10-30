@@ -23,16 +23,19 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
   const search = typeof sp.search === 'string' ? sp.search : undefined
   const sort = typeof sp.sort === 'string' ? sp.sort : 'featured'
   const size = typeof sp.size === 'string' ? sp.size : undefined
+  const tag = typeof sp.tag === 'string' ? sp.tag : undefined
   const minPrice = sp.minPrice ? Number(sp.minPrice) : undefined
   const maxPrice = sp.maxPrice ? Number(sp.maxPrice) : undefined
 
   const [products, categories] = await Promise.all([
-    getProducts({ category, search, sort, size, minPrice, maxPrice, limit: 100 }),
+    getProducts({ category, search, sort, size, tag, minPrice, maxPrice, limit: 100 }),
     getCategories(),
   ])
 
   const activeCat = categories.find((c) => c.slug === category)
-  const title = activeCat?.name ?? (search ? `Results for "${search}"` : 'All Products')
+  const title = activeCat?.name
+    ?? (tag ? tag.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    : (search ? `Results for "${search}"` : 'All Products'))
 
   return (
     <>

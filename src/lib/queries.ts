@@ -133,6 +133,7 @@ export async function getProducts(params: {
   minPrice?: number
   maxPrice?: number
   size?: string
+  tag?: string
   limit?: number
   featuredOnly?: boolean
   publishedOnly?: boolean
@@ -144,6 +145,7 @@ export async function getProducts(params: {
     minPrice,
     maxPrice,
     size,
+    tag,
     limit = 50,
     featuredOnly,
     publishedOnly = true,
@@ -161,6 +163,17 @@ export async function getProducts(params: {
       const catIds = [cat.id, ...cat.children.map((c) => c.id)]
       where.categoryId = { in: catIds }
     }
+  }
+
+  // Tag filtering — allows the admin to tag products with multiple
+  // category-like labels (e.g. "formal shirts, dress shirts") and
+  // customers can browse by any tag via /shop?tag=formal-shirts
+  if (tag) {
+    // Match both "formal-shirts" and "formal shirts" in the comma-separated
+    // tags field. The admin enters tags as "formal shirts, dress shirts"
+    // in the product form; the URL slug is "formal-shirts".
+    const tagNormalized = tag.replace(/-/g, ' ').toLowerCase()
+    where.tags = { contains: tagNormalized }
   }
 
   if (search) {

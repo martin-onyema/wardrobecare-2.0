@@ -217,7 +217,7 @@ export function ProductForm({
             size: 'S',
             sku: '',
             price: '',
-            stock: '10',
+            stock: '0',
             lowStockThreshold: '5',
             imageUrl: '',
           },
@@ -237,7 +237,7 @@ export function ProductForm({
         size: '',
         sku: '',
         price: '',
-        stock: '10',
+        stock: '0',
         lowStockThreshold: '5',
         imageUrl: '',
       },
@@ -496,13 +496,16 @@ export function ProductForm({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="tags">Tags</Label>
+                <Label htmlFor="tags">Tags / Search Tags</Label>
                 <Input
                   id="tags"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
-                  placeholder="comma, separated, tags"
+                  placeholder="formal shirts, dress shirts, office wear"
                 />
+                <p className="text-[11px] text-muted-foreground">
+                  Comma-separated. Customers searching or browsing by these tags will find this product. e.g. tagging a dress shirt with &quot;formal shirts, dress shirts&quot; means it shows up under both.
+                </p>
               </div>
             </CardContent>
           </Card>
