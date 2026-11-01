@@ -44,7 +44,15 @@ import {
 import { adminUploadProductImage, adminRestoreProduct } from '@/actions/supabase'
 import { slugify } from '@/lib/format'
 
-type Category = { id: string; name: string; slug: string; parent?: { name: string } | null }
+type CategoryChild = { id: string; name: string; slug: string }
+type Category = {
+  id: string
+  name: string
+  slug: string
+  parentId?: string | null
+  parent?: { name: string } | null
+  children?: CategoryChild[]
+}
 
 type VariantInput = {
   id?: string
@@ -130,6 +138,17 @@ export function ProductForm({
     product?.salePrice ? String(product.salePrice) : '',
   )
   const [categoryId, setCategoryId] = useState(product?.categoryId ?? categories[0]?.id ?? '')
+  // Cascading category: when the admin picks a parent category (e.g.
+  // Clothing), the second dropdown shows only its subcategories (e.g.
+  // Dress Shirts, Casual Shirts, Formal Shirts). If the product already
+  // has a category, we work backwards to find the parent.
+  const [parentCategoryId, setParentCategoryId] = useState<string>(() => {
+    if (product?.categoryId) {
+      const cat = categories.find(c => c.id === product.categoryId)
+      return cat?.parentId ?? ''
+    }
+    return ''
+  })
   const [tags, setTags] = useState(product?.tags ?? '')
   const [featured, setFeatured] = useState(product?.featured ?? false)
   const [published, setPublished] = useState(product?.published ?? true)
@@ -496,16 +515,13 @@ export function ProductForm({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="tags">Tags / Search Tags</Label>
+                <Label htmlFor="tags">Tags</Label>
                 <Input
                   id="tags"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
-                  placeholder="formal shirts, dress shirts, office wear"
+                  placeholder="comma, separated, tags"
                 />
-                <p className="text-[11px] text-muted-foreground">
-                  Comma-separated. Customers searching or browsing by these tags will find this product. e.g. tagging a dress shirt with &quot;formal shirts, dress shirts&quot; means it shows up under both.
-                </p>
               </div>
             </CardContent>
           </Card>
@@ -733,20 +749,75 @@ export function ProductForm({
                 </p>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="category">Category *</Label>
-                <Select value={categoryId} onValueChange={setCategoryId}>
-                  <SelectTrigger id="category" className="w-full">
-                    <SelectValue placeholder="Select category" />
+                <Label htmlFor="parentCategory">Category *</Label>
+                <p className="text-[11px] text-muted-foreground mb-1">
+                  Select the main category first, then choose the subcategory.
+                </p>
+                {/* Step 1: Parent category (e.g. Clothing, Footwear, Accessories) */}
+                <Select
+                  value={parentCategoryId}
+                  onValueChange={(val) => {
+                    setParentCategoryId(val)
+                    // Reset the subcategory when parent changes
+                    const parent = categories.find(c => c.id === val)
+                    setCategoryId(parent?.children?.[0]?.id ?? val)
+                  }}
+                >
+                  <SelectTrigger id="parentCategory" className="w-full">
+                    <SelectValue placeholder="Select main category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.parent ? `${c.parent.name} — ` : ''}
-                        {c.name}
-                      </SelectItem>
-                    ))}
+                    {/* Parent categories are those with no parentId, OR
+                        categories that have children */}
+                    {categories
+                      .filter(c => !c.parentId && c.children && c.children.length > 0)
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
+
+                {/* Step 2: Subcategory (e.g. Dress Shirts, Casual Shirts) —
+                    only shown when a parent is selected and has children */}
+                {parentCategoryId && (() => {
+                  const parent = categories.find(c => c.id === parentCategoryId)
+                  const subcats = parent?.children ?? []
+                  if (subcats.length === 0) return null
+                  return (
+                    <Select value={categoryId} onValueChange={setCategoryId}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select subcategory" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subcats.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )
+                })()}
+
+                {/* If no parent selected, show flat list of all categories
+                    (fallback for categories without a parent) */}
+                {!parentCategoryId && (
+                  <Select value={categoryId} onValueChange={setCategoryId}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Or select a category directly" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.parent ? `${c.parent.name} — ` : ''}
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </CardContent>
           </Card>
