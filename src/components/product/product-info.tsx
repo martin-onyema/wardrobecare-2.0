@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Minus, Plus, ShoppingBag, Heart, MessageCircle, Truck, RotateCcw, Shield } from 'lucide-react'
+import { Minus, Plus, ShoppingBag, Heart, MessageCircle, Truck, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatNGN, effectivePrice, whatsappLink } from '@/lib/format'
 import { useCartStore } from '@/lib/stores/cart-store'
@@ -415,13 +415,6 @@ export function ProductInfo({
           <div>
             <p className="text-foreground">Cash on Delivery</p>
             <p>Lagos 1hr–3 days · Other states up to 7 days. Complimentary over ₦500,000.</p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3">
-          <RotateCcw className="h-4 w-4 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
-          <div>
-            <p className="text-foreground">7-Day Returns</p>
-            <p>Unworn items in original packaging. Sale items are final.</p>
           </div>
         </div>
         <div className="flex items-start gap-3">
