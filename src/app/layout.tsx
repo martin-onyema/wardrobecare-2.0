@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
@@ -83,6 +84,19 @@ export default function RootLayout({
         <Analytics />
         <SpeedInsights />
       </body>
+      <Script
+        id="google-analytics"
+        strategy="afterInteractive"
+        src="https://www.googletagmanager.com/gtag/js?id=G-7QYEV2CGE4"
+      />
+      <Script id="google-analytics-config" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-7QYEV2CGE4');
+        `}
+      </Script>
     </html>
   );
 }
