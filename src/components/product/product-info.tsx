@@ -223,7 +223,7 @@ export function ProductInfo({
           </p>
         )}
         <div className="flex items-baseline gap-3 mt-4">
-          <span className="text-xl tabular-nums">{formatNGN(displayPrice)}</span>
+          <span className="text-xl tabular-nums text-rust font-medium">{formatNGN(displayPrice)}</span>
           {isOnSale && (
             <>
               <span className="text-base text-muted-foreground line-through tabular-nums">
@@ -263,27 +263,21 @@ export function ProductInfo({
           <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
             Colour {selectedColor && <span className="text-foreground ml-1">— {selectedColor}</span>}
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             {distinctColors.map((color) => (
               <button
                 key={color}
                 onClick={() => handleColorChange(color)}
                 className={cn(
-                  'flex items-center gap-2 px-3 py-2 text-sm border transition-all',
+                  'size-8 rounded-full border-2 transition-all',
                   selectedColor === color
-                    ? 'border-foreground bg-secondary/60'
-                    : 'border-border hover:border-foreground/40',
+                    ? 'border-foreground ring-1 ring-foreground ring-offset-2 ring-offset-background'
+                    : 'border-transparent ring-1 ring-border hover:ring-foreground/40',
                 )}
+                style={{ background: isKnownColor(color) ? colorToCss(color) : '#999' }}
                 title={color}
-              >
-                {isKnownColor(color) && (
-                  <span
-                    className="inline-block w-4 h-4 rounded-full border border-foreground/20 shrink-0"
-                    style={{ background: colorToCss(color) }}
-                  />
-                )}
-                <span>{color}</span>
-              </button>
+                aria-label={`Colour: ${color}`}
+              />
             ))}
           </div>
         </div>
@@ -359,25 +353,39 @@ export function ProductInfo({
 
       {/* Actions */}
       <div className="space-y-3">
-        <button
-          onClick={handleAddToCart}
-          disabled={!inStock}
-          className={cn(
-            "w-full py-4 text-[11px] uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-2",
-            inStock
-              ? "bg-foreground text-background hover:bg-foreground/90"
-              : "bg-muted text-muted-foreground cursor-not-allowed",
-          )}
-        >
-          {inStock ? (
-            <>
-              <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
-              Add to Bag
-            </>
-          ) : (
-            <span className="font-bold tracking-[0.22em]">Sold Out</span>
-          )}
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleAddToCart}
+            disabled={!inStock}
+            className={cn(
+              "flex-1 py-4 text-[11px] uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-2",
+              inStock
+                ? "bg-foreground text-background hover:bg-foreground/90"
+                : "bg-muted text-muted-foreground cursor-not-allowed",
+            )}
+          >
+            {inStock ? (
+              <>
+                <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
+                Add to Cart
+              </>
+            ) : (
+              <span className="font-bold tracking-[0.22em]">Sold Out</span>
+            )}
+          </button>
+          <button
+            onClick={handleWishlist}
+            className={cn(
+              "px-5 border text-[11px] uppercase tracking-[0.2em] transition-colors flex items-center justify-center",
+              inWishlist
+                ? "border-foreground bg-foreground text-background"
+                : "border-foreground hover:bg-foreground hover:text-background",
+            )}
+            aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart className={cn('h-4 w-4', inWishlist && 'fill-current')} strokeWidth={1.5} />
+          </button>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={handleBuyNow}
@@ -399,13 +407,6 @@ export function ProductInfo({
             WhatsApp
           </button>
         </div>
-        <button
-          onClick={handleWishlist}
-          className="w-full flex items-center justify-center gap-2 py-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Heart className={cn('h-3.5 w-3.5', inWishlist && 'fill-current')} strokeWidth={1.5} />
-          {inWishlist ? 'In Wishlist' : 'Add to Wishlist'}
-        </button>
       </div>
 
       {/* Reassurance */}
