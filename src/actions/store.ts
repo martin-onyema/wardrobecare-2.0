@@ -18,6 +18,7 @@ import {
   type EmailOrder,
   type EmailOrderItem,
 } from '@/lib/email'
+import { notifyOwnerNewOrder } from '@/lib/sms'
 
 // ============================================================
 // CART — server-side line persistence (used after server verification)
@@ -274,6 +275,31 @@ export async function createOrder(formData: FormData | Record<string, any>): Pro
     ])
   } catch (e: any) {
     console.error('[email] order confirmation flow error:', e?.message)
+  }
+
+  // ── SMS notification to the store owner ──
+  // Best-effort — never blocks the order. Uses Termii SMS API.
+  // The SMS is sent only when the order meets the confirmation criteria
+  // (order was successfully created — payment status is handled separately
+  // by the Paystack webhook for online payments).
+  try {
+    await notifyOwnerNewOrder(
+      {
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.phone,
+        items: order.items.map((it: any) => ({
+          productName: it.productName,
+          quantity: it.quantity,
+        })),
+        total: order.total,
+        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod,
+      },
+      settings?.supportPhone,
+    )
+  } catch (e: any) {
+    console.error('[sms] order notification error:', e?.message)
   }
 
   // For WhatsApp orders, return the order number so the client can compose a

@@ -198,6 +198,29 @@ async function handleChargeSuccess(data: any) {
       { reference, paidAt: new Date() },
       receiptSettings?.supportEmail ?? undefined,
     )
+
+    // ── SMS notification to the store owner (payment confirmed) ──
+    // Best-effort — never blocks the webhook response.
+    try {
+      const { notifyOwnerNewOrder } = await import('@/lib/sms')
+      await notifyOwnerNewOrder(
+        {
+          orderNumber: payment.order.orderNumber,
+          customerName: payment.order.customerName,
+          customerPhone: payment.order.phone,
+          items: payment.order.items.map((it: any) => ({
+            productName: it.productName,
+            quantity: it.quantity,
+          })),
+          total: payment.order.total,
+          paymentStatus: 'SUCCESS',
+          paymentMethod: payment.order.paymentMethod,
+        },
+        receiptSettings?.supportPhone,
+      )
+    } catch (smsErr: any) {
+      console.error('[sms] webhook payment notification error:', smsErr?.message)
+    }
   } catch (e: any) {
     console.error('[email] webhook receipt error:', e?.message)
   }
