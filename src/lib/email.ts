@@ -71,6 +71,7 @@ function baseUrl(): string {
 
 /**
  * Low-level send. Never throws — every failure is captured and logged.
+ * Tries Gmail SMTP first (if configured), then falls back to Resend.
  */
 export async function sendEmail(input: {
   to: string
@@ -79,8 +80,30 @@ export async function sendEmail(input: {
   text?: string
   replyTo?: string
 }): Promise<EmailSendResult> {
+  // ── Try Gmail SMTP first ──
+  // Gmail is the primary email provider for Wardrobecare (more reliable
+  // for Nigerian delivery than Resend's shared IP pool).
+  try {
+    const { sendGmail, gmailConfigured } = await import('@/lib/gmail')
+    if (gmailConfigured()) {
+      const result = await sendGmail({
+        to: input.to,
+        subject: input.subject,
+        html: input.html,
+      })
+      if (result.ok) {
+        console.log(`[email] gmail sent "${input.subject}" → ${input.to}`)
+        return { ok: true, id: result.messageId }
+      }
+      console.error(`[email] gmail failed, falling back to Resend: ${result.error}`)
+    }
+  } catch (e: any) {
+    console.error(`[email] gmail import/send error, falling back to Resend: ${e?.message}`)
+  }
+
+  // ── Fallback: Resend ──
   if (!emailConfigured()) {
-    console.log(`[email] skipped (RESEND_API_KEY not set): "${input.subject}" → ${input.to}`)
+    console.log(`[email] skipped (neither Gmail nor Resend configured): "${input.subject}" → ${input.to}`)
     return { ok: false, skipped: true, error: 'email-not-configured' }
   }
 
@@ -112,7 +135,7 @@ export async function sendEmail(input: {
     }
 
     const data: any = await res.json().catch(() => ({}))
-    console.log(`[email] sent "${input.subject}" → ${input.to} (id: ${data?.id ?? '?'})`)
+    console.log(`[email] resend sent "${input.subject}" → ${input.to} (id: ${data?.id ?? '?'})`)
     return { ok: true, id: data?.id }
   } catch (e: any) {
     const reason = e?.name === 'AbortError' ? 'timeout' : e?.message
@@ -412,6 +435,72 @@ export async function notifyAdminNewOrder(
   return sendEmail({
     to: target,
     subject: `🔔 New order ${order.orderNumber} — ${naira(order.total)}`,
+    html,
+  })
+}
+
+// ────────────────────────────────────────────────────────────
+// 6. Service enquiry alert (to the store owner)
+// ────────────────────────────────────────────────────────────
+
+export async function notifyAdminServiceEnquiry(input: {
+  enquiryNumber: string
+  customerName: string
+  email: string
+  phone: string
+  serviceSlug: string
+  serviceName: string
+  message: string
+  occasion?: string | null
+  preferredDate?: string | null
+  location?: string | null
+  budget?: string | null
+}, adminEmail: string | null | undefined): Promise<EmailSendResult> {
+  const target = adminEmail || process.env.ADMIN_NOTIFY_EMAIL || process.env.GMAIL_USER
+  if (!target) {
+    console.log('[email] service enquiry alert skipped (no admin email)')
+    return { ok: false, skipped: true, error: 'no-admin-email' }
+  }
+
+  const details = [
+    input.occasion && `<strong>Occasion:</strong> ${escapeHtml(input.occasion)}`,
+    input.preferredDate && `<strong>Preferred date:</strong> ${escapeHtml(input.preferredDate)}`,
+    input.location && `<strong>Location:</strong> ${escapeHtml(input.location)}`,
+    input.budget && `<strong>Budget:</strong> ${escapeHtml(input.budget)}`,
+  ].filter(Boolean).join('<br>')
+
+  const html = layout({
+    title: `New ${input.serviceName} enquiry — ${input.enquiryNumber}`,
+    preheader: `${input.customerName} requested ${input.serviceName}`,
+    body: `
+      <div style="margin:0 0 20px;color:${C.ink};font-family:Helvetica,Arial,sans-serif;font-size:13px;letter-spacing:1px;">
+        <span style="background:${C.paper};border:1px solid ${C.line};padding:6px 14px;">ENQUIRY ${escapeHtml(input.enquiryNumber)}</span>
+      </div>
+      <p style="margin:8px 0 20px;color:${C.muted};font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;">
+        <strong style="color:${C.ink};">${escapeHtml(input.customerName)}</strong> just submitted a
+        <strong style="color:${C.ink};">${escapeHtml(input.serviceName)}</strong> enquiry.
+      </p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:${C.paper};border:1px solid ${C.line};">
+        <tr><td style="padding:16px 20px;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:${C.muted};">
+          <strong style="color:${C.ink};letter-spacing:1px;">CONTACT</strong><br>
+          ${escapeHtml(input.customerName)}<br>
+          ${escapeHtml(input.email)}<br>
+          ${escapeHtml(input.phone)}
+        </td></tr>
+      </table>
+      ${details ? `<p style="margin:12px 0;color:${C.muted};font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;">${details}</p>` : ''}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:${C.paper};border:1px solid ${C.line};">
+        <tr><td style="padding:16px 20px;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:${C.muted};">
+          <strong style="color:${C.ink};letter-spacing:1px;">MESSAGE</strong><br>
+          ${escapeHtml(input.message)}
+        </td></tr>
+      </table>
+      ${button(`${baseUrl()}/admin/services/enquiries`, 'VIEW ENQUIRY')}
+    `,
+  })
+  return sendEmail({
+    to: target,
+    subject: `🔔 New ${input.serviceName} enquiry — ${input.enquiryNumber}`,
     html,
   })
 }

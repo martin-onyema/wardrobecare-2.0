@@ -14,6 +14,7 @@ import {
   sendOrderConfirmation,
   sendPaymentReceipt,
   notifyAdminNewOrder,
+  notifyAdminServiceEnquiry,
   type EmailOrder,
   type EmailOrderItem,
 } from '@/lib/email'
@@ -1048,6 +1049,28 @@ export async function submitServiceEnquiry(formData: FormData) {
       body: `${created.customerName} requested ${created.serviceName}.`,
       link: `/admin/services/enquiries/${created.id}`,
     })
+
+    // ── Email alert to the store owner ──
+    // Best-effort — never blocks the enquiry submission.
+    try {
+      const settings = await db.adminSettings.findUnique({ where: { id: 'singleton' } })
+      await notifyAdminServiceEnquiry({
+        enquiryNumber: created.enquiryNumber,
+        customerName: created.customerName,
+        email: created.email,
+        phone: created.phone,
+        serviceSlug: created.serviceSlug,
+        serviceName: created.serviceName,
+        message: created.message,
+        occasion: created.occasion,
+        preferredDate: created.preferredDate?.toISOString() ?? null,
+        location: created.location,
+        budget: created.budget,
+      }, settings?.supportEmail)
+    } catch (e: any) {
+      console.error('[email] service enquiry notification error:', e?.message)
+    }
+
     revalidatePath('/admin/services/enquiries')
     return { ok: true, enquiryNumber: created.enquiryNumber }
   } catch (e: any) {
