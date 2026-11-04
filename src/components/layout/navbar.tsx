@@ -88,9 +88,13 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  useEffect(() => {
-    setOpenKey(null)
-  }, [pathname])
+  // Close dropdown menus when the route changes — React 19 "adjust state
+  // during render" pattern (avoids setState-in-effect lint error).
+  const [prevPath, setPrevPath] = useState(pathname)
+  if (pathname !== prevPath) {
+    setPrevPath(pathname)
+    if (openKey !== null) setOpenKey(null)
+  }
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
