@@ -112,17 +112,30 @@ export async function POST(req: Request) {
 }
 
 /**
- * Handle charge.success — mark order as PAID if it isn't already.
+ * Handle charge.success — mark order OR consultation booking as PAID.
  *
- * This is the canonical source of truth for "is this order paid?".
- * The customer's browser hitting /checkout/verify is a secondary
- * verification path; the webhook is what really finalises payment
- * even if the customer closes the tab.
+ * For orders: look up the Payment row by reference (FK to Order).
+ * For consultations: the reference starts with `WC-CONS-` — we look up
+ * the ConsultationBooking by `paymentReference` instead.
+ *
+ * This is the canonical source of truth for "is this order/booking paid?".
+ * The customer's browser hitting /checkout/verify (orders) or
+ * /services/wardrobe-consultation/confirmed (consultations) is the
+ * secondary verification path; the webhook is what really finalises
+ * payment even if the customer closes the tab.
  */
 async function handleChargeSuccess(data: any) {
   const reference: string = data.reference
   if (!reference) return
 
+  // ── Consultation booking path ──────────────────────────────────────
+  // Reference format: WC-CONS-0914-<random>
+  if (reference.startsWith('WC-CONS-')) {
+    await handleConsultationChargeSuccess(reference, data)
+    return
+  }
+
+  // ── Order path (existing) ───────────────────────────────────────────
   const payment = await db.payment.findUnique({
     where: { reference },
     include: { order: { include: { items: true } } },
@@ -319,6 +332,58 @@ async function createSystemNotificationsSafe(input: {
 
 function cryptoRandom() {
   return `wh_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
+}
+
+/**
+ * Consultation charge.success — mark the ConsultationBooking as PAID.
+ *
+ * Idempotent: if the booking is already PAID/CONFIRMED/RESCHEDULED/COMPLETED,
+ * we return early. We don't send a separate email here — the wizard's
+ * confirmConsultationPayment call from the browser verify page handles
+ * customer-facing UI; receipt email can be added later via the email
+ * template path used for orders.
+ */
+async function handleConsultationChargeSuccess(reference: string, data: any) {
+  const booking = await db.consultationBooking.findUnique({
+    where: { paymentReference: reference },
+    select: { id: true, bookingNumber: true, status: true, amountPaid: true, slotDate: true, slotTime: true },
+  })
+  if (!booking) {
+    console.warn(`[paystack-webhook] no consultation booking for reference ${reference}`)
+    return
+  }
+  // Idempotency
+  if (
+    booking.status === 'PAID' ||
+    booking.status === 'CONFIRMED' ||
+    booking.status === 'RESCHEDULED' ||
+    booking.status === 'COMPLETED'
+  ) {
+    return
+  }
+
+  // If hold was never set or already expired, we still mark PAID — the
+  // money came through, so the slot is theirs regardless.
+  try {
+    await db.consultationBooking.update({
+      where: { id: booking.id },
+      data: {
+        status: 'PAID',
+        paidAt: new Date(),
+        holdUntil: null,
+      },
+    })
+  } catch (e: any) {
+    console.error('[paystack-webhook] could not mark consultation PAID:', e?.message)
+    return
+  }
+
+  await createSystemNotificationsSafe({
+    type: 'NEW_ORDER',
+    title: `New paid consultation ${booking.bookingNumber}`,
+    body: `₦${booking.amountPaid.toLocaleString()} confirmed via webhook. Slot ${booking.slotDate.toISOString().slice(0, 10)} at ${booking.slotTime}.`,
+    link: `/admin/services/consultations/${booking.id}`,
+  })
 }
 
 /**

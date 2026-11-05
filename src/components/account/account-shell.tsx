@@ -7,6 +7,7 @@ import { signOut } from 'next-auth/react'
 import {
   LayoutDashboard,
   Package,
+  CalendarCheck,
   Heart,
   MapPin,
   User,
@@ -21,6 +22,7 @@ import { toast } from 'sonner'
 const NAV_LINKS = [
   { label: 'Overview', href: '/account', icon: LayoutDashboard },
   { label: 'Orders', href: '/account/orders', icon: Package },
+  { label: 'Bookings', href: '/account/bookings', icon: CalendarCheck },
   { label: 'Wishlist', href: '/account/wishlist', icon: Heart },
   { label: 'Addresses', href: '/account/addresses', icon: MapPin },
   { label: 'Profile', href: '/account/profile', icon: User },

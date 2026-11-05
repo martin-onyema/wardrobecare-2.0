@@ -35,7 +35,7 @@ export default function BookConsultationPage() {
             Let&apos;s set up your session
           </h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-xl leading-relaxed">
-            5 short steps. Takes about 2 minutes.
+            5 short steps. You pay in full at the end to secure your date.
           </p>
 
           {/* Wizard */}
