@@ -19,22 +19,16 @@ export const metadata: Metadata = {
 type Params = Promise<{ ref: string }>
 type SearchParams = Promise<{ thanks?: string; rescheduled?: string }>
 
-function parseProposedSlots(raw: string | unknown[] | null | undefined): Array<{ date: string; time: string }> {
-  if (!raw) return []
-  let arr: unknown
-  if (typeof raw === 'string') {
-    try {
-      arr = JSON.parse(raw)
-    } catch {
-      return []
-    }
-  } else {
-    arr = raw
-  }
-  if (!Array.isArray(arr)) return []
-  return arr
-    .filter((x: any) => x && typeof x.date === 'string' && typeof x.time === 'string')
-    .map((x: any) => ({ date: x.date, time: x.time }))
+// The booking now returns `rescheduleOffers` (from the RescheduleOffer table)
+// instead of the old `proposedSlots` JSON column. Each offer has
+// { slotDate: string (YYYY-MM-DD), slotTime: string, offeredAt, chosenAt, ... }.
+function mapOffers(
+  offers: Array<{ slotDate: string; slotTime: string; chosenAt: string | null }>,
+): Array<{ date: string; time: string }> {
+  // Only show offers that haven't been chosen yet
+  return offers
+    .filter((o) => !o.chosenAt)
+    .map((o) => ({ date: o.slotDate, time: o.slotTime }))
 }
 
 export default async function RescheduleBookingPage({
@@ -153,14 +147,14 @@ export default async function RescheduleBookingPage({
   }
 
   // ── Default: show the picker ──
-  // If the booking is no longer RESCHEDULE_PROPOSED (the customer already
+  // If the booking is no longer NEEDS_NEW_DATE (the customer already
   // accepted a slot or admin cancelled the proposal), bounce to the
   // detail page so they don't see an empty picker.
-  if (booking.status !== 'RESCHEDULE_PROPOSED') {
+  if (booking.status !== 'NEEDS_NEW_DATE') {
     redirect(`/account/bookings/${booking.bookingNumber}`)
   }
 
-  const slots = parseProposedSlots(booking.proposedSlots)
+  const slots = mapOffers(booking.rescheduleOffers ?? [])
 
   return (
     <>

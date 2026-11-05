@@ -56,7 +56,6 @@ type Booking = {
   discountFree: boolean
   status: string
   assignedStylistId: string | null
-  proposedSlots: string | unknown[] | null
   rescheduleReason: string | null
   rescheduledAt: string | null
   originalSlotDate: string | null
@@ -113,10 +112,10 @@ export function RequestsClient({
   const filtered = bookings.filter((b) => {
     if (filter === 'all') return true
     if (filter === 'paid') return b.status === 'PAID'
-    if (filter === 'res') return b.status === 'RESCHEDULE_PROPOSED'
+    if (filter === 'res') return b.status === 'NEEDS_NEW_DATE'
     if (filter === 'conf') return b.status === 'CONFIRMED'
     if (filter === 'ses') return b.status === 'IN_SESSION'
-    if (filter === 'done') return b.status === 'SUMMARY_PENDING'
+    if (filter === 'done') return b.status === 'COMPLETED'
     return true
   })
 
@@ -280,8 +279,8 @@ function RequestDetail({
   }
 
   const showConfirm = booking.status === 'PAID'
-  const showDateNotAvail = (booking.status === 'PAID' || booking.status === 'CONFIRMED' || booking.status === 'RESCHEDULED') && canManage
-  const showDiscount = canManage && booking.status !== 'COMPLETED' && booking.status !== 'CANCELLED' && booking.status !== 'IN_SESSION'
+  const showDateNotAvail = (booking.status === 'PAID' || booking.status === 'CONFIRMED') && canManage
+  const showDiscount = canManage && booking.status !== 'SUMMARY_SENT' && booking.status !== 'CANCELLED' && booking.status !== 'IN_SESSION'
 
   return (
     <div className="space-y-4">
@@ -316,7 +315,7 @@ function RequestDetail({
           {booking.frustration && <KV label="Frustration">{booking.frustration}</KV>}
 
           {/* Stylist assignment */}
-          {canManage && (booking.status === 'PAID' || booking.status === 'CONFIRMED' || booking.status === 'RESCHEDULE_PROPOSED' || booking.status === 'RESCHEDULED') && (
+          {canManage && (booking.status === 'PAID' || booking.status === 'CONFIRMED' || booking.status === 'NEEDS_NEW_DATE') && (
             <div className="pt-3 border-t border-border">
               <label className="block text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
                 Stylist
@@ -419,7 +418,7 @@ function RequestDetail({
                 <p className="text-xs text-muted-foreground">Staff · {new Date(booking.updatedAt).toLocaleString('en-GB')}</p>
               </li>
             )}
-            {booking.status === 'RESCHEDULE_PROPOSED' && booking.rescheduleReason && (
+            {booking.status === 'NEEDS_NEW_DATE' && booking.rescheduleReason && (
               <li className="border-l-2 border-rust pl-4">
                 <p className="text-foreground">
                   Date not available. {booking.rescheduleReason.split('\n')[0]}
@@ -427,7 +426,7 @@ function RequestDetail({
                 <p className="text-xs text-muted-foreground">Staff · {booking.rescheduledAt ? new Date(booking.rescheduledAt).toLocaleString('en-GB') : ''}</p>
               </li>
             )}
-            {booking.originalSlotDate && booking.status === 'RESCHEDULED' && (
+            {booking.originalSlotDate && booking.originalSlotDate && (
               <li className="border-l-2 border-purple-500 pl-4">
                 <p className="text-foreground">
                   Rescheduled from {fmtDateLabel(booking.originalSlotDate)}, {booking.originalSlotTime}

@@ -1251,48 +1251,69 @@ model ServiceEnquiry {
 // ============================================================
 // CONSULTATION BOOKINGS — paid-at-booking sessions
 // (Wardrobe & Style Consultation, etc.)
-// Separate from ServiceEnquiry (which is free, "we'll send a payment
-// link later"). ConsultationBooking captures the actual booked slot,
-// the Paystack payment, the 10-minute hold, and admin-initiated
-// reschedule proposals.
+//
+// Spec: wardrobecare consultation backend workflow. Booking states:
+//   HELD (10 min, before payment)
+//     -> PAID                    payment success webhook
+//     -> EXPIRED                 hold timer ran out, slot released
+//   PAID
+//     -> CONFIRMED               staff confirm (needs stylist assigned, no clash)
+//     -> NEEDS_NEW_DATE          staff: "date not available" + 2-3 new slots offered
+//   NEEDS_NEW_DATE
+//     -> CONFIRMED               customer picks one offered slot
+//     (stays NEEDS_NEW_DATE until resolved; reminder at 6h/24h; alert staff at 48h)
+//   CONFIRMED
+//     -> NEEDS_NEW_DATE          staff can still move it later
+//     -> IN_SESSION              stylist starts session
+//     -> NO_SHOW / CANCELLED
+//   IN_SESSION -> COMPLETED      stylist finishes (audit, outfits, gaps required)
+//   COMPLETED  -> SUMMARY_SENT   send Wardrobe Map + Gap List + publish summary
+//
+// Every transition writes a row to BookingEvent (who, when, from, to, note).
 // ============================================================
 
 enum ConsultationBookingStatus {
-  HELD                // slot held for 10 min, awaiting Paystack payment
-  PAID                // paid, awaiting our confirmation
-  CONFIRMED           // we confirmed the date & assigned a stylist
-  RESCHEDULE_PROPOSED // admin cannot keep date; 3 new slots proposed
-  RESCHEDULED         // customer picked a new slot
-  IN_SESSION          // stylist started the session
-  SUMMARY_PENDING     // session finished, summary not yet sent
-  COMPLETED           // summary sent, session fully closed
-  CANCELLED           // cancelled (refund handled separately)
+  HELD              // slot held for 10 min, awaiting payment
+  EXPIRED           // hold timer ran out, slot released
+  PAID              // payment success webhook
+  NEEDS_NEW_DATE    // staff: date not available + 2-3 new slots offered
+  CONFIRMED         // staff confirmed (needs stylist assigned, no clash)
+  IN_SESSION        // stylist started the session
+  COMPLETED         // session finished (audit, outfits, gaps required)
+  SUMMARY_SENT      // summary sent + Wardrobe Map + Gap List published
+  NO_SHOW           // customer didn\'t show up
+  CANCELLED         // cancelled (refund handled separately)
 }
 
 model ConsultationBooking {
   id              String   @id @default(cuid())
-  bookingNumber    String   @unique // e.g. WC-CONS-0914
-  userId          String?  // optional, if logged in
+  bookingNumber   String   @unique
+  userId          String?  // accountId — who booked and paid
+  profileId       String?  // who the session is for (managed profile, or null=self)
 
-  // ─── Booker details (the person paying, not necessarily the recipient) ───
+  // ─── Booker / contact details ───
   bookerName      String
   bookerPhone     String
   contactMethod   String   // "Call" | "WhatsApp" | "Email"
 
-  // ─── Recipient details (who the session is for) ───
+  // ─── Recipient details ───
   recipientName   String
   recipientRelation String?
-
-  // ─── Style goals (about the recipient) ───
-  promptWhy       String?
-  occasions       String?
-  frustration     String?
 
   // ─── Session details ───
   sessionMode     String   // "In-person" | "Video call"
   location        String?  // area in Lagos, only if In-person
-  slotDate        DateTime // the booked date
+  slotDate        DateTime // the booked date (UTC midnight)
   slotTime        String   // "9:00 AM", "11:30 AM", "2:00 PM", "4:30 PM"
+
+  // ─── Style goals ───
+  promptWhy       String?
+  occasions       String?
+  frustration     String?
+
+  // ─── Stylist assignment ───
+  assignedStylistId String?
+  assignedStylist   User?  @relation("ConsultationBookingStylist", fields: [assignedStylistId], references: [id], onDelete: SetNull)
 
   // ─── Payment ───
   listPrice       Int      @default(45000) // snapshot of fee at booking time
@@ -1300,49 +1321,48 @@ model ConsultationBooking {
   paymentReference String? @unique        // Paystack transaction reference
   paidAt          DateTime?
 
-  // ─── Discount (snapshot on the booking, applied at checkout or by staff) ───
-  discountLabel   String?  // "Code WELCOME10 (10% off)" / "Staff discount: Loyal client (5% off)"
-  discountAmount  Int      @default(0) // naira subtracted from listPrice
-  discountAppliesToAll Boolean @default(false) // true → also applies to extra time + return visit
-  discountPct     Int?      // null for non-percentage discounts
+  // ─── Discount snapshot (denormalised from BookingPrice) ───
+  discountLabel   String?
+  discountAmount  Int      @default(0)
+  discountAppliesToAll Boolean @default(false)
+  discountPct     Int?
   discountFree    Boolean  @default(false)
-  promoCodeId     String?  // link if a code was used
-  promoCode       ConsultationPromoCode? @relation("ConsultationBookingPromoCode", fields: [promoCodeId], references: [id], onDelete: SetNull)
+  promoCodeId     String?
 
   // ─── Slot hold ───
-  holdUntil       DateTime? // 10-min hold for unpaid slot
+  holdUntil       DateTime?
 
   // ─── Workflow ───
   status          ConsultationBookingStatus @default(HELD)
 
-  // ─── Stylist assignment (the staff member running the session) ───
-  assignedStylistId String?
-  assignedStylist  User?   @relation("ConsultationBookingStylist", fields: [assignedStylistId], references: [id], onDelete: SetNull)
-
-  // ─── Reschedule (admin-initiated) ───
-  proposedSlots   Json?      // [{ date: "2026-11-10", time: "11:30 AM" }, ...]
-  rescheduleReason String?   // why admin couldn't keep the original slot
+  // ─── Reschedule ───
+  rescheduleReason String?  // STYLIST_UNAVAILABLE | CLASH | CLOSURE | LOCATION
   rescheduledAt   DateTime?
   originalSlotDate DateTime?
   originalSlotTime String?
 
-  // ─── Session workspace (the in-session audit/photos/gaps/time) ───
-  sessionStartedAt    DateTime?
-  elapsedMinutes      Int      @default(0) // minutes since sessionStartedAt (+ manual adjustments)
-  auditItems          Json?    // [{ i, cat, a: 'Keep'|'Alter'|'Retire', n }]
-  outfitPhotos        Json?    // [{ n, o, url }]  (n = outfit number, o = occasion)
-  gapItems            Json?    // [{ i, p: 'High'|'Medium' }]
-  sessionNotes        String?  // free-form internal notes
-  extraTimeBilledAt   DateTime? // when the extra-time payment link was sent
-  extraTimeAmount     Int      @default(0) // naira billed for extra time (0 if not billed)
+  // ─── Session workspace ───
+  sessionStartedAt DateTime?
+  elapsedMinutes  Int      @default(0)
+  sessionNotes    String?
+  extraTimeBilledAt DateTime?
+  extraTimeAmount Int      @default(0)
 
   // ─── After the session ───
   summarySentAt           DateTime?
-  returnVisitBookingId    String?  // link to a follow-up booking (return visit)
-  personalShoppingBriefAt DateTime? // when a PS brief was generated from gap list
+  returnVisitBookingId    String?
+  personalShoppingBriefAt DateTime?
 
   // ─── Relations ───
-  user            User?    @relation("ConsultationBookingUser", fields: [userId], references: [id], onDelete: SetNull)
+  user              User?  @relation("ConsultationBookingUser", fields: [userId], references: [id], onDelete: SetNull)
+  events            BookingEvent[]
+  rescheduleOffers  RescheduleOffer[]
+  auditItems        AuditItem[]
+  outfitPhotos      OutfitPhoto[]
+  gapItems          GapItem[]
+  summary           ConsultationSummary?
+  price             BookingPrice?
+  promoRedemption   PromoRedemption?
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -1350,60 +1370,194 @@ model ConsultationBooking {
   @@index([status])
   @@index([slotDate, slotTime])
   @@index([userId])
-  @@index([paymentReference])
+  @@index([assignedStylistId])
+}
+
+// Audit trail. Every status transition writes a row.
+model BookingEvent {
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     ConsultationBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  actorId     String?
+  actorType   String   // "CUSTOMER" | "STAFF" | "SYSTEM"
+  fromStatus  String?
+  toStatus    String
+  note        String?
+  channel     String?  // "WhatsApp" | "Email" | "SMS" | null
+  createdAt   DateTime @default(now())
+
+  @@index([bookingId, createdAt])
+}
+
+// One row per offered slot during a reschedule.
+model RescheduleOffer {
+  id          String    @id @default(cuid())
+  bookingId   String
+  booking     ConsultationBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  slotDate    DateTime
+  slotTime    String
+  offeredBy   String?
+  offeredAt   DateTime  @default(now())
+  chosenAt    DateTime?
+  expiresAt   DateTime?
+
+  @@index([bookingId])
+}
+
+// Wardrobe audit — keep / alter / retire.
+model AuditItem {
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     ConsultationBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  name        String
+  category    String
+  action      String   // "Keep" | "Alter" | "Retire"
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@index([bookingId])
+}
+
+// Outfit photo — numbered, with occasion.
+model OutfitPhoto {
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     ConsultationBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  number      Int
+  occasion    String
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+
+  @@unique([bookingId, number])
+  @@index([bookingId])
+}
+
+// Gap list item — what to buy next.
+model GapItem {
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     ConsultationBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  name        String
+  priority    String   // "High" | "Medium" | "Low"
+  createdAt   DateTime @default(now())
+
+  @@index([bookingId])
+}
+
+// Published consultation summary (Mockup 43).
+model ConsultationSummary {
+  id              String   @id @default(cuid())
+  bookingId       String   @unique
+  booking         ConsultationBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  styleDirection  String?
+  palette         String?
+  silhouette      String?
+  publishedAt     DateTime @default(now())
+}
+
+// Price snapshot — one per booking.
+model BookingPrice {
+  id              String   @id @default(cuid())
+  bookingId       String   @unique
+  booking         ConsultationBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  listPrice       Int
+  discountType    String?  // "PERCENT" | "FIXED" | "FREE" | "CUSTOM"
+  discountValue   Int?
+  discountSource  String?  // "CODE" | "AUTO" | "STAFF"
+  discountLabel   String?
+  discountAmount  Int      @default(0)
+  appliesToAll    Boolean  @default(false)
+  amountDue       Int
+  amountPaid      Int
+  staffReason     String?
+  staffNote       String?
+  appliedBy       String?
+  appliedAt       DateTime?
+}
+
+// One row per promo code redemption. One use per customer.
+model PromoRedemption {
+  id          String   @id @default(cuid())
+  codeId      String
+  code        ConsultationPromoCode @relation(fields: [codeId], references: [id], onDelete: Cascade)
+  accountId   String
+  bookingId   String   @unique
+  booking     ConsultationBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amountOff   Int
+  redeemedAt  DateTime @default(now())
+
+  @@unique([codeId, accountId])
+}
+
+// Automatic offers — typed conditions.
+model AutoOfferRule {
+  id              String   @id @default(cuid())
+  name            String
+  condition       String   // "REFERRALS_AT_LEAST" | "FIRST_BOOKING" | "BIRTHDAY_MONTH"
+  conditionValue  Int?
+  rewardType      String   // "PERCENT" | "FIXED" | "FREE"
+  rewardValue     Int
+  active          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  rewards         AccountReward[]
+}
+
+// Account reward — e.g. "free consultation" from referrals.
+model AccountReward {
+  id              String   @id @default(cuid())
+  accountId       String
+  ruleId          String?
+  rule            AutoOfferRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  status          String   @default("AVAILABLE")
+  usedOnBookingId String?
+  earnedAt        DateTime @default(now())
+
+  @@index([accountId, status])
 }
 
 // ============================================================
-// CONSULTATION WORKFLOW — supporting tables (admin side)
+// CONSULTATION WORKFLOW — settings + promo codes + availability
 // ============================================================
 
-// Single-row table holding the current consultation fee structure.
-// Editable in the admin Fees & discounts tab. New bookings snapshot
-// the values in ConsultationBooking.listPrice / amountPaid at checkout.
 model ConsultationServiceSetting {
   id                    String   @id @default("singleton")
-  baseFee               Int      @default(45000) // first two hours, flat
-  extraHourFee          Int      @default(10000) // each extra hour
-  returnVisitDropoffPct Int      @default(50)    // % of baseFee for drop-off-only return visit
-  extraTimeRounding     String   @default("started") // "started" = each started hour, "full" = full hours only
+  baseFee               Int      @default(45000)
+  extraHourFee          Int      @default(10000)
+  returnVisitDropoffPct Int      @default(50)
+  extraTimeRounding     String   @default("started")
   updatedAt             DateTime @updatedAt
 }
 
-// Promo codes customers enter at checkout. Each customer can use a code
-// once. A booking can carry one discount.
 model ConsultationPromoCode {
   id           String    @id @default(cuid())
   code         String    @unique
-  type         String    // "pct" | "fix" | "free"
-  value        Int       // pct: 1-100, fix: naira, free: ignored (100)
-  appliesToAll Boolean   @default(false) // true → also applies to extra time + return visit
+  type         String    // "PERCENT" | "FIXED" | "FREE"
+  value        Int
+  appliesToAll Boolean   @default(false)
   expiresAt    DateTime?
-  usageLimit   Int?      // null = unlimited
+  usageLimit   Int?
   timesUsed    Int       @default(0)
   active       Boolean   @default(true)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  bookings     ConsultationBooking[] @relation("ConsultationBookingPromoCode") // bookings that used this code
+  redemptions  PromoRedemption[]
 
   @@index([active])
 }
 
-// Automatic offers — no code needed. Eligibility is evaluated at checkout.
-// e.g. "Referral reward: free session at 3 referrals" or "First booking: 10% off".
 model ConsultationDiscountRule {
   id        String   @id @default(cuid())
-  name      String   // "Referral reward", "First booking"
-  condition String   // human-readable, e.g. "Client reaches 3 referrals"
-  reward    String   // "Free session (first two hours)", "10% off"
+  name      String
+  condition String
+  reward    String
   active    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// Blocked slots — admin manually blocks a (date, time) cell on the
-// calendar so the website won't offer it. Stored separately from bookings
-// so blocking a slot doesn't require creating a fake booking.
 model ConsultationBlockedSlot {
   id        String   @id @default(cuid())
   slotDate  DateTime
@@ -1414,10 +1568,9 @@ model ConsultationBlockedSlot {
   @@unique([slotDate, slotTime])
 }
 
-// Single-row table holding the consultation availability rules.
 model ConsultationAvailability {
   id                    String   @id @default("singleton")
-  workingDays           String   @default("Mon,Tue,Wed,Thu,Fri,Sat") // comma-sep
+  workingDays           String   @default("Mon,Tue,Wed,Thu,Fri,Sat")
   sessionTimes          String   @default("9:00 AM,11:30 AM,2:00 PM,4:30 PM")
   travelBufferMinutes   Int      @default(60)
   minNoticeHours        Int      @default(24)

@@ -46,7 +46,7 @@ export default async function AdminConsultationCalendarPage({
   const bookings = await db.consultationBooking.findMany({
     where: {
       slotDate: { gte: startDate, lte: endDate },
-      status: { in: ['PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED', 'IN_SESSION', 'SUMMARY_PENDING', 'COMPLETED'] },
+      status: { in: ['PAID', 'CONFIRMED', 'NEEDS_NEW_DATE', 'IN_SESSION', 'COMPLETED', 'SUMMARY_SENT'] },
       ...(stylistFilter !== 'all' ? { assignedStylistId: stylistFilter } : {}),
     },
     select: {

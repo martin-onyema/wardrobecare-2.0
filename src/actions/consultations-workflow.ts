@@ -11,11 +11,9 @@
  *   - Fees & discounts: save fees, promo codes, automatic offers
  *   - Apply discount to a booking (with refund/credit accounting)
  *
- * Session workspace actions are append-only on JSON fields (auditItems,
- * outfitPhotos, gapItems) — we read-modify-write the whole array. This
- * is fine for single-stylist sessions; if two staff edit the same
- * booking simultaneously the last write wins, but that's a rare case
- * for in-person sessions.
+ * Session workspace collections (audit items, outfit photos, gap items) are
+ * now stored in their own tables (AuditItem, OutfitPhoto, GapItem) instead
+ * of JSON columns. A BookingEvent row is written for every status transition.
  */
 
 import { db } from '@/lib/db'
@@ -30,29 +28,32 @@ import {
 } from '@/lib/consultations-constants'
 
 // ============================================================
-// Helpers — JSON parsing that works for both sqlite (String) and
-// postgres (Json) columns. Mirrors parseProposedSlots in consultations.ts.
+// Helpers — write a BookingEvent row for every status transition.
+// Failures are logged but never throw — the workflow must not
+// abort just because the audit trail couldn't be written.
 // ============================================================
 
-function parseJsonArray(raw: string | unknown[] | null | undefined): any[] {
-  if (!raw) return []
-  let arr: unknown
-  if (typeof raw === 'string') {
-    try {
-      arr = JSON.parse(raw)
-    } catch {
-      return []
-    }
-  } else {
-    arr = raw
+async function writeBookingEvent(
+  bookingId: string,
+  fromStatus: string | null,
+  toStatus: string,
+  opts?: { actorId?: string; actorType?: string; note?: string; channel?: string },
+) {
+  try {
+    await db.bookingEvent.create({
+      data: {
+        bookingId,
+        actorId: opts?.actorId ?? null,
+        actorType: opts?.actorType ?? 'SYSTEM',
+        fromStatus,
+        toStatus,
+        note: opts?.note ?? null,
+        channel: opts?.channel ?? null,
+      },
+    })
+  } catch (e) {
+    console.warn('[consultations-workflow] writeBookingEvent failed:', (e as Error).message)
   }
-  return Array.isArray(arr) ? arr : []
-}
-
-function jsonify(value: any): string {
-  // sqlite stores JSON columns as String — we always JSON.stringify on
-  // write so reads can be parsed back. Postgres Json? accepts either.
-  return JSON.stringify(value)
 }
 
 // ============================================================
@@ -90,6 +91,12 @@ export async function adminAssignStylist(bookingId: string, stylistId: string | 
     return { ok: false, error: e?.message ?? 'Could not assign stylist.' } as const
   }
 
+  await writeBookingEvent(bookingId, booking.status, booking.status, {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `Assigned ${stylist?.email ?? 'no one'} to ${booking.bookingNumber}`,
+  })
+
   try {
     await auditLog({
       actorId: admin.id,
@@ -119,8 +126,8 @@ export async function adminConfirmPaidBooking(bookingId: string) {
     select: { id: true, bookingNumber: true, status: true, assignedStylistId: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
-  if (b.status !== 'PAID' && b.status !== 'RESCHEDULED') {
-    return { ok: false, error: 'Only paid or rescheduled bookings can be confirmed.' } as const
+  if (b.status !== 'PAID') {
+    return { ok: false, error: 'Only paid bookings can be confirmed.' } as const
   }
   if (!b.assignedStylistId) {
     return { ok: false, error: 'Assign a stylist first.' } as const
@@ -133,6 +140,11 @@ export async function adminConfirmPaidBooking(bookingId: string) {
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not confirm booking.' } as const
   }
+  await writeBookingEvent(bookingId, b.status, 'CONFIRMED', {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `Confirmed ${b.bookingNumber}`,
+  })
   try {
     await auditLog({
       actorId: admin.id,
@@ -157,7 +169,7 @@ export async function adminStartSession(bookingId: string) {
     select: { id: true, bookingNumber: true, status: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
-  if (b.status !== 'CONFIRMED' && b.status !== 'RESCHEDULED' && b.status !== 'IN_SESSION') {
+  if (b.status !== 'CONFIRMED' && b.status !== 'IN_SESSION') {
     return { ok: false, error: 'Only confirmed bookings can start a session.' } as const
   }
   if (b.status === 'IN_SESSION') return { ok: true, alreadyStarted: true } as const
@@ -169,6 +181,11 @@ export async function adminStartSession(bookingId: string) {
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not start session.' } as const
   }
+  await writeBookingEvent(bookingId, b.status, 'IN_SESSION', {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `Started session for ${b.bookingNumber}`,
+  })
   try {
     await auditLog({
       actorId: admin.id,
@@ -217,57 +234,61 @@ const auditItemSchema = z.object({
 })
 
 export async function adminAddAuditItem(bookingId: string, input: z.infer<typeof auditItemSchema>) {
-  const admin = await requireStaffWithPermission('service.enquiry.manage')
+  await requireStaffWithPermission('service.enquiry.manage')
   const parsed = auditItemSchema.safeParse(input)
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? 'Invalid audit item.' } as const
   }
   const b = await db.consultationBooking.findUnique({
     where: { id: bookingId },
-    select: { id: true, bookingNumber: true, status: true, auditItems: true },
+    select: { id: true, bookingNumber: true, status: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
   if (b.status !== 'IN_SESSION') {
     return { ok: false, error: 'Audit items can only be added while the session is running.' } as const
   }
-  const items = parseJsonArray(b.auditItems)
-  items.push({
-    i: parsed.data.item.trim(),
-    cat: parsed.data.category,
-    a: parsed.data.action,
-    n: parsed.data.note?.trim() ?? '',
-  })
   try {
-    await db.consultationBooking.update({
-      where: { id: bookingId },
-      data: { auditItems: jsonify(items) },
+    await db.auditItem.create({
+      data: {
+        bookingId,
+        name: parsed.data.item.trim(),
+        category: parsed.data.category,
+        action: parsed.data.action,
+        note: parsed.data.note?.trim() ?? null,
+      },
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not add audit item.' } as const
   }
   revalidatePath('/admin/services/consultations')
-  return { ok: true, count: items.length } as const
+  return { ok: true } as const
 }
 
 export async function adminRemoveAuditItem(bookingId: string, index: number) {
   await requireStaffWithPermission('service.enquiry.manage')
   const b = await db.consultationBooking.findUnique({
     where: { id: bookingId },
-    select: { id: true, auditItems: true, status: true },
+    select: { id: true, status: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
   if (b.status !== 'IN_SESSION') {
     return { ok: false, error: 'Can only edit audit while the session is running.' } as const
   }
-  const items = parseJsonArray(b.auditItems)
-  if (index < 0 || index >= items.length) {
+  if (!Number.isInteger(index) || index < 0) {
     return { ok: false, error: 'Invalid item index.' } as const
   }
-  items.splice(index, 1)
-  await db.consultationBooking.update({
-    where: { id: bookingId },
-    data: { auditItems: jsonify(items) },
+  // Resolve the index → concrete row by ordering on createdAt (stable).
+  const items = await db.auditItem.findMany({
+    where: { bookingId },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true },
+    skip: index,
+    take: 1,
   })
+  if (items.length === 0) {
+    return { ok: false, error: 'Invalid item index.' } as const
+  }
+  await db.auditItem.deleteMany({ where: { id: items[0].id } })
   revalidatePath('/admin/services/consultations')
   return { ok: true } as const
 }
@@ -287,50 +308,69 @@ export async function adminAddOutfitPhoto(bookingId: string, input: z.infer<type
   }
   const b = await db.consultationBooking.findUnique({
     where: { id: bookingId },
-    select: { id: true, outfitPhotos: true, status: true },
+    select: { id: true, status: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
   if (b.status !== 'IN_SESSION') {
     return { ok: false, error: 'Photos can only be added while the session is running.' } as const
   }
-  const photos = parseJsonArray(b.outfitPhotos)
-  const next = photos.length + 1
-  photos.push({
-    n: next,
-    o: parsed.data.occasion,
-    url: parsed.data.photoUrl ?? '',
-  })
-  await db.consultationBooking.update({
-    where: { id: bookingId },
-    data: { outfitPhotos: jsonify(photos) },
+  const count = await db.outfitPhoto.count({ where: { bookingId } })
+  const nextNumber = count + 1
+  await db.outfitPhoto.create({
+    data: {
+      bookingId,
+      number: nextNumber,
+      occasion: parsed.data.occasion,
+      imageUrl: parsed.data.photoUrl ?? null,
+    },
   })
   revalidatePath('/admin/services/consultations')
-  return { ok: true, outfitNumber: next } as const
+  return { ok: true, outfitNumber: nextNumber } as const
 }
 
 export async function adminRemoveOutfitPhoto(bookingId: string, index: number) {
   await requireStaffWithPermission('service.enquiry.manage')
   const b = await db.consultationBooking.findUnique({
     where: { id: bookingId },
-    select: { id: true, outfitPhotos: true, status: true },
+    select: { id: true, status: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
   if (b.status !== 'IN_SESSION') {
     return { ok: false, error: 'Can only edit photos while the session is running.' } as const
   }
-  const photos = parseJsonArray(b.outfitPhotos)
-  if (index < 0 || index >= photos.length) {
+  if (!Number.isInteger(index) || index < 0) {
     return { ok: false, error: 'Invalid photo index.' } as const
   }
-  photos.splice(index, 1)
-  // Renumber so they stay sequential 1, 2, 3 …
-  photos.forEach((p: any, i: number) => {
-    p.n = i + 1
+  // Resolve the index → concrete row by ordering on number (stable 1, 2, 3 …).
+  const photos = await db.outfitPhoto.findMany({
+    where: { bookingId },
+    orderBy: { number: 'asc' },
+    select: { id: true },
+    skip: index,
+    take: 1,
   })
-  await db.consultationBooking.update({
-    where: { id: bookingId },
-    data: { outfitPhotos: jsonify(photos) },
+  if (photos.length === 0) {
+    return { ok: false, error: 'Invalid photo index.' } as const
+  }
+  await db.outfitPhoto.delete({ where: { id: photos[0].id } })
+  // Renumber the remaining photos so they stay sequential 1, 2, 3 …
+  // We process in ascending order so each target slot (i+1) is already
+  // free — either vacated by the delete or vacated by the previous row
+  // we just renumbered. This keeps the [bookingId, number] unique
+  // constraint happy without needing temp placeholders.
+  const remaining = await db.outfitPhoto.findMany({
+    where: { bookingId },
+    orderBy: { number: 'asc' },
+    select: { id: true, number: true },
   })
+  for (let i = 0; i < remaining.length; i++) {
+    const target = i + 1
+    if (remaining[i].number === target) continue
+    await db.outfitPhoto.update({
+      where: { id: remaining[i].id },
+      data: { number: target },
+    })
+  }
   revalidatePath('/admin/services/consultations')
   return { ok: true } as const
 }
@@ -350,41 +390,48 @@ export async function adminAddGapItem(bookingId: string, input: z.infer<typeof g
   }
   const b = await db.consultationBooking.findUnique({
     where: { id: bookingId },
-    select: { id: true, gapItems: true, status: true },
+    select: { id: true, status: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
   if (b.status !== 'IN_SESSION') {
     return { ok: false, error: 'Gap items can only be added while the session is running.' } as const
   }
-  const gaps = parseJsonArray(b.gapItems)
-  gaps.push({ i: parsed.data.item.trim(), p: parsed.data.priority })
-  await db.consultationBooking.update({
-    where: { id: bookingId },
-    data: { gapItems: jsonify(gaps) },
+  await db.gapItem.create({
+    data: {
+      bookingId,
+      name: parsed.data.item.trim(),
+      priority: parsed.data.priority,
+    },
   })
   revalidatePath('/admin/services/consultations')
-  return { ok: true, count: gaps.length } as const
+  return { ok: true } as const
 }
 
 export async function adminRemoveGapItem(bookingId: string, index: number) {
   await requireStaffWithPermission('service.enquiry.manage')
   const b = await db.consultationBooking.findUnique({
     where: { id: bookingId },
-    select: { id: true, gapItems: true, status: true },
+    select: { id: true, status: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
   if (b.status !== 'IN_SESSION') {
     return { ok: false, error: 'Can only edit gaps while the session is running.' } as const
   }
-  const gaps = parseJsonArray(b.gapItems)
-  if (index < 0 || index >= gaps.length) {
+  if (!Number.isInteger(index) || index < 0) {
     return { ok: false, error: 'Invalid gap index.' } as const
   }
-  gaps.splice(index, 1)
-  await db.consultationBooking.update({
-    where: { id: bookingId },
-    data: { gapItems: jsonify(gaps) },
+  // Resolve the index → concrete row by ordering on createdAt (stable).
+  const gaps = await db.gapItem.findMany({
+    where: { bookingId },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true },
+    skip: index,
+    take: 1,
   })
+  if (gaps.length === 0) {
+    return { ok: false, error: 'Invalid gap index.' } as const
+  }
+  await db.gapItem.deleteMany({ where: { id: gaps[0].id } })
   revalidatePath('/admin/services/consultations')
   return { ok: true } as const
 }
@@ -435,6 +482,11 @@ export async function adminSendExtraTimeLink(bookingId: string) {
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not record extra-time billing.' } as const
   }
+  await writeBookingEvent(bookingId, b.status, b.status, {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `Extra time billed: ${extraHours}h × ₦${extraHourFee} = ₦${amount} for ${b.bookingNumber}`,
+  })
   try {
     await auditLog({
       actorId: admin.id,
@@ -458,9 +510,6 @@ export async function adminFinishSession(bookingId: string) {
       id: true,
       bookingNumber: true,
       status: true,
-      auditItems: true,
-      outfitPhotos: true,
-      gapItems: true,
       elapsedMinutes: true,
     },
   })
@@ -468,10 +517,12 @@ export async function adminFinishSession(bookingId: string) {
   if (b.status !== 'IN_SESSION') {
     return { ok: false, error: 'Session must be running to finish.' } as const
   }
-  const audits = parseJsonArray(b.auditItems)
-  const photos = parseJsonArray(b.outfitPhotos)
-  const gaps = parseJsonArray(b.gapItems)
-  if (audits.length === 0 || photos.length === 0 || gaps.length === 0) {
+  const [audits, photos, gaps] = await Promise.all([
+    db.auditItem.count({ where: { bookingId } }),
+    db.outfitPhoto.count({ where: { bookingId } }),
+    db.gapItem.count({ where: { bookingId } }),
+  ])
+  if (audits === 0 || photos === 0 || gaps === 0) {
     return {
       ok: false,
       error: 'Need at least one audit item, one outfit photo and one gap item before finishing.',
@@ -480,11 +531,16 @@ export async function adminFinishSession(bookingId: string) {
   try {
     await db.consultationBooking.update({
       where: { id: bookingId },
-      data: { status: 'SUMMARY_PENDING' },
+      data: { status: 'COMPLETED' },
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not finish session.' } as const
   }
+  await writeBookingEvent(bookingId, b.status, 'COMPLETED', {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `Finished session for ${b.bookingNumber} (${Math.floor(b.elapsedMinutes / 60)}h ${b.elapsedMinutes % 60}m)`,
+  })
   try {
     await auditLog({
       actorId: admin.id,
@@ -513,22 +569,40 @@ export async function adminSendSummary(bookingId: string) {
       bookerName: true,
       bookerPhone: true,
       contactMethod: true,
-      outfitPhotos: true,
-      gapItems: true,
     },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
-  if (b.status !== 'SUMMARY_PENDING') {
+  if (b.status !== 'COMPLETED') {
     return { ok: false, error: 'Summary can only be sent after the session is finished.' } as const
   }
   try {
     await db.consultationBooking.update({
       where: { id: bookingId },
-      data: { status: 'COMPLETED', summarySentAt: new Date() },
+      data: { status: 'SUMMARY_SENT', summarySentAt: new Date() },
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not send summary.' } as const
   }
+  // Publish a ConsultationSummary row. The richer Wardrobe Map + Gap
+  // List fields (styleDirection, palette, silhouette) are filled in
+  // later from the audit / outfit / gap tables; we just make sure a
+  // summary row exists once the message has been sent.
+  try {
+    await db.consultationSummary.upsert({
+      where: { bookingId },
+      create: { bookingId },
+      update: {},
+    })
+  } catch (e) {
+    // Non-fatal — the booking status has already moved on.
+    console.warn('[consultations-workflow] consultationSummary upsert failed:', (e as Error).message)
+  }
+  await writeBookingEvent(bookingId, b.status, 'SUMMARY_SENT', {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `Sent Wardrobe Map + Gap List via WhatsApp for ${b.bookingNumber}`,
+    channel: b.contactMethod === 'Email' ? 'Email' : 'WhatsApp',
+  })
   try {
     await auditLog({
       actorId: admin.id,
@@ -546,14 +620,14 @@ export async function adminMarkPersonalShoppingBrief(bookingId: string) {
   const admin = await requireStaffWithPermission('service.enquiry.manage')
   const b = await db.consultationBooking.findUnique({
     where: { id: bookingId },
-    select: { id: true, bookingNumber: true, status: true, gapItems: true },
+    select: { id: true, bookingNumber: true, status: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
-  if (b.status !== 'COMPLETED' && b.status !== 'SUMMARY_PENDING') {
+  if (b.status !== 'COMPLETED' && b.status !== 'SUMMARY_SENT') {
     return { ok: false, error: 'Brief can only be created from a finished session.' } as const
   }
-  const gaps = parseJsonArray(b.gapItems)
-  if (gaps.length === 0) {
+  const gapCount = await db.gapItem.count({ where: { bookingId } })
+  if (gapCount === 0) {
     return { ok: false, error: 'No gap items to create a brief from.' } as const
   }
   try {
@@ -564,17 +638,22 @@ export async function adminMarkPersonalShoppingBrief(bookingId: string) {
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not create PS brief.' } as const
   }
+  await writeBookingEvent(bookingId, b.status, b.status, {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `Created Personal Shopping brief from gap list (${gapCount} items) for ${b.bookingNumber}`,
+  })
   try {
     await auditLog({
       actorId: admin.id,
       action: 'consultation.ps_brief',
       entityType: 'ConsultationBooking',
       entityId: bookingId,
-      description: `Created Personal Shopping brief from gap list (${gaps.length} items) for ${b.bookingNumber}`,
+      description: `Created Personal Shopping brief from gap list (${gapCount} items) for ${b.bookingNumber}`,
     })
   } catch {}
   revalidatePath('/admin/services/consultations')
-  return { ok: true, gapCount: gaps.length } as const
+  return { ok: true, gapCount } as const
 }
 
 // Return visit: just records the intent + the chosen type so staff can
@@ -596,7 +675,7 @@ export async function adminBookReturnVisit(input: z.infer<typeof returnVisitSche
     select: { id: true, bookingNumber: true, status: true },
   })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
-  if (b.status !== 'COMPLETED' && b.status !== 'SUMMARY_PENDING') {
+  if (b.status !== 'COMPLETED' && b.status !== 'SUMMARY_SENT') {
     return { ok: false, error: 'Return visit can only be booked after the session.' } as const
   }
   // We don't create a new booking here — staff will share a payment
@@ -604,6 +683,11 @@ export async function adminBookReturnVisit(input: z.infer<typeof returnVisitSche
   // record the intent in the audit log so the customer booking page can
   // show "Return visit: drop-off" or "Return visit: with fitting" in
   // the timeline.
+  await writeBookingEvent(b.id, b.status, b.status, {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `Booked return visit (${parsed.data.type === 'dropoff' ? 'drop-off only' : 'with fitting'}) for ${b.bookingNumber}`,
+  })
   try {
     await auditLog({
       actorId: admin.id,
@@ -925,22 +1009,29 @@ export async function adminApplyDiscountToBooking(input: z.infer<typeof applyDis
   let labelSuffix: string
   let pct: number | null = null
   let isFree = false
+  let discountType: 'PERCENT' | 'FIXED' | 'FREE' | 'CUSTOM'
+  let discountValue: number | null = null
   if (d.type === 'pct') {
     if (d.value < 1 || d.value > 100) {
       return { ok: false, error: 'Percentage must be 1–100.' } as const
     }
     newPrice = Math.round(listPrice * (1 - d.value / 100))
     pct = d.value
+    discountType = 'PERCENT'
+    discountValue = d.value
     labelSuffix = `${d.value}% off`
   } else if (d.type === 'fix') {
     if (d.value >= listPrice) {
       return { ok: false, error: `Amount off must be less than ₦${listPrice.toLocaleString()}. Use Free session instead.` } as const
     }
     newPrice = listPrice - d.value
+    discountType = 'FIXED'
+    discountValue = d.value
     labelSuffix = `₦${d.value.toLocaleString()} off`
   } else if (d.type === 'free') {
     newPrice = 0
     isFree = true
+    discountType = 'FREE'
     labelSuffix = 'free session'
   } else {
     // custom
@@ -948,6 +1039,8 @@ export async function adminApplyDiscountToBooking(input: z.infer<typeof applyDis
       return { ok: false, error: 'A custom price must be below the list price.' } as const
     }
     newPrice = d.value
+    discountType = 'CUSTOM'
+    discountValue = d.value
     labelSuffix = `custom price ₦${d.value.toLocaleString()}`
   }
 
@@ -960,6 +1053,7 @@ export async function adminApplyDiscountToBooking(input: z.infer<typeof applyDis
 
   const refundAmount = Math.max(0, b.amountPaid - newPrice)
   const label = `Staff discount: ${d.reason} (${labelSuffix})`
+  const discountAmount = listPrice - newPrice
 
   try {
     await db.consultationBooking.update({
@@ -968,7 +1062,7 @@ export async function adminApplyDiscountToBooking(input: z.infer<typeof applyDis
         listPrice, // make sure it's set if missing
         amountPaid: newPrice,
         discountLabel: label,
-        discountAmount: listPrice - newPrice,
+        discountAmount,
         discountAppliesToAll: d.appliesToAll,
         discountPct: pct,
         discountFree: isFree,
@@ -977,6 +1071,56 @@ export async function adminApplyDiscountToBooking(input: z.infer<typeof applyDis
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not apply discount.' } as const
   }
+
+  // Keep the BookingPrice snapshot row in sync. We upsert because the
+  // booking may have been created before this table existed.
+  try {
+    await db.bookingPrice.upsert({
+      where: { bookingId: b.id },
+      create: {
+        bookingId: b.id,
+        listPrice,
+        discountType,
+        discountValue,
+        discountSource: 'STAFF',
+        discountLabel: label,
+        discountAmount,
+        appliesToAll: d.appliesToAll,
+        amountDue: newPrice,
+        amountPaid: newPrice,
+        staffReason: d.reason,
+        staffNote: d.note,
+        appliedBy: admin.id,
+        appliedAt: new Date(),
+      },
+      update: {
+        listPrice,
+        discountType,
+        discountValue,
+        discountSource: 'STAFF',
+        discountLabel: label,
+        discountAmount,
+        appliesToAll: d.appliesToAll,
+        amountDue: newPrice,
+        amountPaid: newPrice,
+        staffReason: d.reason,
+        staffNote: d.note,
+        appliedBy: admin.id,
+        appliedAt: new Date(),
+      },
+    })
+  } catch (e) {
+    // Non-fatal — the booking row above already carries the same data
+    // for legacy readers. Log and continue.
+    console.warn('[consultations-workflow] bookingPrice upsert failed:', (e as Error).message)
+  }
+
+  await writeBookingEvent(b.id, b.status, b.status, {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `${label}. Reason: ${d.reason}. Note: ${d.note}. New price ₦${newPrice.toLocaleString()}` +
+      (refundAmount ? `. ₦${refundAmount.toLocaleString()} returned as ${d.returnAs}.` : '.'),
+  })
 
   try {
     await auditLog({
@@ -999,17 +1143,26 @@ export async function adminApplyDiscountToBooking(input: z.infer<typeof applyDis
 // ============================================================
 
 export async function adminMarkComplete(bookingId: string) {
-  await requireStaffWithPermission('service.enquiry.manage')
-  const b = await db.consultationBooking.findUnique({ where: { id: bookingId } })
+  const admin = await requireStaffWithPermission('service.enquiry.manage')
+  const b = await db.consultationBooking.findUnique({
+    where: { id: bookingId },
+    select: { id: true, bookingNumber: true, status: true },
+  })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
+  const fromStatus = b.status
   try {
     await db.consultationBooking.update({
       where: { id: bookingId },
-      data: { status: 'COMPLETED', summarySentAt: new Date() },
+      data: { status: 'SUMMARY_SENT', summarySentAt: new Date() },
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not mark complete.' } as const
   }
+  await writeBookingEvent(bookingId, fromStatus, 'SUMMARY_SENT', {
+    actorId: admin.id,
+    actorType: 'STAFF',
+    note: `Admin override: marked ${b.bookingNumber} complete (summary sent).`,
+  })
   revalidatePath('/admin/services/consultations')
   return { ok: true } as const
 }

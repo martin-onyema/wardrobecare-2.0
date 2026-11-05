@@ -55,7 +55,6 @@ export default async function AdminConsultationRequestsPage({
       discountFree: true,
       status: true,
       assignedStylistId: true,
-      proposedSlots: true,
       rescheduleReason: true,
       rescheduledAt: true,
       originalSlotDate: true,
@@ -77,9 +76,9 @@ export default async function AdminConsultationRequestsPage({
     total: bookings.length,
     paid: bookings.filter((b) => b.status === 'PAID').length,
     confirmed: bookings.filter((b) => b.status === 'CONFIRMED').length,
-    rescheduleNeeded: bookings.filter((b) => b.status === 'RESCHEDULE_PROPOSED').length,
+    rescheduleNeeded: bookings.filter((b) => b.status === 'NEEDS_NEW_DATE').length,
     inSession: bookings.filter((b) => b.status === 'IN_SESSION').length,
-    summaryPending: bookings.filter((b) => b.status === 'SUMMARY_PENDING').length,
+    summaryPending: bookings.filter((b) => b.status === 'COMPLETED').length,
   }
 
   return (
@@ -111,7 +110,7 @@ export default async function AdminConsultationRequestsPage({
             rescheduledAt: b.rescheduledAt ? b.rescheduledAt.toISOString() : null,
             createdAt: b.createdAt.toISOString(),
             updatedAt: b.updatedAt.toISOString(),
-            proposedSlots: b.proposedSlots as any,
+            
           }))}
           stylists={stylists.map((s) => ({ id: s.id, name: s.name || s.email, role: s.role }))}
           initialFilter={statusFilter}

@@ -370,7 +370,7 @@ function SessionTimeCard({
     )
   }
 
-  // SUMMARY_PENDING — show the final time
+  // COMPLETED — show the final time
   return (
     <p className="text-sm text-muted-foreground">
       Session finished after {Math.floor(elapsed / 60)}h {elapsed % 60}m. Go to the

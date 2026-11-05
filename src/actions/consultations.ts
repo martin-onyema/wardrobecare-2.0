@@ -50,6 +50,34 @@ import { headers } from 'next/headers'
 // ============================================================
 
 /**
+ * Append a BookingEvent row for a status transition. Safe to call from
+ * anywhere — failures are swallowed (logged) so a transient DB error
+ * never breaks the booking flow itself.
+ */
+async function writeBookingEvent(
+  bookingId: string,
+  fromStatus: string | null,
+  toStatus: string,
+  opts?: { actorId?: string; actorType?: string; note?: string; channel?: string },
+) {
+  try {
+    await db.bookingEvent.create({
+      data: {
+        bookingId,
+        actorId: opts?.actorId ?? null,
+        actorType: opts?.actorType ?? 'SYSTEM',
+        fromStatus,
+        toStatus,
+        note: opts?.note ?? null,
+        channel: opts?.channel ?? null,
+      },
+    })
+  } catch (e) {
+    console.warn('[consultations] writeBookingEvent failed:', (e as Error).message)
+  }
+}
+
+/**
  * Compute the next booking number off the *highest* existing suffix.
  * Using `count() + 1` would collide after rows are deleted (count goes
  * down, next number clashes with an existing one). Walking the max
@@ -121,10 +149,10 @@ export async function getConsultationSlotsTaken(opts?: { from?: string; to?: str
   const rows = await db.consultationBooking.findMany({
     where: {
       slotDate: { gte: from, lte: to },
-      // RESCHEDULE_PROPOSED bookings still own their slot while the
+      // NEEDS_NEW_DATE bookings still own their slot while the
       // customer is picking a new time — the original slot is reserved
       // (the customer could still keep it if they push back).
-      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED', 'IN_SESSION'] },
+      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'NEEDS_NEW_DATE', 'IN_SESSION'] },
     },
     select: { slotDate: true, slotTime: true },
   })
@@ -192,9 +220,9 @@ export async function holdConsultationSlot(input: z.infer<typeof holdSchema>) {
     where: {
       slotDate: slotDateObj,
       slotTime: d.slotTime,
-      // RESCHEDULE_PROPOSED bookings still own their original slot until
+      // NEEDS_NEW_DATE bookings still own their original slot until
       // the customer accepts a new one — keep them in the clash set.
-      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED', 'IN_SESSION'] },
+      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'NEEDS_NEW_DATE', 'IN_SESSION'] },
     },
     select: { id: true },
   })
@@ -241,6 +269,14 @@ export async function holdConsultationSlot(input: z.infer<typeof holdSchema>) {
           status: 'HELD',
         },
       })
+
+      // Audit trail — booking created with status HELD.
+      await writeBookingEvent(created.id, null, 'HELD', {
+        actorId: userId ?? undefined,
+        actorType: userId ? 'CUSTOMER' : 'SYSTEM',
+        channel: 'WEB',
+      })
+
       return {
         ok: true,
         bookingNumber: created.bookingNumber,
@@ -372,8 +408,18 @@ export async function confirmConsultationPayment(reference: string) {
   })
   if (!booking) return { ok: false, error: 'Booking not found for that reference.' } as const
 
-  // Idempotency: already paid
-  if (booking.status === 'PAID' || booking.status === 'CONFIRMED' || booking.status === 'RESCHEDULED' || booking.status === 'COMPLETED') {
+  // Idempotency: already paid (any post-HELD, pre-CANCELLED state).
+  // RESCHEDULED was removed from the enum in the schema migration —
+  // a rescheduled booking now sits back at PAID, awaiting re-confirm.
+  if (
+    booking.status === 'PAID' ||
+    booking.status === 'NEEDS_NEW_DATE' ||
+    booking.status === 'CONFIRMED' ||
+    booking.status === 'IN_SESSION' ||
+    booking.status === 'COMPLETED' ||
+    booking.status === 'SUMMARY_SENT' ||
+    booking.status === 'NO_SHOW'
+  ) {
     return { ok: true, bookingNumber: booking.bookingNumber, alreadyPaid: true } as const
   }
 
@@ -384,11 +430,20 @@ export async function confirmConsultationPayment(reference: string) {
   }
 
   // Mark PAID in a transaction so we don't race with the webhook
+  let didUpdate = false
   try {
     await db.$transaction(async (tx) => {
       const fresh = await tx.consultationBooking.findUnique({ where: { id: booking.id } })
       if (!fresh) return
-      if (fresh.status === 'PAID' || fresh.status === 'CONFIRMED' || fresh.status === 'RESCHEDULED' || fresh.status === 'COMPLETED') return
+      if (
+        fresh.status === 'PAID' ||
+        fresh.status === 'NEEDS_NEW_DATE' ||
+        fresh.status === 'CONFIRMED' ||
+        fresh.status === 'IN_SESSION' ||
+        fresh.status === 'COMPLETED' ||
+        fresh.status === 'SUMMARY_SENT' ||
+        fresh.status === 'NO_SHOW'
+      ) return
       await tx.consultationBooking.update({
         where: { id: booking.id },
         data: {
@@ -397,9 +452,17 @@ export async function confirmConsultationPayment(reference: string) {
           holdUntil: null, // hold is satisfied
         },
       })
+      didUpdate = true
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not mark booking as paid.' } as const
+  }
+
+  if (didUpdate) {
+    await writeBookingEvent(booking.id, booking.status, 'PAID', {
+      actorType: 'SYSTEM',
+      channel: 'PAYSTACK',
+    })
   }
 
   // Notify staff (safe — never throws)
@@ -430,6 +493,7 @@ export async function getConsultationByBookingNumber(bookingNumber: string) {
   const b = await db.consultationBooking.findUnique({
     where: { bookingNumber },
     select: {
+      id: true,
       bookingNumber: true,
       bookerName: true,
       bookerPhone: true,
@@ -447,7 +511,6 @@ export async function getConsultationByBookingNumber(bookingNumber: string) {
       status: true,
       paidAt: true,
       holdUntil: true,
-      proposedSlots: true,
       rescheduleReason: true,
       rescheduledAt: true,
       originalSlotDate: true,
@@ -456,6 +519,21 @@ export async function getConsultationByBookingNumber(bookingNumber: string) {
     },
   })
   if (!b) return null
+
+  // Audit-trail events + reschedule offers live in their own tables now
+  // (the old `proposedSlots` JSON column was removed). Fan out both
+  // queries in parallel.
+  const [events, rescheduleOffers] = await Promise.all([
+    db.bookingEvent.findMany({
+      where: { bookingId: b.id },
+      orderBy: { createdAt: 'desc' },
+    }),
+    db.rescheduleOffer.findMany({
+      where: { bookingId: b.id },
+      orderBy: { offeredAt: 'asc' },
+    }),
+  ])
+
   return {
     ...b,
     slotDate: b.slotDate.toISOString().slice(0, 10),
@@ -464,37 +542,35 @@ export async function getConsultationByBookingNumber(bookingNumber: string) {
     paidAt: b.paidAt ? b.paidAt.toISOString() : null,
     rescheduledAt: b.rescheduledAt ? b.rescheduledAt.toISOString() : null,
     createdAt: b.createdAt.toISOString(),
-    proposedSlots: parseProposedSlots(b.proposedSlots),
+    events: events.map((e) => ({ ...e, createdAt: e.createdAt.toISOString() })),
+    rescheduleOffers: rescheduleOffers.map((o) => ({
+      ...o,
+      slotDate: o.slotDate.toISOString().slice(0, 10),
+      offeredAt: o.offeredAt.toISOString(),
+      chosenAt: o.chosenAt ? o.chosenAt.toISOString() : null,
+      expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null,
+    })),
   }
 }
 
 /**
- * Parse the `proposedSlots` column.
+ * Load the reschedule offers for a booking.
  *
- * Stored as a JSON-string in sqlite (`String?`) and as a JSON value in
- * postgres (`Json?`). When read back, sqlite returns the string (so we
- * JSON.parse it) while postgres returns the actual array (or whatever
- * JSON value was stored). We also `JSON.stringify` the array in
- * `adminProposeReschedule`, which means postgres stores it as a JSON
- * string value, not a JSON array — so when read back it's also a
- * string. Either way, this function handles both.
+ * Replaces the old `proposedSlots` JSON column. The offers now live in
+ * the `RescheduleOffer` table (one row per offered slot) and are
+ * returned ordered by `offeredAt` so the index the customer picks in
+ * `acceptRescheduleSlot` matches the order the admin proposed.
  */
-function parseProposedSlots(raw: string | unknown[] | null | undefined): Array<{ date: string; time: string }> {
-  if (!raw) return []
-  let arr: unknown
-  if (typeof raw === 'string') {
-    try {
-      arr = JSON.parse(raw)
-    } catch {
-      return []
-    }
-  } else {
-    arr = raw
-  }
-  if (!Array.isArray(arr)) return []
-  return arr
-    .filter((x: any) => x && typeof x.date === 'string' && typeof x.time === 'string')
-    .map((x: any) => ({ date: x.date, time: x.time }))
+async function parseProposedSlots(bookingId: string): Promise<Array<{ date: string; time: string }>> {
+  const offers = await db.rescheduleOffer.findMany({
+    where: { bookingId },
+    orderBy: { offeredAt: 'asc' },
+    select: { slotDate: true, slotTime: true },
+  })
+  return offers.map((o) => ({
+    date: o.slotDate.toISOString().slice(0, 10),
+    time: o.slotTime,
+  }))
 }
 
 // ============================================================
@@ -504,33 +580,42 @@ function parseProposedSlots(raw: string | unknown[] | null | undefined): Array<{
 export async function acceptRescheduleSlot(bookingNumber: string, slotIndex: number) {
   const b = await db.consultationBooking.findUnique({ where: { bookingNumber } })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
-  if (b.status !== 'RESCHEDULE_PROPOSED') {
+  if (b.status !== 'NEEDS_NEW_DATE') {
     return { ok: false, error: 'This booking is not awaiting a reschedule.' } as const
   }
-  const slots = parseProposedSlots(b.proposedSlots)
-  if (slotIndex < 0 || slotIndex >= slots.length) {
+
+  // Load the admin's offered slots from the RescheduleOffer table.
+  // Ordered by offeredAt so `slotIndex` matches the order the customer
+  // saw in the picker.
+  const offers = await db.rescheduleOffer.findMany({
+    where: { bookingId: b.id },
+    orderBy: { offeredAt: 'asc' },
+  })
+  if (slotIndex < 0 || slotIndex >= offers.length) {
     return { ok: false, error: 'Please pick one of the proposed slots.' } as const
   }
-  const pick = slots[slotIndex]
+  const pick = offers[slotIndex]
+  const pickDate = pick.slotDate.toISOString().slice(0, 10)
+  const pickTime = pick.slotTime
 
-  // Bug 7 fix: re-check that the picked slot is still free. Between the
-  // admin proposing and the customer accepting, another customer could
-  // have booked the same slot directly. The current booking's own row
+  // Re-check that the picked slot is still free. Between the admin
+  // proposing and the customer accepting, another customer could have
+  // booked the same slot directly. The current booking's own row
   // doesn't count (it's about to be moved).
-  const slotDateObj = dateOnly(pick.date)
+  const slotDateObj = dateOnly(pickDate)
   const clash = await db.consultationBooking.findFirst({
     where: {
       id: { not: b.id },
       slotDate: slotDateObj,
-      slotTime: pick.time,
-      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED', 'IN_SESSION'] },
+      slotTime: pickTime,
+      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'NEEDS_NEW_DATE', 'IN_SESSION'] },
     },
     select: { id: true, bookingNumber: true },
   })
   if (clash) {
     return {
       ok: false,
-      error: `Sorry, ${pick.date} at ${pick.time} was just booked by someone else (booking ${clash.bookingNumber}). Please pick another slot or message us.`,
+      error: `Sorry, ${pickDate} at ${pickTime} was just booked by someone else (booking ${clash.bookingNumber}). Please pick another slot or message us.`,
     } as const
   }
 
@@ -541,25 +626,41 @@ export async function acceptRescheduleSlot(bookingNumber: string, slotIndex: num
         originalSlotDate: b.originalSlotDate ?? b.slotDate,
         originalSlotTime: b.originalSlotTime ?? b.slotTime,
         slotDate: slotDateObj,
-        slotTime: pick.time,
-        status: 'RESCHEDULED',
+        slotTime: pickTime,
+        status: 'PAID',
         rescheduledAt: new Date(),
       },
+    })
+    // Stamp the chosen offer. Clear any previously-chosen offers on the
+    // same booking first (there should only ever be one chosen).
+    await db.rescheduleOffer.updateMany({
+      where: { bookingId: b.id, chosenAt: { not: null } },
+      data: { chosenAt: null },
+    })
+    await db.rescheduleOffer.update({
+      where: { id: pick.id },
+      data: { chosenAt: new Date() },
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not update booking.' } as const
   }
 
+  await writeBookingEvent(b.id, 'NEEDS_NEW_DATE', 'NEEDS_NEW_DATE', {
+    actorId: b.userId ?? undefined,
+    actorType: 'CUSTOMER',
+    channel: 'WEB',
+  })
+
   await createStaffNotificationSafe({
     type: 'SYSTEM',
     title: `Reschedule accepted on ${b.bookingNumber}`,
-    body: `Customer picked ${pick.date} at ${pick.time}. Payment stays valid.`,
+    body: `Customer picked ${pickDate} at ${pickTime}. Payment stays valid.`,
     link: `/admin/services/consultations/${b.id}`,
   })
 
   revalidatePath('/admin/services/consultations')
   revalidatePath(`/account/bookings/${b.bookingNumber}`)
-  return { ok: true, bookingNumber: b.bookingNumber, slotDate: pick.date, slotTime: pick.time } as const
+  return { ok: true, bookingNumber: b.bookingNumber, slotDate: pickDate, slotTime: pickTime } as const
 }
 
 // ============================================================
@@ -569,7 +670,7 @@ export async function acceptRescheduleSlot(bookingNumber: string, slotIndex: num
 export async function submitRescheduleSuggestion(bookingNumber: string, freeText: string) {
   const b = await db.consultationBooking.findUnique({ where: { bookingNumber } })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
-  if (b.status !== 'RESCHEDULE_PROPOSED') {
+  if (b.status !== 'NEEDS_NEW_DATE') {
     return { ok: false, error: 'This booking is not awaiting a reschedule.' } as const
   }
   if ((freeText ?? '').trim().length < 3) {
@@ -577,7 +678,7 @@ export async function submitRescheduleSuggestion(bookingNumber: string, freeText
   }
 
   // Store the customer's free-text suggestion in rescheduleReason — staff will
-  // reply via WhatsApp to confirm a new date. Status stays RESCHEDULE_PROPOSED
+  // reply via WhatsApp to confirm a new date. Status stays NEEDS_NEW_DATE
   // so the booking detail page keeps showing the "we have your suggestions"
   // banner until staff confirm manually.
   try {
@@ -638,26 +739,47 @@ export async function adminProposeReschedule(input: z.infer<typeof proposeSchema
 
   const b = await db.consultationBooking.findUnique({ where: { id: d.bookingId } })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
-  // Allow reschedule proposal from PAID, CONFIRMED, or RESCHEDULED. The
-  // last case lets the admin re-propose if the customer has already
-  // accepted one slot but we still can't keep that one either. The
-  // first reschedule preserves the *very* original slot in
-  // originalSlotDate/originalSlotTime; subsequent ones don't overwrite
-  // it, so the customer always sees the trail back to their first booking.
-  if (b.status !== 'PAID' && b.status !== 'CONFIRMED' && b.status !== 'RESCHEDULED') {
-    return { ok: false, error: 'Only paid, confirmed, or already-rescheduled bookings can be rescheduled.' } as const
+  // Allow reschedule proposal from PAID or CONFIRMED (a rescheduled
+  // booking sits back at PAID after acceptRescheduleSlot, so PAID
+  // covers the re-propose case). The last case lets the admin re-propose
+  // if the customer has already accepted one slot but we still can't
+  // keep that one either. The first reschedule preserves the *very*
+  // original slot in originalSlotDate/originalSlotTime; subsequent ones
+  // don't overwrite it, so the customer always sees the trail back to
+  // their first booking.
+  if (b.status !== 'PAID' && b.status !== 'CONFIRMED') {
+    return { ok: false, error: 'Only paid or confirmed bookings can be rescheduled.' } as const
   }
 
   try {
     await db.consultationBooking.update({
       where: { id: b.id },
       data: {
-        status: 'RESCHEDULE_PROPOSED',
+        status: 'NEEDS_NEW_DATE',
         originalSlotDate: b.originalSlotDate ?? b.slotDate,
         originalSlotTime: b.originalSlotTime ?? b.slotTime,
-        proposedSlots: JSON.stringify(d.slots),
         rescheduleReason: d.reason.trim(),
       },
+    })
+
+    // Replace existing offers (if any) so a re-propose clears the old
+    // set before writing the new one — the customer only sees the
+    // latest slots. Each offer is its own row in the RescheduleOffer
+    // table now (the old `proposedSlots` JSON column was removed).
+    await db.rescheduleOffer.deleteMany({ where: { bookingId: b.id } })
+    await db.rescheduleOffer.createMany({
+      data: d.slots.map((s) => ({
+        bookingId: b.id,
+        slotDate: dateOnly(s.date),
+        slotTime: s.time,
+        offeredBy: admin.id,
+      })),
+    })
+
+    await writeBookingEvent(b.id, b.status, 'NEEDS_NEW_DATE', {
+      actorId: admin.id,
+      actorType: 'STAFF',
+      note: d.reason.trim().slice(0, 200),
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not save proposed slots.' } as const
@@ -709,9 +831,11 @@ export async function adminManualReschedule(input: z.infer<typeof manualReschedu
   const b = await db.consultationBooking.findUnique({ where: { id: d.bookingId } })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
   // Only bookings currently in a reschedule flow can be manually
-  // moved. If you want to move a CONFIRMED booking, first use
+  // moved. NEEDS_NEW_DATE (admin proposed, customer hasn't accepted)
+  // or PAID (covers both freshly-paid and already-rescheduled). If
+  // you want to move a CONFIRMED booking, first use
   // adminProposeReschedule (the customer-facing path).
-  if (b.status !== 'RESCHEDULE_PROPOSED' && b.status !== 'PAID' && b.status !== 'RESCHEDULED') {
+  if (b.status !== 'NEEDS_NEW_DATE' && b.status !== 'PAID') {
     return {
       ok: false,
       error: 'Only bookings awaiting reschedule can be manually moved.',
@@ -731,8 +855,8 @@ export async function adminManualReschedule(input: z.infer<typeof manualReschedu
       id: { not: b.id },
       slotDate: slotDateObj,
       slotTime: d.slotTime,
-      // RESCHEDULE_PROPOSED bookings also block the slot.
-      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED', 'IN_SESSION'] },
+      // NEEDS_NEW_DATE bookings also block the slot.
+      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'NEEDS_NEW_DATE', 'IN_SESSION'] },
     },
     select: { id: true, bookingNumber: true },
   })
@@ -751,9 +875,11 @@ export async function adminManualReschedule(input: z.infer<typeof manualReschedu
         originalSlotTime: b.originalSlotTime ?? b.slotTime,
         slotDate: slotDateObj,
         slotTime: d.slotTime,
-        // Status becomes RESCHEDULED so the customer sees the new date
-        // immediately on their booking detail page.
-        status: 'RESCHEDULED',
+        // Status becomes PAID so the customer sees the new date and the
+        // booking is ready for admin confirmation. (RESCHEDULED was
+        // removed from the enum — BookingEvent.toStatus below still
+        // records 'RESCHEDULED' as the logical transition label.)
+        status: 'PAID',
         rescheduledAt: new Date(),
         // Append the admin's note to rescheduleReason so it appears in the
         // audit trail alongside any customer reply.
@@ -765,6 +891,12 @@ export async function adminManualReschedule(input: z.infer<typeof manualReschedu
           .join('\n')
           .trim(),
       },
+    })
+
+    await writeBookingEvent(b.id, b.status, b.status, {
+      actorId: admin.id,
+      actorType: 'STAFF',
+      note: d.note?.trim() || undefined,
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not update booking.' } as const
@@ -800,13 +932,17 @@ export async function adminConfirmConsultation(bookingId: string) {
   const admin = await requireStaffWithPermission('service.enquiry.manage')
   const b = await db.consultationBooking.findUnique({ where: { id: bookingId } })
   if (!b) return { ok: false, error: 'Booking not found.' } as const
-  if (b.status !== 'PAID' && b.status !== 'RESCHEDULED') {
-    return { ok: false, error: 'Only paid or rescheduled bookings can be confirmed.' } as const
+  if (b.status !== 'PAID') {
+    return { ok: false, error: 'Only paid bookings can be confirmed.' } as const
   }
   try {
     await db.consultationBooking.update({
       where: { id: bookingId },
       data: { status: 'CONFIRMED' },
+    })
+    await writeBookingEvent(bookingId, b.status, 'CONFIRMED', {
+      actorId: admin.id,
+      actorType: 'STAFF',
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not confirm booking.' } as const
@@ -826,7 +962,10 @@ export async function adminConfirmConsultation(bookingId: string) {
 }
 
 // ============================================================
-// 10. Admin: mark booking as COMPLETED
+// 10. Admin: mark booking as COMPLETED (session finished).
+//     The old COMPLETED status was removed — once the session
+//     ends the booking moves to COMPLETED, and the summary-publish
+//     flow (consultations-workflow.ts) advances it to SUMMARY_SENT.
 // ============================================================
 
 export async function adminCompleteConsultation(bookingId: string) {
@@ -837,6 +976,11 @@ export async function adminCompleteConsultation(bookingId: string) {
     await db.consultationBooking.update({
       where: { id: bookingId },
       data: { status: 'COMPLETED' },
+    })
+    await writeBookingEvent(bookingId, b.status, 'COMPLETED', {
+      actorId: admin.id,
+      actorType: 'STAFF',
+      note: 'Session finished',
     })
   } catch (e: any) {
     return { ok: false, error: e?.message ?? 'Could not update booking.' } as const

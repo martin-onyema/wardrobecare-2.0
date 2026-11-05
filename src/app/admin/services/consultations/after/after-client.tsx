@@ -180,7 +180,7 @@ function AfterDetail({
     })
   }
 
-  const isSent = session.status === 'COMPLETED' && !!session.summarySentAt
+  const isSent = session.status === 'SUMMARY_SENT'
 
   return (
     <div className="border border-border bg-card">

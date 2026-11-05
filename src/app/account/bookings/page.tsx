@@ -17,11 +17,11 @@ const STATUS_LABEL: Record<string, string> = {
   HELD: 'Held — awaiting payment',
   PAID: 'Paid — awaiting our confirmation',
   CONFIRMED: 'Confirmed',
-  RESCHEDULE_PROPOSED: 'Action needed — reschedule',
-  RESCHEDULED: 'Rescheduled',
+  NEEDS_NEW_DATE: 'Action needed — reschedule',
   IN_SESSION: 'Session in progress',
-  SUMMARY_PENDING: 'Summary being prepared',
-  COMPLETED: 'Completed',
+  COMPLETED: 'Summary being prepared',
+  SUMMARY_SENT: 'Completed',
+  NO_SHOW: 'No show',
   CANCELLED: 'Cancelled',
 }
 
@@ -29,11 +29,11 @@ const STATUS_TONE: Record<string, string> = {
   HELD: 'text-muted-foreground',
   PAID: 'text-olive',
   CONFIRMED: 'text-olive',
-  RESCHEDULE_PROPOSED: 'text-rust font-medium',
-  RESCHEDULED: 'text-olive',
+  NEEDS_NEW_DATE: 'text-rust font-medium',
   IN_SESSION: 'text-olive',
-  SUMMARY_PENDING: 'text-olive',
-  COMPLETED: 'text-muted-foreground',
+  COMPLETED: 'text-olive',
+  SUMMARY_SENT: 'text-muted-foreground',
+  NO_SHOW: 'text-rust',
   CANCELLED: 'text-rust',
 }
 
@@ -92,7 +92,7 @@ export default async function BookingsPage() {
                   month: 'long',
                   year: 'numeric',
                 })
-                const needsAction = b.status === 'RESCHEDULE_PROPOSED'
+                const needsAction = b.status === 'NEEDS_NEW_DATE'
                 return (
                   <li key={b.id}>
                     <Link

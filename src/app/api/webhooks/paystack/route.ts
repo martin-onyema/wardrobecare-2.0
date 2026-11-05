@@ -356,7 +356,7 @@ async function handleConsultationChargeSuccess(reference: string, data: any) {
   if (
     booking.status === 'PAID' ||
     booking.status === 'CONFIRMED' ||
-    booking.status === 'RESCHEDULED' ||
+    
     booking.status === 'COMPLETED'
   ) {
     return

@@ -14,13 +14,14 @@ export const BOOKING_STATUS: Record<
   { label: string; tone: string; dot: string }
 > = {
   HELD:                { label: 'Held — awaiting payment', tone: 'bg-amber-100 text-amber-800', dot: 'bg-amber-500' },
+  EXPIRED:             { label: 'Hold expired',              tone: 'bg-gray-100 text-gray-500',     dot: 'bg-gray-400' },
   PAID:                { label: 'Paid — to confirm',       tone: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-600' },
+  NEEDS_NEW_DATE:      { label: 'Needs new date',         tone: 'bg-red-100 text-red-800',       dot: 'bg-red-600' },
   CONFIRMED:           { label: 'Confirmed',               tone: 'bg-green-100 text-green-800',   dot: 'bg-green-600' },
-  RESCHEDULE_PROPOSED: { label: 'Needs new date',         tone: 'bg-red-100 text-red-800',       dot: 'bg-red-600' },
-  RESCHEDULED:         { label: 'Rescheduled',             tone: 'bg-purple-100 text-purple-800', dot: 'bg-purple-600' },
   IN_SESSION:          { label: 'In session',             tone: 'bg-indigo-100 text-indigo-800', dot: 'bg-indigo-600' },
-  SUMMARY_PENDING:     { label: 'Summary to send',        tone: 'bg-stone-200 text-stone-700',   dot: 'bg-stone-500' },
-  COMPLETED:           { label: 'Completed',               tone: 'bg-emerald-100 text-emerald-800', dot: 'bg-emerald-600' },
+  COMPLETED:           { label: 'Summary to send',        tone: 'bg-stone-200 text-stone-700',   dot: 'bg-stone-500' },
+  SUMMARY_SENT:        { label: 'Completed',               tone: 'bg-emerald-100 text-emerald-800', dot: 'bg-emerald-600' },
+  NO_SHOW:             { label: 'No show',                tone: 'bg-orange-100 text-orange-800', dot: 'bg-orange-600' },
   CANCELLED:           { label: 'Cancelled',               tone: 'bg-gray-100 text-gray-500',    dot: 'bg-gray-400' },
 }
 

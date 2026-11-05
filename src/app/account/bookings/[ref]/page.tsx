@@ -21,11 +21,11 @@ const STATUS_LABEL: Record<string, string> = {
   HELD: 'Held — awaiting payment',
   PAID: 'Paid — awaiting our confirmation',
   CONFIRMED: 'Confirmed',
-  RESCHEDULE_PROPOSED: 'Action needed — reschedule',
-  RESCHEDULED: 'Rescheduled',
+  NEEDS_NEW_DATE: 'Action needed — reschedule',
   IN_SESSION: 'Session in progress',
-  SUMMARY_PENDING: 'Session complete — summary being prepared',
-  COMPLETED: 'Completed',
+  COMPLETED: 'Session complete — summary being prepared',
+  SUMMARY_SENT: 'Completed',
+  NO_SHOW: 'No show',
   CANCELLED: 'Cancelled',
 }
 
@@ -33,11 +33,11 @@ const STATUS_TONE: Record<string, string> = {
   HELD: 'text-muted-foreground',
   PAID: 'text-olive',
   CONFIRMED: 'text-olive',
-  RESCHEDULE_PROPOSED: 'text-rust font-medium',
-  RESCHEDULED: 'text-olive',
+  NEEDS_NEW_DATE: 'text-rust font-medium',
   IN_SESSION: 'text-olive',
-  SUMMARY_PENDING: 'text-olive',
-  COMPLETED: 'text-muted-foreground',
+  COMPLETED: 'text-olive',
+  SUMMARY_SENT: 'text-muted-foreground',
+  NO_SHOW: 'text-rust',
   CANCELLED: 'text-rust',
 }
 
@@ -104,7 +104,7 @@ export default async function BookingDetailPage({ params }: { params: Params }) 
         >
           <div className="space-y-6">
             {/* Action banner — reschedule proposed */}
-            {booking.status === 'RESCHEDULE_PROPOSED' && (
+            {booking.status === 'NEEDS_NEW_DATE' && (
               <div className="bg-rust/10 border-l-4 border-rust px-5 py-5 rounded-r-lg">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="h-5 w-5 flex-shrink-0 text-rust mt-0.5" />
@@ -132,7 +132,7 @@ export default async function BookingDetailPage({ params }: { params: Params }) 
             )}
 
             {/* Rescheduled history (if any) */}
-            {hasOriginal && booking.status === 'RESCHEDULED' && (
+            {hasOriginal && (
               <div className="bg-secondary/40 border-l-4 border-camel px-5 py-4 flex items-start gap-3 rounded-r-lg" style={{ borderLeftWidth: '3px' }}>
                 <CalendarClock className="h-5 w-5 flex-shrink-0 text-camel mt-0.5" />
                 <div className="flex-1 text-sm text-foreground leading-relaxed">

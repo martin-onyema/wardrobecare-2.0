@@ -26,7 +26,7 @@ export default async function AdminConsultationSessionPage({
 
   // Confirmed or in-session bookings only.
   const sessions = await db.consultationBooking.findMany({
-    where: { status: { in: ['CONFIRMED', 'IN_SESSION', 'SUMMARY_PENDING'] } },
+    where: { status: { in: ['CONFIRMED', 'IN_SESSION', 'COMPLETED'] } },
     orderBy: { slotDate: 'asc' },
     select: {
       id: true,

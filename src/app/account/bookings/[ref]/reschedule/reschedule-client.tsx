@@ -3,7 +3,7 @@
 /**
  * Customer-facing reschedule page.
  *
- * Reached when admin marks a paid booking as RESCHEDULE_PROPOSED.
+ * Reached when admin marks a paid booking as NEEDS_NEW_DATE.
  * The customer sees:
  *   - The original booked slot
  *   - The reason we cannot keep it

@@ -24,9 +24,10 @@ export default async function AdminConsultationAfterPage({
   const sp = await searchParams
   const selectedId = typeof sp.selected === 'string' ? sp.selected : null
 
-  // Sessions that have finished (SUMMARY_PENDING) or are fully done (COMPLETED).
+  // Sessions that have finished (COMPLETED = session done, summary to send)
+  // or are fully done (SUMMARY_SENT = summary published).
   const sessions = await db.consultationBooking.findMany({
-    where: { status: { in: ['SUMMARY_PENDING', 'COMPLETED'] } },
+    where: { status: { in: ['COMPLETED', 'SUMMARY_SENT'] } },
     orderBy: { slotDate: 'desc' },
     select: {
       id: true,
