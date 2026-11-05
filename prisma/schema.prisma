@@ -1750,3 +1750,95 @@ model PSEvent {
 
   @@index([requestId, createdAt])
 }
+
+// ============================================================
+// PERSONAL SHOPPING — spec-aligned additions (Mockups 50, 52)
+// ============================================================
+
+// Structured brief (separate from the free-text `brief` column on the
+// request). Captures the full style questionnaire from the booking wizard.
+model PSBrief {
+  id          String   @id @default(cuid())
+  requestId   String   @unique
+  fit         String?  // "Slim" | "Regular" | "Relaxed" | "Not sure"
+  style       String?  // free-text style preferences
+  occasion    String?  // "Work" | "Events" | "Everyday" | "Wedding" | ...
+  budgetBand  String?  // "₦100,000 to ₦250,000" | "₦250,000 to ₦500,000" | ...
+  sizes       String?  // comma-sep top/bottom/shoe sizes
+  notes       String?  // additional notes from the brief
+  createdAt   DateTime @default(now())
+}
+
+// Brief guard — stores whether the brief text triggered a brand/exact-item
+// alert, and whether the customer acknowledged it before continuing.
+// Computed server-side at booking time so staff see the Brand tag.
+model PSBriefFlag {
+  id              String   @id @default(cuid())
+  requestId       String   @unique
+  terms           String   // comma-sep detected terms: "Gucci, Nike"
+  customerChoice  String   // "CONTINUED_ACK" | "WAITLIST"
+  createdAt       DateTime @default(now())
+}
+
+// In-Person fitting slot (held for 10 min during checkout, like
+// ConsultationBooking.holdUntil but for PS).
+model PSSlot {
+  id          String    @id @default(cuid())
+  requestId   String   @unique
+  date        DateTime
+  start       String   // "9:00 AM", "11:30 AM", ...
+  area        String?
+  heldUntil   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+// Shortlist container — one per request, holds items + a shareable
+// token for the online review page. 48-hour hold on items.
+model PSShortlist {
+  id          String    @id @default(cuid())
+  requestId   String   @unique
+  token       String   @unique @default(cuid()) // for the public review URL
+  sentAt      DateTime?
+  channel     String?  // "ONLINE" | "WHATSAPP" | "ONSITE"
+  holdUntil   DateTime? // 48h from sentAt
+  createdAt   DateTime @default(now())
+}
+
+// ShortlistItem — replaces PSItem. Each item belongs to a PSShortlist
+// (which belongs to a request). Carries the customer's decision.
+model PSShortlistItem {
+  id              String   @id @default(cuid())
+  shortlistId     String
+  name            String
+  category        PSItemType
+  size            String
+  price           Int
+  source          String   // "IN_STOCK" | "SUPPLIER"
+  stylistNote     String?
+  decision        PSItemDecision @default(PENDING)
+  altNote         String?  // for WANTS_DIFFERENT: what they want instead
+  decidedBy       String?  // "CUSTOMER" | "STAFF"
+  decidedAt       DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([shortlistId])
+}
+
+// Fulfilment record — captures delivery/fitting state in a structured
+// form separate from the request's flat columns.
+model PSFulfilment {
+  id              String    @id @default(cuid())
+  requestId       String   @unique
+  deliveryFee     Int?     // area fee or quoted fee
+  quoteBy         String?  // staff who quoted (for outside Lagos)
+  payMode         String?  // "LINK" | "COD" | "ONSITE"
+  rider           String?
+  dispatchedAt    DateTime?
+  deliveredAt     DateTime?
+  fittingStart    DateTime?
+  fittingEnd      DateTime?
+  extraBlocks     Int      @default(0)
+  exchangeUntil48 DateTime?
+  exchangeUntil24 DateTime?
+  createdAt       DateTime @default(now())
+}

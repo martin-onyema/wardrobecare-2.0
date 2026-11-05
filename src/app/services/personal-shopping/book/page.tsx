@@ -42,7 +42,7 @@ export default function BookPersonalShoppingPage() {
               Tell us what you need
             </h1>
             <p className="text-sm md:text-base text-muted-foreground mt-4">
-              4 short steps. Takes about 2 minutes.
+              4 short steps. You pay the sourcing fee at the end to start.
             </p>
           </div>
 

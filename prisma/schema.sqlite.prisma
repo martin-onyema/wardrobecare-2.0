@@ -1644,3 +1644,82 @@ model PSEvent {
 
   @@index([requestId, createdAt])
 }
+
+// ============================================================
+// PERSONAL SHOPPING — spec-aligned additions
+// ============================================================
+
+model PSBrief {
+  id          String   @id @default(cuid())
+  requestId   String   @unique
+  fit         String?
+  style       String?
+  occasion    String?
+  budgetBand  String?
+  sizes       String?
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model PSBriefFlag {
+  id              String   @id @default(cuid())
+  requestId   String   @unique
+  terms           String
+  customerChoice  String
+  createdAt       DateTime @default(now())
+}
+
+model PSSlot {
+  id          String    @id @default(cuid())
+  requestId   String   @unique
+  date        DateTime
+  start       String
+  area        String?
+  heldUntil   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model PSShortlist {
+  id          String    @id @default(cuid())
+  requestId   String   @unique
+  token       String   @unique @default(cuid())
+  sentAt      DateTime?
+  channel     String?
+  holdUntil   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model PSShortlistItem {
+  id              String   @id @default(cuid())
+  shortlistId     String
+  name            String
+  category        PSItemType
+  size            String
+  price           Int
+  source          String
+  stylistNote     String?
+  decision        PSItemDecision @default(PENDING)
+  altNote         String?
+  decidedBy       String?
+  decidedAt       DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([shortlistId])
+}
+
+model PSFulfilment {
+  id              String    @id @default(cuid())
+  requestId       String   @unique
+  deliveryFee     Int?
+  quoteBy         String?
+  payMode         String?
+  rider           String?
+  dispatchedAt    DateTime?
+  deliveredAt     DateTime?
+  fittingStart    DateTime?
+  fittingEnd      DateTime?
+  extraBlocks     Int      @default(0)
+  exchangeUntil48 DateTime?
+  exchangeUntil24 DateTime?
+  createdAt       DateTime @default(now())
+}
