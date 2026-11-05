@@ -1,40 +1,9 @@
 /**
  * Personal Shopping — customer-facing server actions.
- *
- * Customer flow:
- *   1. Wizard computes a brief → `checkBriefGuard` (sync, client-callable)
- *      flags brand / exact-item / link mentions so the UI can show the
- *      PS-vs-Premium-Sourcing interstitial (Mockup 50).
- *   2. Customer picks a tier (DELIVERED or IN_PERSON_FITTING). For
- *      IN_PERSON_FITTING the wizard calls `getPSAvailableSlots` and the
- *      customer picks a date + time.
- *   3. `createPersonalShoppingRequest` creates the request row
- *      (status=NEW), the PSBrief row, an optional PSBriefFlag (if the
- *      brief triggered a brand/exact/link alert and the customer
- *      acknowledged), an optional PSSlot (held for 10 min, only for
- *      IN_PERSON_FITTING) and validates the promo code if supplied.
- *   4. `initializePSPayment` creates a Paystack tx for the sourcing fee
- *      (the deposit that books the service).
- *   5. `confirmPSPayment` verifies the Paystack tx and stamps `paidAt`.
- *      Status stays NEW — staff still need to accept the request.
- *
- * After staff have sourced a shortlist and the customer receives the
- * review link:
- *   6. `getShortlistByToken` loads the shortlist + items + request info.
- *   7. `submitItemDecision` records KEEP / SKIP / WANTS_DIFFERENT on
- *      each PSShortlistItem, with decidedBy=CUSTOMER.
- *   8. `requestMoreItems` lets the customer push back ("none of these
- *      suit me"). Writes a PSEvent so the stylist knows to re-source.
- *   9. `payForItems` (online review flow) sums the KEEP items + delivery
- *      fee and creates a Paystack link for the balance.
- *
- * NOTE on 'use server':
- * The directive is applied per-function (not at the file level) so the
- * synchronous `checkBriefGuard` helper can also live in this file and
- * be imported by the booking wizard client-side without forcing it
- * through the server-action boundary. A file-level 'use server' would
- * require every export to be an async function.
+ * The sync `checkBriefGuard` helper lives in src/lib/ps-brief-guard.ts.
  */
+
+'use server'
 
 import { db } from '@/lib/db'
 import { getSession } from '@/lib/session'
@@ -199,125 +168,6 @@ function applyPromoDiscount(
 }
 
 // ============================================================
-// 1. Brief guard — SYNC (not a server action)
-// ============================================================
-
-const BRAND_NAMES = [
-  'Gucci', 'Nike', 'Prada', 'Louis Vuitton', 'LV', 'Zara', 'H&M', 'Adidas',
-  'Puma', 'Balenciaga', 'Versace', 'Dolce & Gabbana', 'D&G', 'Tom Ford',
-  'Ralph Lauren', 'Lacoste', 'Hugo Boss', 'Boss', 'Armani', 'Burberry',
-  'Givenchy', 'Valentino', 'Off-White', 'Stone Island', 'Moncler',
-  'Canada Goose', 'Fendi', 'Celine', 'Chanel', 'Dior', 'Saint Laurent',
-  'YSL', 'Bottega Veneta', 'Kenzo', 'Comme des Garcons', 'CDG', 'Supreme',
-  'Stüssy', 'Carhartt', 'A-Cold-Wall', 'Rhude', 'Amiri', 'Heron Preston',
-  'Kith',
-] as const
-
-const EXACT_CUES = [
-  'exact same', 'this exact', 'exactly this', 'the one in', 'link to',
-  'url',
-] as const
-
-const LINK_CUES = ['http://', 'https://', 'www.'] as const
-
-const INSPIRATION_CUES = [
-  'inspired by', 'like the', 'similar to', 'vibe of',
-] as const
-
-export type BriefGuardResult = {
-  flagged: boolean
-  terms: string[]
-  type: 'BRAND' | 'EXACT' | 'LINK' | 'INSPIRATION' | null
-}
-
-/**
- * Detect brand names, exact-item cues, links and "inspiration" cues in
- * a customer's free-text brief.
- *
- * Hard alerts (flagged=true):
- *   - LINK:  http(s)/www URL in the brief — most specific
- *   - EXACT: "exact same", "this exact", "the one in", "link to", "url"
- *   - BRAND: any of the known brand names appears
- *
- * Soft note (flagged=false, type=INSPIRATION):
- *   - "inspired by", "like the", "similar to", "vibe of"
- *
- * When multiple categories match, the most specific (LINK > EXACT >
- * BRAND > INSPIRATION) is returned as `type`. `terms` carries every
- * matched term so the UI can show the customer exactly what was
- * flagged.
- *
- * This function is sync and exported WITHOUT a `'use server'`
- * directive so the booking wizard can import and call it directly
- * from a Client Component without an extra round-trip. All other
- * exports in this file use the function-level `'use server'`
- * directive and become Server Actions.
- */
-export function checkBriefGuard(briefText: string): BriefGuardResult {
-  const text = (briefText ?? '').toLowerCase()
-  if (!text.trim()) {
-    return { flagged: false, terms: [], type: null }
-  }
-  const original = briefText ?? ''
-
-  // ── Brand mentions ──────────────────────────────────────────────
-  const matchedBrands: string[] = []
-  for (const b of BRAND_NAMES) {
-    // Multi-word / punctuation-containing brands ("Louis Vuitton",
-    // "H&M", "Off-White", "D&G", "A-Cold-Wall", "Comme des Garcons"):
-    // the spaces / punctuation already provide a natural boundary so a
-    // plain substring match is precise enough.
-    if (/[ .&\-]/.test(b)) {
-      if (text.includes(b.toLowerCase())) matchedBrands.push(b)
-      continue
-    }
-    // Single-word brands — use a boundary regex so "LV" doesn't match
-    // inside "loved" and "Armani" doesn't match inside "Harmanique".
-    const re = new RegExp(
-      `(?:^|[^a-z0-9])${escapeRegex(b.toLowerCase())}(?:[^a-z0-9]|$)`,
-      'i',
-    )
-    if (re.test(text)) matchedBrands.push(b)
-  }
-
-  // ── Links ────────────────────────────────────────────────────────
-  const matchedLinks: string[] = []
-  for (const cue of LINK_CUES) {
-    if (text.includes(cue)) matchedLinks.push(cue)
-  }
-  // Pull out the actual URLs so the UI can show them verbatim.
-  const urls = original.match(/https?:\/\/\S+/gi) || []
-  for (const u of urls) matchedLinks.push(u)
-
-  // ── Exact-item cues ──────────────────────────────────────────────
-  const matchedExact: string[] = []
-  for (const cue of EXACT_CUES) {
-    if (text.includes(cue)) matchedExact.push(cue)
-  }
-
-  // ── Inspiration cues (soft notes) ────────────────────────────────
-  const matchedInspiration: string[] = []
-  for (const cue of INSPIRATION_CUES) {
-    if (text.includes(cue)) matchedInspiration.push(cue)
-  }
-
-  // Priority: LINK > EXACT > BRAND > INSPIRATION.
-  if (matchedLinks.length) {
-    return { flagged: true, terms: dedupe(matchedLinks), type: 'LINK' }
-  }
-  if (matchedExact.length) {
-    return { flagged: true, terms: dedupe(matchedExact), type: 'EXACT' }
-  }
-  if (matchedBrands.length) {
-    return { flagged: true, terms: dedupe(matchedBrands), type: 'BRAND' }
-  }
-  if (matchedInspiration.length) {
-    return { flagged: false, terms: dedupe(matchedInspiration), type: 'INSPIRATION' }
-  }
-  return { flagged: false, terms: [], type: null }
-}
-
-// ============================================================
 // 2. getPSAvailableSlots — In-Person fitting slots
 // ============================================================
 
@@ -345,7 +195,6 @@ export async function getPSAvailableSlots(input: {
   days: number
   mode: string
 }) {
-  'use server'
   if (!input?.from || !/^\d{4}-\d{2}-\d{2}$/.test(input.from)) {
     return []
   }
@@ -446,7 +295,6 @@ const createSchema = z.object({
 export async function createPersonalShoppingRequest(
   input: z.infer<typeof createSchema>,
 ) {
-  'use server'
   const parsed = createSchema.safeParse(input)
   if (!parsed.success) {
     return {
@@ -729,7 +577,6 @@ export async function createPersonalShoppingRequest(
  * `WC-PS-` prefix to route charge.success back to the PS handler.
  */
 export async function initializePSPayment(requestId: string) {
-  'use server'
   if (!requestId) return { ok: false, error: 'Missing request id.' } as const
 
   const req = await db.personalShoppingRequest.findUnique({
@@ -857,7 +704,6 @@ export async function initializePSPayment(requestId: string) {
  * idempotent — whichever lands first wins, the second is a no-op.
  */
 export async function confirmPSPayment(reference: string) {
-  'use server'
   if (!reference) return { ok: false, error: 'Missing payment reference.' } as const
 
   const req = await db.personalShoppingRequest.findUnique({
@@ -941,7 +787,6 @@ export async function confirmPSPayment(reference: string) {
  *     shouldn't be reachable before the stylist sends the link.
  */
 export async function getShortlistByToken(token: string) {
-  'use server'
   if (!token || !token.trim()) return null
 
   const shortlist = await db.pSShortlist.findUnique({
@@ -1048,7 +893,6 @@ export async function submitItemDecision(
   decision: string,
   altNote?: string,
 ) {
-  'use server'
   if (!token || !token.trim()) {
     return { ok: false, error: 'Missing shortlist token.' } as const
   }
@@ -1116,7 +960,6 @@ export async function submitItemDecision(
  * still tap KEEP/SKIP on the existing items after this is submitted.
  */
 export async function requestMoreItems(token: string, note: string) {
-  'use server'
   if (!token || !token.trim()) {
     return { ok: false, error: 'Missing shortlist token.' } as const
   }
@@ -1168,7 +1011,6 @@ export async function requestMoreItems(token: string, note: string) {
  * nothing to pay for.
  */
 export async function payForItems(requestId: string) {
-  'use server'
   if (!requestId) return { ok: false, error: 'Missing request id.' } as const
 
   const req = await db.personalShoppingRequest.findUnique({

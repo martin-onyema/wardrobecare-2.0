@@ -24,9 +24,9 @@ import { toast } from 'sonner'
 import {
   createPersonalShoppingRequest,
   initializePSPayment,
-  checkBriefGuard,
   getPSAvailableSlots,
 } from '@/actions/personal-shopping-customer'
+import { checkBriefGuard } from '@/lib/ps-brief-guard'
 
 type FormData = {
   // Step 1 — Your details
