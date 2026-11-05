@@ -69,6 +69,7 @@ model User {
 
   // Consultations (paid-at-booking sessions, separate from free service enquiries)
   consultationBookings     ConsultationBooking[] @relation("ConsultationBookingUser")
+  consultationBookingsAsStylist ConsultationBooking[] @relation("ConsultationBookingStylist")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -1262,7 +1263,9 @@ enum ConsultationBookingStatus {
   CONFIRMED           // we confirmed the date & assigned a stylist
   RESCHEDULE_PROPOSED // admin cannot keep date; 3 new slots proposed
   RESCHEDULED         // customer picked a new slot
-  COMPLETED           // session delivered
+  IN_SESSION          // stylist started the session
+  SUMMARY_PENDING     // session finished, summary not yet sent
+  COMPLETED           // summary sent, session fully closed
   CANCELLED           // cancelled (refund handled separately)
 }
 
@@ -1292,9 +1295,19 @@ model ConsultationBooking {
   slotTime        String   // "9:00 AM", "11:30 AM", "2:00 PM", "4:30 PM"
 
   // ─── Payment ───
-  amountPaid      Int      @default(45000) // naira, first 2 hours flat
+  listPrice       Int      @default(45000) // snapshot of fee at booking time
+  amountPaid      Int      @default(45000) // naira actually paid (after discount)
   paymentReference String? @unique        // Paystack transaction reference
   paidAt          DateTime?
+
+  // ─── Discount (snapshot on the booking, applied at checkout or by staff) ───
+  discountLabel   String?  // "Code WELCOME10 (10% off)" / "Staff discount: Loyal client (5% off)"
+  discountAmount  Int      @default(0) // naira subtracted from listPrice
+  discountAppliesToAll Boolean @default(false) // true → also applies to extra time + return visit
+  discountPct     Int?      // null for non-percentage discounts
+  discountFree    Boolean  @default(false)
+  promoCodeId     String?  // link if a code was used
+  promoCode       ConsultationPromoCode? @relation("ConsultationBookingPromoCode", fields: [promoCodeId], references: [id], onDelete: SetNull)
 
   // ─── Slot hold ───
   holdUntil       DateTime? // 10-min hold for unpaid slot
@@ -1302,12 +1315,31 @@ model ConsultationBooking {
   // ─── Workflow ───
   status          ConsultationBookingStatus @default(HELD)
 
+  // ─── Stylist assignment (the staff member running the session) ───
+  assignedStylistId String?
+  assignedStylist  User?   @relation("ConsultationBookingStylist", fields: [assignedStylistId], references: [id], onDelete: SetNull)
+
   // ─── Reschedule (admin-initiated) ───
   proposedSlots   Json?      // [{ date: "2026-11-10", time: "11:30 AM" }, ...]
   rescheduleReason String?   // why admin couldn't keep the original slot
   rescheduledAt   DateTime?
   originalSlotDate DateTime?
   originalSlotTime String?
+
+  // ─── Session workspace (the in-session audit/photos/gaps/time) ───
+  sessionStartedAt    DateTime?
+  elapsedMinutes      Int      @default(0) // minutes since sessionStartedAt (+ manual adjustments)
+  auditItems          Json?    // [{ i, cat, a: 'Keep'|'Alter'|'Retire', n }]
+  outfitPhotos        Json?    // [{ n, o, url }]  (n = outfit number, o = occasion)
+  gapItems            Json?    // [{ i, p: 'High'|'Medium' }]
+  sessionNotes        String?  // free-form internal notes
+  extraTimeBilledAt   DateTime? // when the extra-time payment link was sent
+  extraTimeAmount     Int      @default(0) // naira billed for extra time (0 if not billed)
+
+  // ─── After the session ───
+  summarySentAt           DateTime?
+  returnVisitBookingId    String?  // link to a follow-up booking (return visit)
+  personalShoppingBriefAt DateTime? // when a PS brief was generated from gap list
 
   // ─── Relations ───
   user            User?    @relation("ConsultationBookingUser", fields: [userId], references: [id], onDelete: SetNull)
@@ -1319,4 +1351,77 @@ model ConsultationBooking {
   @@index([slotDate, slotTime])
   @@index([userId])
   @@index([paymentReference])
+}
+
+// ============================================================
+// CONSULTATION WORKFLOW — supporting tables (admin side)
+// ============================================================
+
+// Single-row table holding the current consultation fee structure.
+// Editable in the admin Fees & discounts tab. New bookings snapshot
+// the values in ConsultationBooking.listPrice / amountPaid at checkout.
+model ConsultationServiceSetting {
+  id                    String   @id @default("singleton")
+  baseFee               Int      @default(45000) // first two hours, flat
+  extraHourFee          Int      @default(10000) // each extra hour
+  returnVisitDropoffPct Int      @default(50)    // % of baseFee for drop-off-only return visit
+  extraTimeRounding     String   @default("started") // "started" = each started hour, "full" = full hours only
+  updatedAt             DateTime @updatedAt
+}
+
+// Promo codes customers enter at checkout. Each customer can use a code
+// once. A booking can carry one discount.
+model ConsultationPromoCode {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  type         String    // "pct" | "fix" | "free"
+  value        Int       // pct: 1-100, fix: naira, free: ignored (100)
+  appliesToAll Boolean   @default(false) // true → also applies to extra time + return visit
+  expiresAt    DateTime?
+  usageLimit   Int?      // null = unlimited
+  timesUsed    Int       @default(0)
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  bookings     ConsultationBooking[] @relation("ConsultationBookingPromoCode") // bookings that used this code
+
+  @@index([active])
+}
+
+// Automatic offers — no code needed. Eligibility is evaluated at checkout.
+// e.g. "Referral reward: free session at 3 referrals" or "First booking: 10% off".
+model ConsultationDiscountRule {
+  id        String   @id @default(cuid())
+  name      String   // "Referral reward", "First booking"
+  condition String   // human-readable, e.g. "Client reaches 3 referrals"
+  reward    String   // "Free session (first two hours)", "10% off"
+  active    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Blocked slots — admin manually blocks a (date, time) cell on the
+// calendar so the website won't offer it. Stored separately from bookings
+// so blocking a slot doesn't require creating a fake booking.
+model ConsultationBlockedSlot {
+  id        String   @id @default(cuid())
+  slotDate  DateTime
+  slotTime  String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([slotDate, slotTime])
+}
+
+// Single-row table holding the consultation availability rules.
+model ConsultationAvailability {
+  id                    String   @id @default("singleton")
+  workingDays           String   @default("Mon,Tue,Wed,Thu,Fri,Sat") // comma-sep
+  sessionTimes          String   @default("9:00 AM,11:30 AM,2:00 PM,4:30 PM")
+  travelBufferMinutes   Int      @default(60)
+  minNoticeHours        Int      @default(24)
+  allowVideo            Boolean  @default(true)
+  allowInPerson         Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
 }

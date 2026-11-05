@@ -23,6 +23,8 @@ const STATUS_LABEL: Record<string, string> = {
   CONFIRMED: 'Confirmed',
   RESCHEDULE_PROPOSED: 'Action needed — reschedule',
   RESCHEDULED: 'Rescheduled',
+  IN_SESSION: 'Session in progress',
+  SUMMARY_PENDING: 'Session complete — summary being prepared',
   COMPLETED: 'Completed',
   CANCELLED: 'Cancelled',
 }
@@ -33,6 +35,8 @@ const STATUS_TONE: Record<string, string> = {
   CONFIRMED: 'text-olive',
   RESCHEDULE_PROPOSED: 'text-rust font-medium',
   RESCHEDULED: 'text-olive',
+  IN_SESSION: 'text-olive',
+  SUMMARY_PENDING: 'text-olive',
   COMPLETED: 'text-muted-foreground',
   CANCELLED: 'text-rust',
 }

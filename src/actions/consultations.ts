@@ -124,7 +124,7 @@ export async function getConsultationSlotsTaken(opts?: { from?: string; to?: str
       // RESCHEDULE_PROPOSED bookings still own their slot while the
       // customer is picking a new time — the original slot is reserved
       // (the customer could still keep it if they push back).
-      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED'] },
+      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED', 'IN_SESSION'] },
     },
     select: { slotDate: true, slotTime: true },
   })
@@ -194,7 +194,7 @@ export async function holdConsultationSlot(input: z.infer<typeof holdSchema>) {
       slotTime: d.slotTime,
       // RESCHEDULE_PROPOSED bookings still own their original slot until
       // the customer accepts a new one — keep them in the clash set.
-      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED'] },
+      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED', 'IN_SESSION'] },
     },
     select: { id: true },
   })
@@ -523,7 +523,7 @@ export async function acceptRescheduleSlot(bookingNumber: string, slotIndex: num
       id: { not: b.id },
       slotDate: slotDateObj,
       slotTime: pick.time,
-      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED'] },
+      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED', 'IN_SESSION'] },
     },
     select: { id: true, bookingNumber: true },
   })
@@ -732,7 +732,7 @@ export async function adminManualReschedule(input: z.infer<typeof manualReschedu
       slotDate: slotDateObj,
       slotTime: d.slotTime,
       // RESCHEDULE_PROPOSED bookings also block the slot.
-      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED'] },
+      status: { in: ['HELD', 'PAID', 'CONFIRMED', 'RESCHEDULE_PROPOSED', 'RESCHEDULED', 'IN_SESSION'] },
     },
     select: { id: true, bookingNumber: true },
   })
