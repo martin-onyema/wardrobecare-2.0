@@ -69,6 +69,8 @@ model User {
   // Consultations (paid-at-booking sessions, separate from free service enquiries)
   consultationBookings     ConsultationBooking[] @relation("ConsultationBookingUser")
   consultationBookingsAsStylist ConsultationBooking[] @relation("ConsultationBookingStylist")
+  personalShoppingRequests      PersonalShoppingRequest[] @relation("PersonalShoppingUser")
+  personalShoppingAsStylist     PersonalShoppingRequest[] @relation("PersonalShoppingStylist")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -1489,4 +1491,156 @@ model ConsultationAvailability {
   allowVideo            Boolean  @default(true)
   allowInPerson         Boolean  @default(true)
   updatedAt             DateTime @updatedAt
+}
+
+// ============================================================
+// PERSONAL SHOPPING — paid sourcing service
+// ============================================================
+
+enum PersonalShoppingStatus {
+  NEW
+  SOURCING
+  SENT
+  APPROVED
+  PAID
+  FULFILLING
+  DONE
+  CANCELLED
+}
+
+enum PSReviewMethod {
+  ONLINE
+  WHATSAPP
+  ONSITE
+}
+
+enum PSItemType {
+  SHIRTS
+  TROUSERS
+  SUITING
+  FOOTWEAR
+  ACCESSORIES
+  FRAGRANCE
+  TRADITIONAL
+}
+
+enum PSItemDecision {
+  PENDING
+  KEEP
+  SKIP
+  WANTS_DIFFERENT
+}
+
+model PersonalShoppingRequest {
+  id              String   @id @default(cuid())
+  ref             String   @unique
+  userId          String?
+
+  customerName    String
+  customerPhone   String
+  contactVia      String
+  shoppingFor     String
+
+  tier            String   // "DELIVERED" | "IN_PERSON_FITTING"
+  reviewMethod    PSReviewMethod @default(ONLINE)
+  area            String?
+  isLagos         Boolean  @default(true)
+
+  brief           String
+  categories      String
+  colours         String
+  budget          String
+  neededBy        String?
+
+  brandMentioned   String?
+  brandAcknowledged String?
+
+  stylistId       String?
+  stylist         User?    @relation("PersonalShoppingStylist", fields: [stylistId], references: [id], onDelete: SetNull)
+
+  sourcingFeePaid Int      @default(45000)
+  discountLabel   String?
+  discountAmount  Int      @default(0)
+  paymentReference String? @unique
+  paidAt          DateTime?
+
+  fittingDate     DateTime?
+  fittingTime     String?
+  fittingArea     String?
+  fittingElapsedMinutes Int @default(0)
+
+  deliveryFeeQuoted Int?
+  deliveryFeeZone   Int?
+  riderName          String?
+  paymentMethod     String?
+
+  status          PersonalShoppingStatus @default(NEW)
+
+  user            User?    @relation("PersonalShoppingUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([stylistId])
+  @@index([userId])
+}
+
+model PSItem {
+  id              String   @id @default(cuid())
+  requestId       String
+  name            String
+  category        PSItemType
+  size            String
+  price           Int
+  source          String
+  stylistNote     String?
+  decision        PSItemDecision @default(PENDING)
+  decisionNote    String?
+  createdAt       DateTime @default(now())
+
+  @@index([requestId])
+}
+
+model PSServiceSetting {
+  id                    String   @id @default("singleton")
+  deliveredFee          Int      @default(45000)
+  inPersonFittingFee    Int      @default(50000)
+  includedMinutes       Int      @default(60)
+  extraBlockMinutes     Int      @default(30)
+  extraBlockFee         Int      @default(5000)
+  updatedAt             DateTime @updatedAt
+}
+
+model PSDeliveryZone {
+  id        String  @id @default(cuid())
+  zone      String  @unique
+  fee       Int
+  createdAt DateTime @default(now())
+}
+
+model PSPromoCode {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  type         String
+  value        Int
+  service      String    @default("Both")
+  expiresAt    DateTime?
+  timesUsed    Int       @default(0)
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([active])
+}
+
+model PSEvent {
+  id          String   @id @default(cuid())
+  requestId   String
+  actorId     String?
+  actorType   String
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@index([requestId, createdAt])
 }

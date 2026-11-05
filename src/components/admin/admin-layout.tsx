@@ -36,6 +36,7 @@ import {
   ConciergeBell,
   ClipboardList,
   CalendarCheck,
+  ShoppingBag,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
@@ -103,6 +104,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Enquiries', href: '/admin/services/enquiries', icon: ConciergeBell, permission: 'service.enquiry.view' },
       { label: 'Consultations', href: '/admin/services/consultations', icon: CalendarCheck, permission: 'service.enquiry.view' },
+      { label: 'Personal Shopping', href: '/admin/services/personal-shopping', icon: ShoppingBag, permission: 'service.enquiry.view' },
     ],
   },
   {

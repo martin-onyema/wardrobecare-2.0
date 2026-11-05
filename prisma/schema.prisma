@@ -70,6 +70,8 @@ model User {
   // Consultations (paid-at-booking sessions, separate from free service enquiries)
   consultationBookings     ConsultationBooking[] @relation("ConsultationBookingUser")
   consultationBookingsAsStylist ConsultationBooking[] @relation("ConsultationBookingStylist")
+  personalShoppingRequests      PersonalShoppingRequest[] @relation("PersonalShoppingUser")
+  personalShoppingAsStylist     PersonalShoppingRequest[] @relation("PersonalShoppingStylist")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -1577,4 +1579,174 @@ model ConsultationAvailability {
   allowVideo            Boolean  @default(true)
   allowInPerson         Boolean  @default(true)
   updatedAt             DateTime @updatedAt
+}
+
+// ============================================================
+// PERSONAL SHOPPING — paid sourcing service
+// (Distinct from the free ServiceEnquiry path.)
+// Statuses: NEW → SOURCING → SENT → APPROVED → PAID → FULFILLING → DONE
+// ============================================================
+
+enum PersonalShoppingStatus {
+  NEW          // sourcing fee paid, to accept
+  SOURCING     // stylist accepted, building shortlist
+  SENT         // shortlist sent to customer
+  APPROVED     // customer choices recorded
+  PAID         // items paid, ready to dispatch/fit
+  FULFILLING   // out for delivery or at fitting
+  DONE         // delivered / fitting complete
+  CANCELLED
+}
+
+enum PSReviewMethod {
+  ONLINE      // customer gets a link to a shortlist page
+  WHATSAPP    // stylist sends list via WhatsApp
+  ONSITE      // items prepared for in-person fitting
+}
+
+enum PSItemType {
+  SHIRTS
+  TROUSERS
+  SUITING
+  FOOTWEAR
+  ACCESSORIES
+  FRAGRANCE
+  TRADITIONAL
+}
+
+enum PSItemDecision {
+  PENDING
+  KEEP
+  SKIP
+  WANTS_DIFFERENT
+}
+
+model PersonalShoppingRequest {
+  id              String   @id @default(cuid())
+  ref             String   @unique // e.g. WC-PS-1051
+  userId          String?  // who booked and paid
+
+  // ─── Customer ───
+  customerName    String
+  customerPhone   String
+  contactVia      String   // "Call" | "WhatsApp" | "Email"
+  shoppingFor     String   // "Self" or "Femi (Husband)"
+
+  // ─── Service type ───
+  tier            String   // "DELIVERED" | "IN_PERSON_FITTING"
+  reviewMethod    PSReviewMethod @default(ONLINE)
+  area            String?  // delivery area (Lagos zone or outside Lagos)
+  isLagos         Boolean  @default(true)
+
+  // ─── Brief ───
+  brief           String
+  categories      String   // comma-sep
+  colours         String   // comma-sep
+  budget          String
+  neededBy        String?
+
+  // ─── Brand guard (Mockup 50) ───
+  brandMentioned   String?  // comma-sep brand terms detected in brief
+  brandAcknowledged String? // customer saw PS vs Premium Sourcing explanation
+
+  // ─── Stylist ───
+  stylistId       String?
+  stylist         User?    @relation("PersonalShoppingStylist", fields: [stylistId], references: [id], onDelete: SetNull)
+
+  // ─── Fee ───
+  sourcingFeePaid Int      @default(45000)
+  discountLabel   String?
+  discountAmount  Int      @default(0)
+  paymentReference String? @unique
+  paidAt          DateTime?
+
+  // ─── Fitting (only for IN_PERSON_FITTING) ───
+  fittingDate     DateTime?
+  fittingTime     String?
+  fittingArea     String?
+  fittingElapsedMinutes Int @default(0)
+
+  // ─── Fulfilment ───
+  deliveryFeeQuoted Int?   // for outside-Lagos delivery
+  deliveryFeeZone   Int?  // for Lagos delivery (from zone table)
+  riderName          String?
+  paymentMethod     String? // "link" | "cod" | "paid"
+
+  // ─── Workflow ───
+  status          PersonalShoppingStatus @default(NEW)
+
+  // ─── Relations ───
+  user            User?    @relation("PersonalShoppingUser", fields: [userId], references: [id], onDelete: SetNull)
+  items           PSItem[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([stylistId])
+  @@index([userId])
+}
+
+model PSItem {
+  id              String   @id @default(cuid())
+  requestId       String
+  request         PersonalShoppingRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  name            String
+  category        PSItemType
+  size            String
+  price           Int      // naira
+  source          String   // "In stock" | "Sourced from supplier"
+  stylistNote     String?
+  decision        PSItemDecision @default(PENDING)
+  decisionNote    String?  // for WANTS_DIFFERENT: what they want instead
+  createdAt       DateTime @default(now())
+
+  @@index([requestId])
+}
+
+// Single-row PS fee settings (like ConsultationServiceSetting)
+model PSServiceSetting {
+  id                    String   @id @default("singleton")
+  deliveredFee          Int      @default(45000)
+  inPersonFittingFee    Int      @default(50000)
+  includedMinutes       Int      @default(60)
+  extraBlockMinutes     Int      @default(30)
+  extraBlockFee         Int      @default(5000)
+  updatedAt             DateTime @updatedAt
+}
+
+// Delivery fees by Lagos zone (same data as Delivery Charges page)
+model PSDeliveryZone {
+  id        String  @id @default(cuid())
+  zone      String  @unique
+  fee       Int
+  createdAt DateTime @default(now())
+}
+
+// PS promo codes (discount sourcing fee only, never items)
+model PSPromoCode {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  type         String    // "PERCENT" | "FIXED" | "FREE"
+  value        Int
+  service      String    @default("Both") // "Personal Shopping" | "Both"
+  expiresAt    DateTime?
+  timesUsed    Int       @default(0)
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([active])
+}
+
+// PS audit events (like BookingEvent for consultations)
+model PSEvent {
+  id          String   @id @default(cuid())
+  requestId   String
+  actorId     String?
+  actorType   String   // "CUSTOMER" | "STAFF" | "SYSTEM"
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@index([requestId, createdAt])
 }
