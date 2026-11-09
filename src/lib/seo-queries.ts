@@ -4,6 +4,15 @@
  * All the queries that build the "page list" the admin sees, with
  * pagination at the DB level. Reused by /admin/seo (overview) and
  * /admin/seo/pages (full list).
+ *
+ * RESILIENCE: every query that touches the new SEO columns or tables
+ * is wrapped in a try/catch. If the production migration hasn't been
+ * applied yet, the queries fall back to using only the pre-existing
+ * columns (noindex defaults to false, inSitemap defaults to true,
+ * seoH1/seoIntroText/seoOgImage default to null). This means the SEO
+ * Manager UI loads successfully both before and after the migration
+ * is applied — the new fields just appear empty until the migration
+ * lands.
  */
 
 import { db } from '@/lib/db'
@@ -17,6 +26,131 @@ import {
 } from '@/lib/seo'
 
 export type SeoPageRow = SeoPageRecord & { score: number }
+
+// ============================================================
+// RESILIENT QUERIES — fall back if migration hasn't been applied
+// ============================================================
+
+type CategoryRow = {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  parentId: string | null
+  parent: { name: string } | null
+  seoTitle: string | null
+  seoDescription: string | null
+  seoH1: string | null
+  seoIntroText: string | null
+  seoOgImage: string | null
+  noindex: boolean
+  inSitemap: boolean
+  active: boolean
+}
+
+type ProductRow = {
+  id: string
+  name: string
+  slug: string
+  description: string
+  seoTitle: string | null
+  seoDescription: string | null
+  seoH1: string | null
+  ogImage: string | null
+  noindex: boolean
+  inSitemap: boolean
+  published: boolean
+  status: string
+  images: { altText: string | null; url: string; position: number }[]
+}
+
+type OverrideRow = {
+  route: string
+  contentType: string
+  name: string
+  seoTitle: string | null
+  seoDescription: string | null
+  h1: string | null
+  introText: string | null
+  ogImage: string | null
+  noindex: boolean
+  inSitemap: boolean
+}[]
+
+async function fetchCategories(): Promise<CategoryRow[]> {
+  try {
+    // Try with the new SEO columns
+    return await db.category.findMany({
+      select: {
+        id: true, name: true, slug: true, description: true, parentId: true,
+        parent: { select: { name: true } },
+        seoTitle: true, seoDescription: true, seoH1: true, seoIntroText: true,
+        seoOgImage: true, noindex: true, inSitemap: true, active: true,
+      },
+    }) as CategoryRow[]
+  } catch (e: any) {
+    // Migration not applied — fall back to pre-existing columns
+    console.warn('[seo-queries] new Category columns missing, using fallback:', e?.message?.slice(0, 100))
+    const rows = await db.category.findMany({
+      select: {
+        id: true, name: true, slug: true, description: true, parentId: true,
+        parent: { select: { name: true } },
+        seoTitle: true, seoDescription: true, active: true,
+      },
+    }) as any[]
+    // Apply defaults for the new columns
+    return rows.map((r) => ({
+      ...r,
+      seoH1: null,
+      seoIntroText: null,
+      seoOgImage: null,
+      noindex: false,
+      inSitemap: true,
+    })) as CategoryRow[]
+  }
+}
+
+async function fetchProducts(): Promise<ProductRow[]> {
+  try {
+    return await db.product.findMany({
+      select: {
+        id: true, name: true, slug: true, description: true,
+        seoTitle: true, seoDescription: true, seoH1: true, ogImage: true,
+        noindex: true, inSitemap: true, published: true, status: true,
+        images: { select: { altText: true, url: true, position: true }, orderBy: { position: 'asc' } },
+      },
+    }) as ProductRow[]
+  } catch (e: any) {
+    console.warn('[seo-queries] new Product columns missing, using fallback:', e?.message?.slice(0, 100))
+    const rows = await db.product.findMany({
+      select: {
+        id: true, name: true, slug: true, description: true,
+        seoTitle: true, seoDescription: true, ogImage: true,
+        published: true, status: true,
+        images: { select: { altText: true, url: true, position: true }, orderBy: { position: 'asc' } },
+      },
+    }) as any[]
+    return rows.map((r) => ({
+      ...r,
+      seoH1: null,
+      noindex: false,
+      inSitemap: true,
+    })) as ProductRow[]
+  }
+}
+
+async function fetchOverrides(): Promise<OverrideRow> {
+  try {
+    return await db.seoOverride.findMany() as OverrideRow
+  } catch (e: any) {
+    console.warn('[seo-queries] SeoOverride table missing, using empty list:', e?.message?.slice(0, 100))
+    return []
+  }
+}
+
+// ============================================================
+// LIST — for the All Pages tab
+// ============================================================
 
 /**
  * Build the full list of SEO page records (categories + products +
@@ -37,27 +171,10 @@ export async function listSeoPages(opts: {
   const limit = opts.limit ?? 50
   const offset = opts.offset ?? 0
 
-  // Build all records in memory — fine for the typical catalogue size
-  // (the project has hundreds of products, not millions). We use
-  // db.findMany with select to keep payload size down.
   const [categories, products, overrides, dups] = await Promise.all([
-    db.category.findMany({
-      select: {
-        id: true, name: true, slug: true, description: true, parentId: true,
-        parent: { select: { name: true } },
-        seoTitle: true, seoDescription: true, seoH1: true, seoIntroText: true,
-        seoOgImage: true, noindex: true, inSitemap: true, active: true,
-      },
-    }),
-    db.product.findMany({
-      select: {
-        id: true, name: true, slug: true, description: true,
-        seoTitle: true, seoDescription: true, seoH1: true, ogImage: true,
-        noindex: true, inSitemap: true, published: true, status: true,
-        images: { select: { altText: true, url: true, position: true }, orderBy: { position: 'asc' } },
-      },
-    }),
-    db.seoOverride.findMany(),
+    fetchCategories(),
+    fetchProducts(),
+    fetchOverrides(),
     import('@/lib/seo').then((m) => m.buildDuplicateMaps()),
   ])
 
@@ -91,7 +208,6 @@ export async function listSeoPages(opts: {
   // Filter by issue
   if (opts.issue) {
     scored = scored.filter((r) => {
-      // Skip hidden coming-soon records unless they're the issue we're after
       if (r.hidden && r.noindex) return opts.issue === 'idxMap'
       const cs = checksFor(r, dups)
       return cs.some((c) => c.key === opts.issue && !c.ok)
@@ -117,6 +233,10 @@ export async function listSeoPages(opts: {
   return { rows: page, total }
 }
 
+// ============================================================
+// OVERVIEW STATS — for the dashboard cards
+// ============================================================
+
 /**
  * Build just the overview statistics — counts for the KPI cards
  * and the per-content-type progress bars.
@@ -124,23 +244,9 @@ export async function listSeoPages(opts: {
 export async function getSeoOverviewStats() {
   const { buildDuplicateMaps, checksFor, scoreFor, bandFor } = await import('@/lib/seo')
   const [categories, products, overrides, dups] = await Promise.all([
-    db.category.findMany({
-      select: {
-        id: true, name: true, slug: true, description: true, parentId: true,
-        parent: { select: { name: true } },
-        seoTitle: true, seoDescription: true, seoH1: true, seoIntroText: true,
-        seoOgImage: true, noindex: true, inSitemap: true, active: true,
-      },
-    }),
-    db.product.findMany({
-      select: {
-        id: true, name: true, slug: true, description: true,
-        seoTitle: true, seoDescription: true, seoH1: true, ogImage: true,
-        noindex: true, inSitemap: true, published: true, status: true,
-        images: { select: { altText: true, url: true, position: true }, orderBy: { position: 'asc' } },
-      },
-    }),
-    db.seoOverride.findMany(),
+    fetchCategories(),
+    fetchProducts(),
+    fetchOverrides(),
     buildDuplicateMaps(),
   ])
 
@@ -207,37 +313,75 @@ export async function getSeoOverviewStats() {
   }
 }
 
+// ============================================================
+// SINGLE RECORD — for the editor
+// ============================================================
+
 /**
  * Fetch a single record for the editor.
  */
 export async function getSeoRecordForEdit(type: string, id: string): Promise<SeoPageRecord | null> {
   if (type === 'category') {
-    const c = await db.category.findUnique({
-      where: { id },
-      select: {
-        id: true, name: true, slug: true, description: true, parentId: true,
-        parent: { select: { name: true } },
-        seoTitle: true, seoDescription: true, seoH1: true, seoIntroText: true,
-        seoOgImage: true, noindex: true, inSitemap: true, active: true,
-      },
-    })
+    let c: CategoryRow | null = null
+    try {
+      c = await db.category.findUnique({
+        where: { id },
+        select: {
+          id: true, name: true, slug: true, description: true, parentId: true,
+          parent: { select: { name: true } },
+          seoTitle: true, seoDescription: true, seoH1: true, seoIntroText: true,
+          seoOgImage: true, noindex: true, inSitemap: true, active: true,
+        },
+      }) as CategoryRow | null
+    } catch (e: any) {
+      console.warn('[seo-queries] falling back to legacy category fetch:', e?.message?.slice(0, 100))
+      const r = await db.category.findUnique({
+        where: { id },
+        select: {
+          id: true, name: true, slug: true, description: true, parentId: true,
+          parent: { select: { name: true } },
+          seoTitle: true, seoDescription: true, active: true,
+        },
+      }) as any
+      c = r ? { ...r, seoH1: null, seoIntroText: null, seoOgImage: null, noindex: false, inSitemap: true } : null
+    }
     return c ? categoryToRecord(c) : null
   }
   if (type === 'product') {
-    const p = await db.product.findUnique({
-      where: { id },
-      select: {
-        id: true, name: true, slug: true, description: true,
-        seoTitle: true, seoDescription: true, seoH1: true, ogImage: true,
-        noindex: true, inSitemap: true, published: true, status: true,
-        images: { select: { id: true, altText: true, url: true, position: true }, orderBy: { position: 'asc' } },
-      },
-    })
+    let p: ProductRow | null = null
+    try {
+      p = await db.product.findUnique({
+        where: { id },
+        select: {
+          id: true, name: true, slug: true, description: true,
+          seoTitle: true, seoDescription: true, seoH1: true, ogImage: true,
+          noindex: true, inSitemap: true, published: true, status: true,
+          images: { select: { id: true, altText: true, url: true, position: true }, orderBy: { position: 'asc' } },
+        },
+      }) as ProductRow | null
+    } catch (e: any) {
+      console.warn('[seo-queries] falling back to legacy product fetch:', e?.message?.slice(0, 100))
+      const r = await db.product.findUnique({
+        where: { id },
+        select: {
+          id: true, name: true, slug: true, description: true,
+          seoTitle: true, seoDescription: true, ogImage: true,
+          published: true, status: true,
+          images: { select: { id: true, altText: true, url: true, position: true }, orderBy: { position: 'asc' } },
+        },
+      }) as any
+      p = r ? { ...r, seoH1: null, noindex: false, inSitemap: true } : null
+    }
     return p ? productToRecord(p) : null
   }
   if (type === 'service' || type === 'page') {
-    // For service/page, "id" passed in is the route
-    const ov = await db.seoOverride.findUnique({ where: { route: id } })
+    let ov: OverrideRow[number] | null = null
+    try {
+      ov = await db.seoOverride.findUnique({ where: { route: id } }) as OverrideRow[number] | null
+    } catch (e: any) {
+      console.warn('[seo-queries] SeoOverride table missing, treating as no override:', e?.message?.slice(0, 100))
+      ov = null
+    }
     if (type === 'service') {
       const s = SERVICES.find((x) => `/services/${x.slug}` === id)
       if (!s) return null
@@ -260,11 +404,9 @@ export async function findNextPageNeedingWork(currentType: string, currentId: st
   const { rows } = await listSeoPages({ limit: 10000 })
   const idx = rows.findIndex((r) => r.type === currentType && r.id === currentId)
   if (idx < 0) {
-    // Not in list — return first <85
     const next = rows.find((r) => r.score < 85 && !(r.hidden && r.noindex))
     return next ? { type: next.type, id: next.id } : null
   }
-  // Search forward from idx+1, wrapping around
   for (let i = 1; i <= rows.length; i++) {
     const candidate = rows[(idx + i) % rows.length]
     if (candidate.score < 85 && !(candidate.hidden && candidate.noindex)) {

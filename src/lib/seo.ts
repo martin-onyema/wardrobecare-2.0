@@ -138,14 +138,14 @@ export async function buildDuplicateMaps(): Promise<{ titles: Record<string, num
     if (n) m[n] = (m[n] || 0) + 1
   }
 
-  // Categories
+  // Categories — uses pre-existing columns only (safe before/after migration)
   const cats = await db.category.findMany({ select: { seoTitle: true, seoDescription: true, name: true } })
   for (const c of cats) {
     bump(titles, c.seoTitle || c.name)
     bump(descs, c.seoDescription || '')
   }
 
-  // Products
+  // Products — uses pre-existing columns only
   const products = await db.product.findMany({ select: { seoTitle: true, seoDescription: true, name: true } })
   for (const p of products) {
     bump(titles, p.seoTitle || p.name)
@@ -158,11 +158,15 @@ export async function buildDuplicateMaps(): Promise<{ titles: Record<string, num
     bump(descs, s.tagline)
   }
 
-  // Static page overrides
-  const overrides = await db.seoOverride.findMany({ select: { seoTitle: true, seoDescription: true, name: true } })
-  for (const o of overrides) {
-    bump(titles, o.seoTitle || o.name)
-    bump(descs, o.seoDescription || '')
+  // Static page overrides — SeoOverride table may not exist if migration not applied yet
+  try {
+    const overrides = await db.seoOverride.findMany({ select: { seoTitle: true, seoDescription: true, name: true } })
+    for (const o of overrides) {
+      bump(titles, o.seoTitle || o.name)
+      bump(descs, o.seoDescription || '')
+    }
+  } catch (e: any) {
+    // SeoOverride table missing — skip silently
   }
 
   return { titles, descs }
@@ -448,20 +452,29 @@ export async function getAllTemplates() {
 // ============================================================
 
 /**
- * Get the SEO override for a route, if any. Returns null if no override exists.
- * Used by the public generateMetadata hooks for static pages and services.
+ * Get the SEO override for a route, if any. Returns null if no override exists
+ * (or if the SeoOverride table doesn't exist yet — the migration hasn't been
+ * applied). Used by the public generateMetadata hooks for static pages and
+ * services.
  */
 export async function getSeoOverride(route: string) {
-  return db.seoOverride.findUnique({ where: { route } })
+  try {
+    return await db.seoOverride.findUnique({ where: { route } })
+  } catch (e: any) {
+    // SeoOverride table doesn't exist yet (migration not applied) — treat as no override
+    console.warn('[seo] getSeoOverride failed (table may not exist):', e?.message?.slice(0, 100))
+    return null
+  }
 }
 
 /**
  * Get or create the SEO override for a route. Used by the admin editor
  * when the user opens a static page or service for the first time —
- * we create an empty row they can fill in.
+ * we create an empty row they can fill in. Throws if the table doesn't
+ * exist (the admin will see a clear error telling them to apply the migration).
  */
 export async function getOrCreateSeoOverride(route: string, contentType: 'page' | 'service', name: string) {
-  const existing = await db.seoOverride.findUnique({ where: { route } })
+  const existing = await getSeoOverride(route)
   if (existing) return existing
   return db.seoOverride.create({
     data: { route, contentType, name },
