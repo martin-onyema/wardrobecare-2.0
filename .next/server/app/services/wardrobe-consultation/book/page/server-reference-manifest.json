@@ -1,6 +1,6 @@
 {
   "node": {
-    "40a46cfe3dcd403483e2f6f9c4d4b769ea54da55c7": {
+    "40c27601a2e0fdac3bd2fad1ff32ac37842d50c392": {
       "workers": {
         "app/services/wardrobe-consultation/book/page": {
           "moduleId": 584161,
@@ -15,7 +15,7 @@
       "exportedName": "subscribeToNewsletter",
       "filename": "src/actions/store.ts"
     },
-    "40032959d66d878c9ee951dd2b78bb0277c4142f35": {
+    "40382151b0fbca73615793d689d391cb61100926af": {
       "workers": {
         "app/services/wardrobe-consultation/book/page": {
           "moduleId": 584161,
@@ -30,7 +30,7 @@
       "exportedName": "holdConsultationSlot",
       "filename": "src/actions/consultations.ts"
     },
-    "40ef3c4458c20b5c6076df0dcf43554ebff3d8d6d8": {
+    "402e30ebdd8d40a61c0c4f9063fe976035fbf79fea": {
       "workers": {
         "app/services/wardrobe-consultation/book/page": {
           "moduleId": 584161,
@@ -45,7 +45,7 @@
       "exportedName": "initializeConsultationPayment",
       "filename": "src/actions/consultations.ts"
     },
-    "4072180f4d8d75a081f362a2618e6235c52c3721c9": {
+    "40e1944e33543712da3b325bff615ce2e0edd07a57": {
       "workers": {
         "app/services/wardrobe-consultation/book/page": {
           "moduleId": 584161,

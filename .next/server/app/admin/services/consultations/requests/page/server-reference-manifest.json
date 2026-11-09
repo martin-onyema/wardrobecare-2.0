@@ -1,6 +1,6 @@
 {
   "node": {
-    "60f4b105a74d9e4f6c1b8289100d691f9c4f22ed23": {
+    "60fd02676a1e430adfe45ec10eb49ca9415a2d044a": {
       "workers": {
         "app/admin/services/consultations/requests/page": {
           "moduleId": 124402,
@@ -15,7 +15,7 @@
       "exportedName": "adminAssignStylist",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "40e7ea0fedb0a009e6e6fdb7a64c4010782432c9b1": {
+    "404dc3044ea06b6fb54dd27fa5c65af15303f7f6be": {
       "workers": {
         "app/admin/services/consultations/requests/page": {
           "moduleId": 124402,
@@ -30,7 +30,7 @@
       "exportedName": "adminConfirmPaidBooking",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "409c358cacdf4119451cdc675bf1acea0765f8ddb0": {
+    "4042999181543ffe6bd4ec8172b255982d25931c0f": {
       "workers": {
         "app/admin/services/consultations/requests/page": {
           "moduleId": 124402,
@@ -45,7 +45,7 @@
       "exportedName": "adminApplyDiscountToBooking",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "40bd936ec5d6eba9b5982dfa7258991b7b9bd406d9": {
+    "4020016cc7fc40906ffdc152a16add27113ff99c6a": {
       "workers": {
         "app/admin/services/consultations/requests/page": {
           "moduleId": 124402,

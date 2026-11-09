@@ -1,6 +1,6 @@
 {
   "node": {
-    "40a46cfe3dcd403483e2f6f9c4d4b769ea54da55c7": {
+    "40c27601a2e0fdac3bd2fad1ff32ac37842d50c392": {
       "workers": {
         "app/account/addresses/page": {
           "moduleId": 103100,
@@ -15,7 +15,7 @@
       "exportedName": "subscribeToNewsletter",
       "filename": "src/actions/store.ts"
     },
-    "40da9a6f92c90e44d9cd46c251ee8883bbef1c056e": {
+    "407b2e8a731a3e9e4d2300b05ce0ae57c15474f876": {
       "workers": {
         "app/account/addresses/page": {
           "moduleId": 103100,
@@ -30,7 +30,7 @@
       "exportedName": "saveAddress",
       "filename": "src/actions/store.ts"
     },
-    "40a00354262f6fc6d485f08be577510d6d61bb1b68": {
+    "40aa9b52baec22a4b348ceea38af27e3214d32fac3": {
       "workers": {
         "app/account/addresses/page": {
           "moduleId": 103100,

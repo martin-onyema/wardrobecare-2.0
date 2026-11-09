@@ -1371,6 +1371,12 @@ if ("TURBOPACK compile-time truthy", 1) globalForPrisma.prisma = db;
 "use strict";
 
 __turbopack_context__.s([
+    "CATEGORY_SELECT_BASE",
+    ()=>CATEGORY_SELECT_BASE,
+    "CATEGORY_SELECT_WITH_PARENT",
+    ()=>CATEGORY_SELECT_WITH_PARENT,
+    "PRODUCT_SELECT_BASE",
+    ()=>PRODUCT_SELECT_BASE,
     "getActiveBanners",
     ()=>getActiveBanners,
     "getAdminSettings",
@@ -1410,19 +1416,7 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/db.ts [app-ssr] (ecmascript)");
 ;
-// ============================================================
-// CATALOGUE QUERIES
-// ============================================================
-/**
- * Pre-existing Category columns only — used in explicit `select` to avoid
- * fetching the new SEO Manager columns (seoH1, seoIntroText, seoOgImage,
- * noindex, inSitemap) that may not exist on the production DB yet.
- *
- * Without this, `db.category.findUnique({ include: { ... } })` would emit
- * `SELECT * FROM Category` which fails on a DB that hasn't had the SEO
- * migration applied. With explicit `select`, Prisma only fetches the
- * columns listed here.
- */ const CATEGORY_SELECT_BASE = {
+const CATEGORY_SELECT_BASE = {
     id: true,
     name: true,
     slug: true,
@@ -1434,7 +1428,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$
     active: true,
     seoTitle: true,
     seoDescription: true,
-    seoKeywords: true
+    seoKeywords: true,
+    createdAt: true,
+    updatedAt: true
 };
 const CATEGORY_SELECT_WITH_PARENT = {
     ...CATEGORY_SELECT_BASE,
@@ -1444,9 +1440,7 @@ const CATEGORY_SELECT_WITH_PARENT = {
         }
     }
 };
-/**
- * Pre-existing Product columns only — same rationale as above.
- */ const PRODUCT_SELECT_BASE = {
+const PRODUCT_SELECT_BASE = {
     id: true,
     name: true,
     slug: true,
@@ -1470,7 +1464,9 @@ const CATEGORY_SELECT_WITH_PARENT = {
     seoKeywords: true,
     canonicalUrl: true,
     ogImage: true,
-    status: true
+    status: true,
+    createdAt: true,
+    updatedAt: true
 };
 async function getCategories() {
     return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["db"].category.findMany({
@@ -1480,8 +1476,10 @@ async function getCategories() {
         orderBy: {
             order: 'asc'
         },
-        include: {
+        select: {
+            ...CATEGORY_SELECT_BASE,
             children: {
+                select: CATEGORY_SELECT_BASE,
                 orderBy: {
                     name: 'asc'
                 }
@@ -1494,9 +1492,15 @@ async function getAllCategories() {
         orderBy: {
             name: 'asc'
         },
-        include: {
-            parent: true,
+        select: {
+            ...CATEGORY_SELECT_BASE,
+            parent: {
+                select: {
+                    name: true
+                }
+            },
             children: {
+                select: CATEGORY_SELECT_BASE,
                 orderBy: {
                     name: 'asc'
                 }
@@ -1509,9 +1513,16 @@ async function getCategoryBySlug(slug) {
         where: {
             slug
         },
-        include: {
-            parent: true,
-            children: true
+        select: {
+            ...CATEGORY_SELECT_BASE,
+            parent: {
+                select: {
+                    name: true
+                }
+            },
+            children: {
+                select: CATEGORY_SELECT_BASE
+            }
         }
     });
 }
@@ -1598,8 +1609,11 @@ async function getProducts(params) {
             where: {
                 slug: category
             },
-            include: {
-                children: true
+            select: {
+                ...CATEGORY_SELECT_BASE,
+                children: {
+                    select: CATEGORY_SELECT_BASE
+                }
             }
         });
         if (cat) {
@@ -1670,17 +1684,23 @@ async function getProducts(params) {
         where,
         orderBy,
         take: limit,
-        include: {
+        select: {
+            ...PRODUCT_SELECT_BASE,
             images: {
                 orderBy: {
                     position: 'asc'
+                },
+                select: {
+                    id: true,
+                    url: true,
+                    altText: true,
+                    position: true,
+                    productId: true
                 }
             },
             variants: true,
             category: {
-                include: {
-                    parent: true
-                }
+                select: CATEGORY_SELECT_WITH_PARENT
             }
         }
     });
@@ -1690,17 +1710,23 @@ async function getProductBySlug(slug) {
         where: {
             slug
         },
-        include: {
+        select: {
+            ...PRODUCT_SELECT_BASE,
             images: {
                 orderBy: {
                     position: 'asc'
+                },
+                select: {
+                    id: true,
+                    url: true,
+                    altText: true,
+                    position: true,
+                    productId: true
                 }
             },
             variants: true,
             category: {
-                include: {
-                    parent: true
-                }
+                select: CATEGORY_SELECT_WITH_PARENT
             },
             brand: true,
             reviews: {
@@ -1757,15 +1783,25 @@ async function getFeaturedProducts(limit = 8) {
             createdAt: 'desc'
         },
         take: limit,
-        include: {
+        select: {
+            ...PRODUCT_SELECT_BASE,
             images: {
                 orderBy: {
                     position: 'asc'
                 },
-                take: 2
+                take: 2,
+                select: {
+                    id: true,
+                    url: true,
+                    altText: true,
+                    position: true,
+                    productId: true
+                }
             },
             variants: true,
-            category: true
+            category: {
+                select: CATEGORY_SELECT_BASE
+            }
         }
     });
 }
@@ -1810,15 +1846,25 @@ async function getNewArrivals(limit = 12) {
             createdAt: 'desc'
         },
         take: limit,
-        include: {
+        select: {
+            ...PRODUCT_SELECT_BASE,
             images: {
                 orderBy: {
                     position: 'asc'
                 },
-                take: 2
+                take: 2,
+                select: {
+                    id: true,
+                    url: true,
+                    altText: true,
+                    position: true,
+                    productId: true
+                }
             },
             variants: true,
-            category: true
+            category: {
+                select: CATEGORY_SELECT_BASE
+            }
         }
     });
 }
@@ -1836,15 +1882,25 @@ async function getRelatedProducts(productId, categoryId, limit = 4) {
             createdAt: 'desc'
         },
         take: limit,
-        include: {
+        select: {
+            ...PRODUCT_SELECT_BASE,
             images: {
                 orderBy: {
                     position: 'asc'
                 },
-                take: 2
+                take: 2,
+                select: {
+                    id: true,
+                    url: true,
+                    altText: true,
+                    position: true,
+                    productId: true
+                }
             },
             variants: true,
-            category: true
+            category: {
+                select: CATEGORY_SELECT_BASE
+            }
         }
     });
 }
@@ -1927,12 +1983,20 @@ async function getCartWithProducts(lines) {
                 in: lines.map((l)=>l.productId)
             }
         },
-        include: {
+        select: {
+            ...PRODUCT_SELECT_BASE,
             images: {
                 orderBy: {
                     position: 'asc'
                 },
-                take: 1
+                take: 1,
+                select: {
+                    id: true,
+                    url: true,
+                    altText: true,
+                    position: true,
+                    productId: true
+                }
             },
             variants: true
         }

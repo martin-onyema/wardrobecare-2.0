@@ -1,36 +1,35 @@
 {
   "node": {
-    "40233ef22fcec78bf7cf66cb2816e9a7b99cfdbc90": {
+    "40b8768d70307752950c912e991cadada77528ea5a": {
       "workers": {
-        "app/services/[slug]/page": {
-          "moduleId": "[project]/.next-internal/server/app/services/[slug]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/store.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/store.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "src/actions/store.ts"
+        },
+        "app/product/[slug]/page": {
+          "moduleId": "[project]/.next-internal/server/app/product/[slug]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/store.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "src/actions/store.ts"
+        },
+        "app/shop/page": {
+          "moduleId": "[project]/.next-internal/server/app/shop/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/store.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false,
           "exportedName": "subscribeToNewsletter",
           "filename": "src/actions/store.ts"
         }
       },
       "layer": {
-        "app/services/[slug]/page": "action-browser"
+        "app/page": "action-browser",
+        "app/product/[slug]/page": "action-browser",
+        "app/shop/page": "action-browser"
       },
       "filename": "src/actions/store.ts",
       "exportedName": "subscribeToNewsletter"
-    },
-    "4072971b3c5000a45bb874e16018a2df80bf35d6cb": {
-      "workers": {
-        "app/services/[slug]/page": {
-          "moduleId": "[project]/.next-internal/server/app/services/[slug]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/store.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false,
-          "exportedName": "submitServiceEnquiry",
-          "filename": "src/actions/store.ts"
-        }
-      },
-      "layer": {
-        "app/services/[slug]/page": "action-browser"
-      },
-      "filename": "src/actions/store.ts",
-      "exportedName": "submitServiceEnquiry"
     }
   },
   "edge": {},
-  "encryptionKey": "l6HJ9YPCm/J/5TXvtG9g6Ul7fY3lAJeLt6BMwJqC1uI="
+  "encryptionKey": "rhAho+3cKJgSlJFVCmiTwdYOpbuRpBlbRgAD0ZEbaQY="
 }

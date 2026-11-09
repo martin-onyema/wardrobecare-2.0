@@ -1,6 +1,6 @@
 {
   "node": {
-    "40a46cfe3dcd403483e2f6f9c4d4b769ea54da55c7": {
+    "40c27601a2e0fdac3bd2fad1ff32ac37842d50c392": {
       "workers": {
         "app/account/bookings/[ref]/page": {
           "moduleId": 144017,
@@ -15,7 +15,7 @@
       "exportedName": "subscribeToNewsletter",
       "filename": "src/actions/store.ts"
     },
-    "40025c5ecc6d5c5c7a0174a8713feb77e14f056b09": {
+    "4012ce1faf1a316d8beef827e812ba5d0432509822": {
       "workers": {
         "app/account/bookings/[ref]/page": {
           "moduleId": 144017,
@@ -30,82 +30,7 @@
       "exportedName": "adminManualReschedule",
       "filename": "src/actions/consultations.ts"
     },
-    "40032959d66d878c9ee951dd2b78bb0277c4142f35": {
-      "workers": {
-        "app/account/bookings/[ref]/page": {
-          "moduleId": 144017,
-          "async": false,
-          "exportedName": "holdConsultationSlot",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/account/bookings/[ref]/page": "rsc"
-      },
-      "exportedName": "holdConsultationSlot",
-      "filename": "src/actions/consultations.ts"
-    },
-    "401cd9abf128aff4b1756134c49f76b93cb00a81b9": {
-      "workers": {
-        "app/account/bookings/[ref]/page": {
-          "moduleId": 144017,
-          "async": false,
-          "exportedName": "adminConfirmConsultation",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/account/bookings/[ref]/page": "rsc"
-      },
-      "exportedName": "adminConfirmConsultation",
-      "filename": "src/actions/consultations.ts"
-    },
-    "4024cfaa8d4dd1025fb279c1a7174aad2baf9f924f": {
-      "workers": {
-        "app/account/bookings/[ref]/page": {
-          "moduleId": 144017,
-          "async": false,
-          "exportedName": "getConsultationByBookingNumber",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/account/bookings/[ref]/page": "rsc"
-      },
-      "exportedName": "getConsultationByBookingNumber",
-      "filename": "src/actions/consultations.ts"
-    },
-    "406d70e0a1b27f28c36aff1674445e19bdf76f7ae5": {
-      "workers": {
-        "app/account/bookings/[ref]/page": {
-          "moduleId": 144017,
-          "async": false,
-          "exportedName": "adminCompleteConsultation",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/account/bookings/[ref]/page": "rsc"
-      },
-      "exportedName": "adminCompleteConsultation",
-      "filename": "src/actions/consultations.ts"
-    },
-    "4072180f4d8d75a081f362a2618e6235c52c3721c9": {
-      "workers": {
-        "app/account/bookings/[ref]/page": {
-          "moduleId": 144017,
-          "async": false,
-          "exportedName": "getConsultationSlotsTaken",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/account/bookings/[ref]/page": "rsc"
-      },
-      "exportedName": "getConsultationSlotsTaken",
-      "filename": "src/actions/consultations.ts"
-    },
-    "40bd936ec5d6eba9b5982dfa7258991b7b9bd406d9": {
+    "4020016cc7fc40906ffdc152a16add27113ff99c6a": {
       "workers": {
         "app/account/bookings/[ref]/page": {
           "moduleId": 144017,
@@ -120,22 +45,7 @@
       "exportedName": "adminProposeReschedule",
       "filename": "src/actions/consultations.ts"
     },
-    "40be8f56e4a840c5e548f050d811205adfd8d8a62d": {
-      "workers": {
-        "app/account/bookings/[ref]/page": {
-          "moduleId": 144017,
-          "async": false,
-          "exportedName": "confirmConsultationPayment",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/account/bookings/[ref]/page": "rsc"
-      },
-      "exportedName": "confirmConsultationPayment",
-      "filename": "src/actions/consultations.ts"
-    },
-    "40ef3c4458c20b5c6076df0dcf43554ebff3d8d6d8": {
+    "402e30ebdd8d40a61c0c4f9063fe976035fbf79fea": {
       "workers": {
         "app/account/bookings/[ref]/page": {
           "moduleId": 144017,
@@ -150,7 +60,97 @@
       "exportedName": "initializeConsultationPayment",
       "filename": "src/actions/consultations.ts"
     },
-    "60394039974822dfae7f123353abe0c2d499c1dc79": {
+    "402ea640e0cd042461e079a121a47a4a51e32e4d4d": {
+      "workers": {
+        "app/account/bookings/[ref]/page": {
+          "moduleId": 144017,
+          "async": false,
+          "exportedName": "confirmConsultationPayment",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/account/bookings/[ref]/page": "rsc"
+      },
+      "exportedName": "confirmConsultationPayment",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40382151b0fbca73615793d689d391cb61100926af": {
+      "workers": {
+        "app/account/bookings/[ref]/page": {
+          "moduleId": 144017,
+          "async": false,
+          "exportedName": "holdConsultationSlot",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/account/bookings/[ref]/page": "rsc"
+      },
+      "exportedName": "holdConsultationSlot",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40b6701d77fd94064f8f2b8194caba66f7a8560790": {
+      "workers": {
+        "app/account/bookings/[ref]/page": {
+          "moduleId": 144017,
+          "async": false,
+          "exportedName": "adminConfirmConsultation",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/account/bookings/[ref]/page": "rsc"
+      },
+      "exportedName": "adminConfirmConsultation",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40e1944e33543712da3b325bff615ce2e0edd07a57": {
+      "workers": {
+        "app/account/bookings/[ref]/page": {
+          "moduleId": 144017,
+          "async": false,
+          "exportedName": "getConsultationSlotsTaken",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/account/bookings/[ref]/page": "rsc"
+      },
+      "exportedName": "getConsultationSlotsTaken",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40e296b49fb1a07c302c4d4cbda6f88bc2bef65ed2": {
+      "workers": {
+        "app/account/bookings/[ref]/page": {
+          "moduleId": 144017,
+          "async": false,
+          "exportedName": "getConsultationByBookingNumber",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/account/bookings/[ref]/page": "rsc"
+      },
+      "exportedName": "getConsultationByBookingNumber",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40f401016f3b6f70b9aded739ad0d4ae045bdea6db": {
+      "workers": {
+        "app/account/bookings/[ref]/page": {
+          "moduleId": 144017,
+          "async": false,
+          "exportedName": "adminCompleteConsultation",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/account/bookings/[ref]/page": "rsc"
+      },
+      "exportedName": "adminCompleteConsultation",
+      "filename": "src/actions/consultations.ts"
+    },
+    "60a2731120989305c1eff9b32fafddd50dc5530272": {
       "workers": {
         "app/account/bookings/[ref]/page": {
           "moduleId": 144017,
@@ -165,7 +165,7 @@
       "exportedName": "submitRescheduleSuggestion",
       "filename": "src/actions/consultations.ts"
     },
-    "60ad18126fa00dfd89f092f35b904824beb69373c6": {
+    "60dc5ebfbaa1e2e41c7c07b36a54406e58a61e1908": {
       "workers": {
         "app/account/bookings/[ref]/page": {
           "moduleId": 144017,

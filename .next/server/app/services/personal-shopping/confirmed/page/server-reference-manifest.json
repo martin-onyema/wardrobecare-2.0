@@ -1,6 +1,6 @@
 {
   "node": {
-    "40a46cfe3dcd403483e2f6f9c4d4b769ea54da55c7": {
+    "40c27601a2e0fdac3bd2fad1ff32ac37842d50c392": {
       "workers": {
         "app/services/personal-shopping/confirmed/page": {
           "moduleId": 671648,
@@ -15,37 +15,7 @@
       "exportedName": "subscribeToNewsletter",
       "filename": "src/actions/store.ts"
     },
-    "4018a4aa46024619003b39ee0a6682c42f0c69b33b": {
-      "workers": {
-        "app/services/personal-shopping/confirmed/page": {
-          "moduleId": 671648,
-          "async": false,
-          "exportedName": "payForItems",
-          "filename": "src/actions/personal-shopping-customer.ts"
-        }
-      },
-      "layer": {
-        "app/services/personal-shopping/confirmed/page": "rsc"
-      },
-      "exportedName": "payForItems",
-      "filename": "src/actions/personal-shopping-customer.ts"
-    },
-    "40593f24cac9775fe134b78c78be133ee4262c8896": {
-      "workers": {
-        "app/services/personal-shopping/confirmed/page": {
-          "moduleId": 671648,
-          "async": false,
-          "exportedName": "getShortlistByToken",
-          "filename": "src/actions/personal-shopping-customer.ts"
-        }
-      },
-      "layer": {
-        "app/services/personal-shopping/confirmed/page": "rsc"
-      },
-      "exportedName": "getShortlistByToken",
-      "filename": "src/actions/personal-shopping-customer.ts"
-    },
-    "407cc736d5004c632f122d5086c1993f0595b83954": {
+    "401756048a7884d3c8c411de30fbd484e70d048507": {
       "workers": {
         "app/services/personal-shopping/confirmed/page": {
           "moduleId": 671648,
@@ -60,22 +30,22 @@
       "exportedName": "getPSAvailableSlots",
       "filename": "src/actions/personal-shopping-customer.ts"
     },
-    "4082d1130336e6f978580bca63cf120e432ce02257": {
+    "40544a180c386fd954d9022ab27ce0a89f8eb8c37f": {
       "workers": {
         "app/services/personal-shopping/confirmed/page": {
           "moduleId": 671648,
           "async": false,
-          "exportedName": "initializePSPayment",
+          "exportedName": "payForItems",
           "filename": "src/actions/personal-shopping-customer.ts"
         }
       },
       "layer": {
         "app/services/personal-shopping/confirmed/page": "rsc"
       },
-      "exportedName": "initializePSPayment",
+      "exportedName": "payForItems",
       "filename": "src/actions/personal-shopping-customer.ts"
     },
-    "408757b33e92124c315803477248ee0189c6b2249a": {
+    "4076ab26a068843cde751339e5054f9add8e10ac17": {
       "workers": {
         "app/services/personal-shopping/confirmed/page": {
           "moduleId": 671648,
@@ -90,7 +60,7 @@
       "exportedName": "confirmPSPayment",
       "filename": "src/actions/personal-shopping-customer.ts"
     },
-    "408b24ba31ac503627c2414b3260e2749c196f3dca": {
+    "407954066a914f641d93d6103666e339a4bc0248ab": {
       "workers": {
         "app/services/personal-shopping/confirmed/page": {
           "moduleId": 671648,
@@ -105,7 +75,37 @@
       "exportedName": "createPersonalShoppingRequest",
       "filename": "src/actions/personal-shopping-customer.ts"
     },
-    "60139e20e5362c3b702ffe0f3951c07db962317d01": {
+    "4081f9722090eac96089e0762b7396333574f2142e": {
+      "workers": {
+        "app/services/personal-shopping/confirmed/page": {
+          "moduleId": 671648,
+          "async": false,
+          "exportedName": "initializePSPayment",
+          "filename": "src/actions/personal-shopping-customer.ts"
+        }
+      },
+      "layer": {
+        "app/services/personal-shopping/confirmed/page": "rsc"
+      },
+      "exportedName": "initializePSPayment",
+      "filename": "src/actions/personal-shopping-customer.ts"
+    },
+    "4099a00629c3afedef1b2f70e319a53fcf2cc968b1": {
+      "workers": {
+        "app/services/personal-shopping/confirmed/page": {
+          "moduleId": 671648,
+          "async": false,
+          "exportedName": "getShortlistByToken",
+          "filename": "src/actions/personal-shopping-customer.ts"
+        }
+      },
+      "layer": {
+        "app/services/personal-shopping/confirmed/page": "rsc"
+      },
+      "exportedName": "getShortlistByToken",
+      "filename": "src/actions/personal-shopping-customer.ts"
+    },
+    "60ae3dfb43e257c378cbe8de627e8d4fa333339c38": {
       "workers": {
         "app/services/personal-shopping/confirmed/page": {
           "moduleId": 671648,
@@ -120,7 +120,7 @@
       "exportedName": "requestMoreItems",
       "filename": "src/actions/personal-shopping-customer.ts"
     },
-    "785b1c733417b98f1880c176905a68fc628833d60d": {
+    "781289886ea1738bdf846e475cbe847d77348bbf79": {
       "workers": {
         "app/services/personal-shopping/confirmed/page": {
           "moduleId": 671648,
