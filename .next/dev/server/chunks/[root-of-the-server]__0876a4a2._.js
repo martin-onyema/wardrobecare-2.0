@@ -725,7 +725,7 @@ async function buildDuplicateMaps() {
         const n = normalize(v);
         if (n) m[n] = (m[n] || 0) + 1;
     };
-    // Categories
+    // Categories — uses pre-existing columns only (safe before/after migration)
     const cats = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].category.findMany({
         select: {
             seoTitle: true,
@@ -737,7 +737,7 @@ async function buildDuplicateMaps() {
         bump(titles, c.seoTitle || c.name);
         bump(descs, c.seoDescription || '');
     }
-    // Products
+    // Products — uses pre-existing columns only
     const products = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].product.findMany({
         select: {
             seoTitle: true,
@@ -754,17 +754,21 @@ async function buildDuplicateMaps() {
         bump(titles, `${s.name} — Wardrobecare Services`);
         bump(descs, s.tagline);
     }
-    // Static page overrides
-    const overrides = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].seoOverride.findMany({
-        select: {
-            seoTitle: true,
-            seoDescription: true,
-            name: true
+    // Static page overrides — SeoOverride table may not exist if migration not applied yet
+    try {
+        const overrides = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].seoOverride.findMany({
+            select: {
+                seoTitle: true,
+                seoDescription: true,
+                name: true
+            }
+        });
+        for (const o of overrides){
+            bump(titles, o.seoTitle || o.name);
+            bump(descs, o.seoDescription || '');
         }
-    });
-    for (const o of overrides){
-        bump(titles, o.seoTitle || o.name);
-        bump(descs, o.seoDescription || '');
+    } catch (e) {
+    // SeoOverride table missing — skip silently
     }
     return {
         titles,
@@ -1015,18 +1019,20 @@ async function getAllTemplates() {
     });
 }
 async function getSeoOverride(route) {
-    return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].seoOverride.findUnique({
-        where: {
-            route
-        }
-    });
+    try {
+        return await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].seoOverride.findUnique({
+            where: {
+                route
+            }
+        });
+    } catch (e) {
+        // SeoOverride table doesn't exist yet (migration not applied) — treat as no override
+        console.warn('[seo] getSeoOverride failed (table may not exist):', e?.message?.slice(0, 100));
+        return null;
+    }
 }
 async function getOrCreateSeoOverride(route, contentType, name) {
-    const existing = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].seoOverride.findUnique({
-        where: {
-            route
-        }
-    });
+    const existing = await getSeoOverride(route);
     if (existing) return existing;
     return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].seoOverride.create({
         data: {
@@ -1055,57 +1061,107 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$seo$2e$ts__$5b
 const dynamic = 'force-dynamic';
 async function sitemap() {
     const baseUrl = 'https://wardrobecare.com.ng';
-    // Pull all overrides once
-    const overrides = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].seoOverride.findMany({
-        select: {
-            route: true,
-            noindex: true,
-            inSitemap: true,
-            contentType: true
-        }
-    });
-    const overrideMap = new Map(overrides.map((o)=>[
-            o.route,
-            o
-        ]));
+    // ── SeoOverride table — may not exist if migration hasn't been applied ──
+    let overrideMap = new Map();
+    try {
+        const overrides = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].seoOverride.findMany({
+            select: {
+                route: true,
+                noindex: true,
+                inSitemap: true,
+                contentType: true
+            }
+        });
+        overrideMap = new Map(overrides.map((o)=>[
+                o.route,
+                o
+            ]));
+    } catch (e) {
+        // SeoOverride table doesn't exist yet — treat as empty
+        console.warn('[sitemap] SeoOverride table not available, using defaults:', e?.message?.slice(0, 100));
+    }
     // ── Products ──
-    const products = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].product.findMany({
-        where: {
-            published: true,
-            status: 'ACTIVE',
-            inSitemap: true,
-            noindex: false
-        },
-        select: {
-            slug: true,
-            updatedAt: true
-        }
-    });
-    const productPages = products.map((p)=>({
-            url: `${baseUrl}/product/${p.slug}`,
-            lastModified: p.updatedAt,
-            changeFrequency: 'monthly',
-            priority: 0.8
-        }));
-    // ── Categories (top-level + sub) ──
-    const categories = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].category.findMany({
-        where: {
-            active: true,
-            inSitemap: true,
-            noindex: false
-        },
-        select: {
-            slug: true,
-            updatedAt: true,
-            parentId: true
-        }
-    });
-    const categoryPages = categories.map((c)=>({
-            url: `${baseUrl}/shop?category=${c.slug}`,
-            lastModified: c.updatedAt,
-            changeFrequency: 'weekly',
-            priority: c.parentId ? 0.5 : 0.6
-        }));
+    let productPages = [];
+    try {
+        // Try with the new SEO columns
+        const products = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].product.findMany({
+            where: {
+                published: true,
+                status: 'ACTIVE',
+                inSitemap: true,
+                noindex: false
+            },
+            select: {
+                slug: true,
+                updatedAt: true
+            }
+        });
+        productPages = products.map((p)=>({
+                url: `${baseUrl}/product/${p.slug}`,
+                lastModified: p.updatedAt,
+                changeFrequency: 'monthly',
+                priority: 0.8
+            }));
+    } catch (e) {
+        // Migration not applied yet — fall back to the pre-SEO-Manager query
+        console.warn('[sitemap] falling back to pre-SEO-Manager product query:', e?.message?.slice(0, 100));
+        const products = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].product.findMany({
+            where: {
+                published: true,
+                status: 'ACTIVE'
+            },
+            select: {
+                slug: true,
+                updatedAt: true
+            }
+        });
+        productPages = products.map((p)=>({
+                url: `${baseUrl}/product/${p.slug}`,
+                lastModified: p.updatedAt,
+                changeFrequency: 'monthly',
+                priority: 0.8
+            }));
+    }
+    // ── Categories ──
+    let categoryPages = [];
+    try {
+        const categories = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].category.findMany({
+            where: {
+                active: true,
+                inSitemap: true,
+                noindex: false
+            },
+            select: {
+                slug: true,
+                updatedAt: true,
+                parentId: true
+            }
+        });
+        categoryPages = categories.map((c)=>({
+                url: `${baseUrl}/shop?category=${c.slug}`,
+                lastModified: c.updatedAt,
+                changeFrequency: 'weekly',
+                priority: c.parentId ? 0.5 : 0.6
+            }));
+    } catch (e) {
+        console.warn('[sitemap] falling back to pre-SEO-Manager category query:', e?.message?.slice(0, 100));
+        const categories = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].category.findMany({
+            where: {
+                active: true
+            },
+            select: {
+                slug: true,
+                updatedAt: true,
+                parentId: true
+            }
+        });
+        categoryPages = categories.map((c)=>({
+                url: `${baseUrl}/shop?category=${c.slug}`,
+                lastModified: c.updatedAt,
+                changeFrequency: 'weekly',
+                priority: c.parentId ? 0.5 : 0.6
+            }));
+    }
     // ── Services hub + individual services ──
     const serviceHubOverride = overrideMap.get('/services');
     const serviceHubIncluded = !serviceHubOverride || !serviceHubOverride.noindex && serviceHubOverride.inSitemap;
@@ -1135,7 +1191,6 @@ async function sitemap() {
         ];
     });
     // ── Static pages — pulled from the registry in src/lib/seo.ts ──
-    // Skip /shop (covered by category pages) and the homepage (covered separately)
     const staticPageEntries = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$seo$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["STATIC_PAGES"].flatMap((p)=>{
         if (p.route === '/') {
             return [

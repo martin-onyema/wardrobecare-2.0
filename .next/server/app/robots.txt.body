@@ -1,3 +1,43 @@
+User-Agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /api
+Disallow: /cart
+Disallow: /checkout
+Disallow: /track-order
+Disallow: /gift-card/checkout
+
+User-Agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /api
+Disallow: /cart
+Disallow: /checkout
+Disallow: /track-order
+Disallow: /gift-card/checkout
+
+User-Agent: Twitterbot
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /api
+Disallow: /cart
+Disallow: /checkout
+Disallow: /track-order
+Disallow: /gift-card/checkout
+
+User-Agent: facebookexternalhit
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /api
+Disallow: /cart
+Disallow: /checkout
+Disallow: /track-order
+Disallow: /gift-card/checkout
+
 User-Agent: *
 Allow: /
 Disallow: /admin

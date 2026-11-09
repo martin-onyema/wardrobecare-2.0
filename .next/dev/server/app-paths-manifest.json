@@ -1,1 +1,5 @@
-{}
+{
+  "/robots.txt/route": "app/robots.txt/route.js",
+  "/services/[slug]/page": "app/services/[slug]/page.js",
+  "/sitemap.xml/route": "app/sitemap.xml/route.js"
+}

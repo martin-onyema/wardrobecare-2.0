@@ -1,6 +1,6 @@
 {
   "node": {
-    "60d1d107d64d2ca8a15b023b1af6de815ecdad9db6": {
+    "60befb57d1285b104a416cacbe43c116ead24bca8b": {
       "workers": {
         "app/admin/orders/[id]/page": {
           "moduleId": 869284,

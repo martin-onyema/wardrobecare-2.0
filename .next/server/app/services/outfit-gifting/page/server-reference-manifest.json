@@ -1,6 +1,6 @@
 {
   "node": {
-    "40a9dc0ed98d206077613f648cb388cee793d8b3fb": {
+    "4020bde95b73e6a99ea172ff5f447caa0b075235ee": {
       "workers": {
         "app/services/outfit-gifting/page": {
           "moduleId": 826183,
@@ -15,7 +15,7 @@
       "exportedName": "subscribeToNewsletter",
       "filename": "src/actions/store.ts"
     },
-    "4006a72d2d70cdddff43d56567aad8a869c02ef230": {
+    "40323609b4a3ed529474d97cf63659bae2cd014c51": {
       "workers": {
         "app/services/outfit-gifting/page": {
           "moduleId": 826183,

@@ -1,6 +1,6 @@
 {
   "node": {
-    "40b265ba55309e23ed26b5a506daa6855faafddd03": {
+    "401f213eba2b32a5d7fc1388fe005ba080f2c0b8c4": {
       "workers": {
         "app/admin/categories/page": {
           "moduleId": 423176,
@@ -15,7 +15,7 @@
       "exportedName": "adminDeleteCategory",
       "filename": "src/actions/admin.ts"
     },
-    "608d0ed57b4f500adb6b18f6b27054e0595ea0850f": {
+    "60f860db32d6c2285c6bdb01f494f3fd16ce814550": {
       "workers": {
         "app/admin/categories/page": {
           "moduleId": 423176,

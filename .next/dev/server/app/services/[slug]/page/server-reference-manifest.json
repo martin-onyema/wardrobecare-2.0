@@ -1,0 +1,35 @@
+{
+  "node": {
+    "4052e0a847736e31758f31cb9192068fdb64d99d7b": {
+      "workers": {
+        "app/services/[slug]/page": {
+          "moduleId": "[project]/.next-internal/server/app/services/[slug]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/store.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/services/[slug]/page": "action-browser"
+      },
+      "exportedName": "subscribeToNewsletter",
+      "filename": "src/actions/store.ts"
+    },
+    "40e2ccbcfe74340ebd8505024a39a06428d75db0df": {
+      "workers": {
+        "app/services/[slug]/page": {
+          "moduleId": "[project]/.next-internal/server/app/services/[slug]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/store.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "submitServiceEnquiry",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/services/[slug]/page": "action-browser"
+      },
+      "exportedName": "submitServiceEnquiry",
+      "filename": "src/actions/store.ts"
+    }
+  },
+  "edge": {}
+}
