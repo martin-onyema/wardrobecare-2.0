@@ -1,6 +1,6 @@
 {
   "node": {
-    "70d187992fbbb7f171eb0715cddd73adf7c2c98793": {
+    "70be5387d137efb392a92657aaddec961d2f2c5345": {
       "workers": {
         "app/admin/services/consultations/calendar/page": {
           "moduleId": 459900,
@@ -15,7 +15,7 @@
       "exportedName": "adminBlockSlot",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "60d4507b7de5b5091a21b83c72e9dfa88ce8b45824": {
+    "6066fbc1c103512fa01c5fc16cfdaad52494064653": {
       "workers": {
         "app/admin/services/consultations/calendar/page": {
           "moduleId": 459900,
@@ -30,7 +30,7 @@
       "exportedName": "adminUnblockSlot",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "400ec532280248534007d7e04aee106461b59ba4f9": {
+    "401ebf7850fdb4f055a69a7b959104fa82e17ff629": {
       "workers": {
         "app/admin/services/consultations/calendar/page": {
           "moduleId": 459900,

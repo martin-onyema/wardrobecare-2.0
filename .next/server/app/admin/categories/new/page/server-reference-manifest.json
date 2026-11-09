@@ -1,6 +1,6 @@
 {
   "node": {
-    "40c5e7e2be98747bb582ca86502b27564692a0e17a": {
+    "40bdf780775c7bb334338a11bbb6a27ad85703b7ec": {
       "workers": {
         "app/admin/categories/new/page": {
           "moduleId": 655165,
@@ -15,7 +15,7 @@
       "exportedName": "adminCreateCategory",
       "filename": "src/actions/admin.ts"
     },
-    "60106dea2ed1cea538ed6479d6d2d4db5380258d2b": {
+    "608dc9bdef4ebb4e36a7a934633ed340921fbc3709": {
       "workers": {
         "app/admin/categories/new/page": {
           "moduleId": 655165,
@@ -30,7 +30,7 @@
       "exportedName": "adminUpdateCategory",
       "filename": "src/actions/admin.ts"
     },
-    "409a0996468b43eec8aa1c17d39a52c7f8d6518311": {
+    "40cc5967eba666bbae52e8681822edf7f4ec7b7544": {
       "workers": {
         "app/admin/categories/new/page": {
           "moduleId": 655165,

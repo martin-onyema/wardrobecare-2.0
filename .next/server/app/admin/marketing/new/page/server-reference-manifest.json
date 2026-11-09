@@ -1,6 +1,6 @@
 {
   "node": {
-    "4052fcaad2bfca69c2d6396fc0b8365e233445b7f3": {
+    "40648919806ce5176a01e19af441895289cf61ff4d": {
       "workers": {
         "app/admin/marketing/new/page": {
           "moduleId": 452131,
@@ -15,7 +15,7 @@
       "exportedName": "adminCreateCampaign",
       "filename": "src/actions/admin.ts"
     },
-    "6005934ebd03cab4b205f150f87b7de08daf0c3ee9": {
+    "602e62885dd0c20151662006e602eab2cde101d827": {
       "workers": {
         "app/admin/marketing/new/page": {
           "moduleId": 452131,
@@ -30,7 +30,7 @@
       "exportedName": "adminUpdateCampaign",
       "filename": "src/actions/admin.ts"
     },
-    "408043c68d94150879ecca348f2c2c9a13c5915c57": {
+    "40519688daee0f0bfb24d37e3112b5703105acf97c": {
       "workers": {
         "app/admin/marketing/new/page": {
           "moduleId": 452131,

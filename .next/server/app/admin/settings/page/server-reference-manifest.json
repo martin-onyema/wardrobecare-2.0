@@ -1,6 +1,6 @@
 {
   "node": {
-    "409221d0b62211c8eefb1b3a10646d9d35da44747a": {
+    "4090388dcee37177bff689639006582ed8e0d281dc": {
       "workers": {
         "app/admin/settings/page": {
           "moduleId": 595874,
@@ -15,7 +15,7 @@
       "exportedName": "adminUpdateSettings",
       "filename": "src/actions/store.ts"
     },
-    "0020f0d8670c5b3c7d8ede0f5c00e212d08256e685": {
+    "00f7a610a0e86b6a3cd3794433c7776e06e51139ba": {
       "workers": {
         "app/admin/settings/page": {
           "moduleId": 595874,
@@ -30,7 +30,7 @@
       "exportedName": "adminMarkAllNotificationsRead",
       "filename": "src/actions/admin.ts"
     },
-    "4062c0f344ba3c5b081d8d5febb778af55b992738f": {
+    "4099f065c853ee65a7aeb8b1797b6bd5283de5aaa0": {
       "workers": {
         "app/admin/settings/page": {
           "moduleId": 595874,
@@ -45,7 +45,7 @@
       "exportedName": "adminMarkNotificationRead",
       "filename": "src/actions/admin.ts"
     },
-    "4068210f091c39129cc5898d8b6b8d43756ca25658": {
+    "4018b2938bb97ec61e998cacf5c44744bb1c241fc4": {
       "workers": {
         "app/admin/settings/page": {
           "moduleId": 595874,
@@ -60,7 +60,7 @@
       "exportedName": "adminDeleteNotification",
       "filename": "src/actions/admin.ts"
     },
-    "40ce815849e797c66de88140ad89aefddb2541f7c4": {
+    "4018fceb266a5e13847278b084f9ba94454f45f07b": {
       "workers": {
         "app/admin/settings/page": {
           "moduleId": 595874,

@@ -1,6 +1,6 @@
 {
   "node": {
-    "407a7cddbaf1c9e957d56081c3accfab3b0ba38934": {
+    "40d1579848caad543841488f72842003d5c2fa2ff8": {
       "workers": {
         "app/admin/services/consultations/fees/page": {
           "moduleId": 93847,
@@ -15,7 +15,7 @@
       "exportedName": "adminSaveFees",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "407f8f35d7dab9daa3536fce82106591850313c41f": {
+    "40863ea78e60498d12f2ea32fdf4ebe4dbacce820a": {
       "workers": {
         "app/admin/services/consultations/fees/page": {
           "moduleId": 93847,
@@ -30,7 +30,7 @@
       "exportedName": "adminCreatePromoCode",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "40a73f938f0fe89c52977257bcaf6afd5ec363dbdd": {
+    "40155eb30c9c97322494adcfb96bdaa6fd7ddd9761": {
       "workers": {
         "app/admin/services/consultations/fees/page": {
           "moduleId": 93847,
@@ -45,7 +45,7 @@
       "exportedName": "adminTogglePromoCode",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "40a6f956caa70003e98e86b11427354ebe552d678f": {
+    "4071c18613155c793bb24eb7adbd698ab7b8a99826": {
       "workers": {
         "app/admin/services/consultations/fees/page": {
           "moduleId": 93847,
@@ -60,7 +60,7 @@
       "exportedName": "adminDeletePromoCode",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "40b8128f4b6dc0bc49dc50af0d34ae47432ef097ba": {
+    "4012fabf043d3e185072d20d5b900bac3a4235fd5b": {
       "workers": {
         "app/admin/services/consultations/fees/page": {
           "moduleId": 93847,
@@ -75,7 +75,7 @@
       "exportedName": "adminCreateDiscountRule",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "40f2ab2d301bc90e7e91414fe52218e61ce1211fdd": {
+    "408f02427bdcd076ab88aeab656f07cd6a654fdbfa": {
       "workers": {
         "app/admin/services/consultations/fees/page": {
           "moduleId": 93847,

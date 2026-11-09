@@ -1,6 +1,6 @@
 {
   "node": {
-    "40c27601a2e0fdac3bd2fad1ff32ac37842d50c392": {
+    "40c8fc17ec38c324f5ad627c479ef33b1bec4b4c4b": {
       "workers": {
         "app/services/wardrobe-consultation/confirmed/page": {
           "moduleId": 264408,
@@ -15,7 +15,7 @@
       "exportedName": "subscribeToNewsletter",
       "filename": "src/actions/store.ts"
     },
-    "4012ce1faf1a316d8beef827e812ba5d0432509822": {
+    "401e772a5826fe71fa6ac10d7555309102d859205f": {
       "workers": {
         "app/services/wardrobe-consultation/confirmed/page": {
           "moduleId": 264408,
@@ -30,112 +30,7 @@
       "exportedName": "adminManualReschedule",
       "filename": "src/actions/consultations.ts"
     },
-    "4020016cc7fc40906ffdc152a16add27113ff99c6a": {
-      "workers": {
-        "app/services/wardrobe-consultation/confirmed/page": {
-          "moduleId": 264408,
-          "async": false,
-          "exportedName": "adminProposeReschedule",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/services/wardrobe-consultation/confirmed/page": "rsc"
-      },
-      "exportedName": "adminProposeReschedule",
-      "filename": "src/actions/consultations.ts"
-    },
-    "402e30ebdd8d40a61c0c4f9063fe976035fbf79fea": {
-      "workers": {
-        "app/services/wardrobe-consultation/confirmed/page": {
-          "moduleId": 264408,
-          "async": false,
-          "exportedName": "initializeConsultationPayment",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/services/wardrobe-consultation/confirmed/page": "rsc"
-      },
-      "exportedName": "initializeConsultationPayment",
-      "filename": "src/actions/consultations.ts"
-    },
-    "402ea640e0cd042461e079a121a47a4a51e32e4d4d": {
-      "workers": {
-        "app/services/wardrobe-consultation/confirmed/page": {
-          "moduleId": 264408,
-          "async": false,
-          "exportedName": "confirmConsultationPayment",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/services/wardrobe-consultation/confirmed/page": "rsc"
-      },
-      "exportedName": "confirmConsultationPayment",
-      "filename": "src/actions/consultations.ts"
-    },
-    "40382151b0fbca73615793d689d391cb61100926af": {
-      "workers": {
-        "app/services/wardrobe-consultation/confirmed/page": {
-          "moduleId": 264408,
-          "async": false,
-          "exportedName": "holdConsultationSlot",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/services/wardrobe-consultation/confirmed/page": "rsc"
-      },
-      "exportedName": "holdConsultationSlot",
-      "filename": "src/actions/consultations.ts"
-    },
-    "40b6701d77fd94064f8f2b8194caba66f7a8560790": {
-      "workers": {
-        "app/services/wardrobe-consultation/confirmed/page": {
-          "moduleId": 264408,
-          "async": false,
-          "exportedName": "adminConfirmConsultation",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/services/wardrobe-consultation/confirmed/page": "rsc"
-      },
-      "exportedName": "adminConfirmConsultation",
-      "filename": "src/actions/consultations.ts"
-    },
-    "40e1944e33543712da3b325bff615ce2e0edd07a57": {
-      "workers": {
-        "app/services/wardrobe-consultation/confirmed/page": {
-          "moduleId": 264408,
-          "async": false,
-          "exportedName": "getConsultationSlotsTaken",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/services/wardrobe-consultation/confirmed/page": "rsc"
-      },
-      "exportedName": "getConsultationSlotsTaken",
-      "filename": "src/actions/consultations.ts"
-    },
-    "40e296b49fb1a07c302c4d4cbda6f88bc2bef65ed2": {
-      "workers": {
-        "app/services/wardrobe-consultation/confirmed/page": {
-          "moduleId": 264408,
-          "async": false,
-          "exportedName": "getConsultationByBookingNumber",
-          "filename": "src/actions/consultations.ts"
-        }
-      },
-      "layer": {
-        "app/services/wardrobe-consultation/confirmed/page": "rsc"
-      },
-      "exportedName": "getConsultationByBookingNumber",
-      "filename": "src/actions/consultations.ts"
-    },
-    "40f401016f3b6f70b9aded739ad0d4ae045bdea6db": {
+    "4038412cd764c38ad0ddec8db0f2d636d89b90d038": {
       "workers": {
         "app/services/wardrobe-consultation/confirmed/page": {
           "moduleId": 264408,
@@ -150,7 +45,112 @@
       "exportedName": "adminCompleteConsultation",
       "filename": "src/actions/consultations.ts"
     },
-    "60a2731120989305c1eff9b32fafddd50dc5530272": {
+    "405b28463b234ac5c76bfa5920dfa43ddbb8bd9006": {
+      "workers": {
+        "app/services/wardrobe-consultation/confirmed/page": {
+          "moduleId": 264408,
+          "async": false,
+          "exportedName": "getConsultationSlotsTaken",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/confirmed/page": "rsc"
+      },
+      "exportedName": "getConsultationSlotsTaken",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40606c720a84dcfc5002d816e20b46f5df067006ae": {
+      "workers": {
+        "app/services/wardrobe-consultation/confirmed/page": {
+          "moduleId": 264408,
+          "async": false,
+          "exportedName": "initializeConsultationPayment",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/confirmed/page": "rsc"
+      },
+      "exportedName": "initializeConsultationPayment",
+      "filename": "src/actions/consultations.ts"
+    },
+    "406bd69decf16cb81609d1aa2898b8f2696ed5eb3e": {
+      "workers": {
+        "app/services/wardrobe-consultation/confirmed/page": {
+          "moduleId": 264408,
+          "async": false,
+          "exportedName": "getConsultationByBookingNumber",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/confirmed/page": "rsc"
+      },
+      "exportedName": "getConsultationByBookingNumber",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40775b5cdd3e906cb20262b4270b85e381cd3c1825": {
+      "workers": {
+        "app/services/wardrobe-consultation/confirmed/page": {
+          "moduleId": 264408,
+          "async": false,
+          "exportedName": "adminConfirmConsultation",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/confirmed/page": "rsc"
+      },
+      "exportedName": "adminConfirmConsultation",
+      "filename": "src/actions/consultations.ts"
+    },
+    "4096ce210acaac0cbbda48da818249a40be8606396": {
+      "workers": {
+        "app/services/wardrobe-consultation/confirmed/page": {
+          "moduleId": 264408,
+          "async": false,
+          "exportedName": "confirmConsultationPayment",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/confirmed/page": "rsc"
+      },
+      "exportedName": "confirmConsultationPayment",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40bfebf2ab02cfccee72d7affcd68cde3dcaec233c": {
+      "workers": {
+        "app/services/wardrobe-consultation/confirmed/page": {
+          "moduleId": 264408,
+          "async": false,
+          "exportedName": "adminProposeReschedule",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/confirmed/page": "rsc"
+      },
+      "exportedName": "adminProposeReschedule",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40dbd02ff9b760f4202f04cbe5a6f11f90f6765ae2": {
+      "workers": {
+        "app/services/wardrobe-consultation/confirmed/page": {
+          "moduleId": 264408,
+          "async": false,
+          "exportedName": "holdConsultationSlot",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/confirmed/page": "rsc"
+      },
+      "exportedName": "holdConsultationSlot",
+      "filename": "src/actions/consultations.ts"
+    },
+    "602bfdffd64b6dfcae5a700e4aef801553f13c2e5f": {
       "workers": {
         "app/services/wardrobe-consultation/confirmed/page": {
           "moduleId": 264408,
@@ -165,7 +165,7 @@
       "exportedName": "submitRescheduleSuggestion",
       "filename": "src/actions/consultations.ts"
     },
-    "60dc5ebfbaa1e2e41c7c07b36a54406e58a61e1908": {
+    "60802f0c370162aa30c66a68a92ccf2ce2f9444fa5": {
       "workers": {
         "app/services/wardrobe-consultation/confirmed/page": {
           "moduleId": 264408,

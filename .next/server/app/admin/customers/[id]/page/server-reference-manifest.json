@@ -1,6 +1,6 @@
 {
   "node": {
-    "70293e62cbefc76ad17b8f3f984f9fb5b94a06c8c1": {
+    "7065de5efa38293a3cab1d928a891b7ae667bf8717": {
       "workers": {
         "app/admin/customers/[id]/page": {
           "moduleId": 844147,
@@ -15,7 +15,7 @@
       "exportedName": "adminCreateCustomerNote",
       "filename": "src/actions/admin.ts"
     },
-    "40863b0cdb64e495374bd994b3c0556982bf2a4ac4": {
+    "40db9e93abca494762b13f201b4f71a179f7bc85ee": {
       "workers": {
         "app/admin/customers/[id]/page": {
           "moduleId": 844147,

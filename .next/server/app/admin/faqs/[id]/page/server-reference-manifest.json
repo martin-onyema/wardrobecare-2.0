@@ -1,6 +1,6 @@
 {
   "node": {
-    "40722e2ae8311b5c7caa01320e2474bf56de2f18c1": {
+    "4006c14c2d0d4549cdb2f4a3ac39745538c21f5ce7": {
       "workers": {
         "app/admin/faqs/[id]/page": {
           "moduleId": 318133,
@@ -15,7 +15,7 @@
       "exportedName": "adminCreateFaq",
       "filename": "src/actions/admin.ts"
     },
-    "6098bb876324bcd1b228ed415525d129922b3ad75f": {
+    "602c38bd472e88cbb5c7e7dfc8cb576d981aa62efa": {
       "workers": {
         "app/admin/faqs/[id]/page": {
           "moduleId": 318133,
@@ -30,7 +30,7 @@
       "exportedName": "adminUpdateFaq",
       "filename": "src/actions/admin.ts"
     },
-    "40fd8c34ea1c0079d3397a5655f73a2134def60cf7": {
+    "409ea8ba796e0c1b69f1d722ae0f3941d4a238791f": {
       "workers": {
         "app/admin/faqs/[id]/page": {
           "moduleId": 318133,
