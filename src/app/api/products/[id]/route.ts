@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { PRODUCT_SELECT_BASE, CATEGORY_SELECT_BASE } from '@/lib/queries'
 
 export async function GET(
   _req: NextRequest,
@@ -8,10 +9,11 @@ export async function GET(
   const { id } = await params
   const product = await db.product.findUnique({
     where: { id },
-    include: {
-      images: { orderBy: { position: 'asc' } },
+    select: {
+      ...PRODUCT_SELECT_BASE,
+      images: { orderBy: { position: 'asc' }, select: { id: true, url: true, altText: true, position: true, productId: true } },
       variants: true,
-      category: true,
+      category: { select: CATEGORY_SELECT_BASE },
     },
   })
   if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })

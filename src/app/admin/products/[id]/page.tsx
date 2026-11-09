@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { requireAdmin } from '@/lib/session'
 import { getMyPermissionCodes } from '@/lib/permissions'
 import { db } from '@/lib/db'
-import { getAllCategories } from '@/lib/queries'
+import { getAllCategories, PRODUCT_SELECT_BASE, CATEGORY_SELECT_WITH_PARENT } from '@/lib/queries'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { ProductForm } from '@/components/admin/product-form'
 
@@ -24,10 +24,11 @@ export default async function EditProductPage({
   const [product, categories] = await Promise.all([
     db.product.findUnique({
       where: { id },
-      include: {
-        images: { orderBy: { position: 'asc' } },
+      select: {
+        ...PRODUCT_SELECT_BASE,
+        images: { orderBy: { position: 'asc' }, select: { id: true, url: true, altText: true, position: true, productId: true } },
         variants: { orderBy: { size: 'asc' } },
-        category: { include: { parent: true } },
+        category: { select: CATEGORY_SELECT_WITH_PARENT },
       },
     }),
     getAllCategories(),

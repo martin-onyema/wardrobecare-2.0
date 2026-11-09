@@ -8,6 +8,9 @@ import { requireStaffWithPermission } from '@/lib/permissions'
 import { auditLog, diffChangedFields, describeChanges } from '@/lib/audit'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
+// Resilient Prisma select constants — list only pre-existing columns so
+// queries work whether or not the SEO Manager migration has been applied.
+import { PRODUCT_SELECT_BASE, CATEGORY_SELECT_BASE } from '@/lib/queries'
 import { headers } from 'next/headers'
 import { rateLimit, clientIpFromHeaders } from '@/lib/rate-limit'
 import {
@@ -35,10 +38,11 @@ export async function getCartLinesWithProducts(lines: CartLineInput[]) {
   if (!lines.length) return []
   const products = await db.product.findMany({
     where: { id: { in: lines.map((l) => l.productId) } },
-    include: {
-      images: { orderBy: { position: 'asc' }, take: 1 },
+    select: {
+      ...PRODUCT_SELECT_BASE,
+      images: { orderBy: { position: 'asc' }, take: 1, select: { id: true, url: true, altText: true, position: true, productId: true } },
       variants: true,
-      category: true,
+      category: { select: CATEGORY_SELECT_BASE },
     },
   })
   return lines
@@ -151,7 +155,12 @@ export async function createOrder(formData: FormData | Record<string, any>): Pro
   // Fetch products server-side to recompute totals — never trust client prices
   const products = await db.product.findMany({
     where: { id: { in: data.lines.map((l) => l.productId) } },
-    include: { variants: true, category: true, images: { take: 1, orderBy: { position: 'asc' } } },
+    select: {
+      ...PRODUCT_SELECT_BASE,
+      variants: true,
+      category: { select: CATEGORY_SELECT_BASE },
+      images: { take: 1, orderBy: { position: 'asc' }, select: { id: true, url: true, altText: true, position: true, productId: true } },
+    },
   })
 
   let subtotal = 0

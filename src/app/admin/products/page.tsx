@@ -4,6 +4,7 @@ import { Plus, Search } from 'lucide-react'
 import { requireAdmin } from '@/lib/session'
 import { getMyPermissionCodes } from '@/lib/permissions'
 import { db } from '@/lib/db'
+import { PRODUCT_SELECT_BASE, CATEGORY_SELECT_WITH_PARENT, CATEGORY_SELECT_BASE } from '@/lib/queries'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -66,10 +67,11 @@ export default async function AdminProductsPage({
       orderBy: { createdAt: 'desc' },
       skip,
       take: PAGE_SIZE,
-      include: {
-        images: { orderBy: { position: 'asc' }, take: 1 },
+      select: {
+        ...PRODUCT_SELECT_BASE,
+        images: { orderBy: { position: 'asc' }, take: 1, select: { id: true, url: true, altText: true, position: true, productId: true } },
         variants: { select: { stock: true, lowStockThreshold: true } },
-        category: { include: { parent: true } },
+        category: { select: CATEGORY_SELECT_WITH_PARENT },
       },
     }),
     db.product.count({ where }),
@@ -78,7 +80,10 @@ export default async function AdminProductsPage({
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
   const categories = await db.category.findMany({
     where: { parentId: null },
-    include: { children: { select: { id: true, name: true } } },
+    select: {
+      ...CATEGORY_SELECT_BASE,
+      children: { select: { id: true, name: true } },
+    },
     orderBy: { name: 'asc' },
   })
 

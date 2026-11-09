@@ -15,8 +15,11 @@ import { Prisma } from '@prisma/client'
  * `SELECT * FROM Category` which fails on a DB that hasn't had the SEO
  * migration applied. With explicit `select`, Prisma only fetches the
  * columns listed here.
+ *
+ * Exported so other files (e.g. src/actions/store.ts) can reuse the same
+ * safe column list.
  */
-const CATEGORY_SELECT_BASE = {
+export const CATEGORY_SELECT_BASE = {
   id: true,
   name: true,
   slug: true,
@@ -29,17 +32,20 @@ const CATEGORY_SELECT_BASE = {
   seoTitle: true,
   seoDescription: true,
   seoKeywords: true,
+  createdAt: true,
+  updatedAt: true,
 } as const
 
-const CATEGORY_SELECT_WITH_PARENT = {
+export const CATEGORY_SELECT_WITH_PARENT = {
   ...CATEGORY_SELECT_BASE,
   parent: { select: { name: true } },
 } as const
 
 /**
  * Pre-existing Product columns only — same rationale as above.
+ * Exported for reuse in src/actions/store.ts and other files.
  */
-const PRODUCT_SELECT_BASE = {
+export const PRODUCT_SELECT_BASE = {
   id: true,
   name: true,
   slug: true,
@@ -64,6 +70,8 @@ const PRODUCT_SELECT_BASE = {
   canonicalUrl: true,
   ogImage: true,
   status: true,
+  createdAt: true,
+  updatedAt: true,
 } as const
 
 export type ProductWithRelations = Prisma.ProductGetPayload<{
@@ -78,21 +86,32 @@ export async function getCategories() {
   return db.category.findMany({
     where: { parentId: null },
     orderBy: { order: 'asc' },
-    include: { children: { orderBy: { name: 'asc' } } },
+    select: {
+      ...CATEGORY_SELECT_BASE,
+      children: { select: CATEGORY_SELECT_BASE, orderBy: { name: 'asc' } },
+    },
   })
 }
 
 export async function getAllCategories() {
   return db.category.findMany({
     orderBy: { name: 'asc' },
-    include: { parent: true, children: { orderBy: { name: 'asc' } } },
+    select: {
+      ...CATEGORY_SELECT_BASE,
+      parent: { select: { name: true } },
+      children: { select: CATEGORY_SELECT_BASE, orderBy: { name: 'asc' } },
+    },
   })
 }
 
 export async function getCategoryBySlug(slug: string) {
   return db.category.findUnique({
     where: { slug },
-    include: { parent: true, children: true },
+    select: {
+      ...CATEGORY_SELECT_BASE,
+      parent: { select: { name: true } },
+      children: { select: CATEGORY_SELECT_BASE },
+    },
   })
 }
 
@@ -221,7 +240,7 @@ export async function getProducts(params: {
   if (category) {
     const cat = await db.category.findUnique({
       where: { slug: category },
-      include: { children: true },
+      select: { ...CATEGORY_SELECT_BASE, children: { select: CATEGORY_SELECT_BASE } },
     })
     if (cat) {
       const catIds = [cat.id, ...cat.children.map((c) => c.id)]
@@ -270,10 +289,11 @@ export async function getProducts(params: {
     where,
     orderBy,
     take: limit,
-    include: {
-      images: { orderBy: { position: 'asc' } },
+    select: {
+      ...PRODUCT_SELECT_BASE,
+      images: { orderBy: { position: 'asc' }, select: { id: true, url: true, altText: true, position: true, productId: true } },
       variants: true,
-      category: { include: { parent: true } },
+      category: { select: CATEGORY_SELECT_WITH_PARENT },
     },
   })
 }
@@ -281,10 +301,11 @@ export async function getProducts(params: {
 export async function getProductBySlug(slug: string) {
   return db.product.findUnique({
     where: { slug },
-    include: {
-      images: { orderBy: { position: 'asc' } },
+    select: {
+      ...PRODUCT_SELECT_BASE,
+      images: { orderBy: { position: 'asc' }, select: { id: true, url: true, altText: true, position: true, productId: true } },
       variants: true,
-      category: { include: { parent: true } },
+      category: { select: CATEGORY_SELECT_WITH_PARENT },
       brand: true,
       reviews: { where: { published: true }, orderBy: { createdAt: 'desc' } },
     },
@@ -309,10 +330,11 @@ export async function getFeaturedProducts(limit = 8) {
     },
     orderBy: { createdAt: 'desc' },
     take: limit,
-    include: {
-      images: { orderBy: { position: 'asc' }, take: 2 },
+    select: {
+      ...PRODUCT_SELECT_BASE,
+      images: { orderBy: { position: 'asc' }, take: 2, select: { id: true, url: true, altText: true, position: true, productId: true } },
       variants: true,
-      category: true,
+      category: { select: CATEGORY_SELECT_BASE },
     },
   })
 }
@@ -333,10 +355,11 @@ export async function getNewArrivals(limit = 12) {
     },
     orderBy: { createdAt: 'desc' },
     take: limit,
-    include: {
-      images: { orderBy: { position: 'asc' }, take: 2 },
+    select: {
+      ...PRODUCT_SELECT_BASE,
+      images: { orderBy: { position: 'asc' }, take: 2, select: { id: true, url: true, altText: true, position: true, productId: true } },
       variants: true,
-      category: true,
+      category: { select: CATEGORY_SELECT_BASE },
     },
   })
 }
@@ -351,10 +374,11 @@ export async function getRelatedProducts(productId: string, categoryId: string, 
     },
     orderBy: { createdAt: 'desc' },
     take: limit,
-    include: {
-      images: { orderBy: { position: 'asc' }, take: 2 },
+    select: {
+      ...PRODUCT_SELECT_BASE,
+      images: { orderBy: { position: 'asc' }, take: 2, select: { id: true, url: true, altText: true, position: true, productId: true } },
       variants: true,
-      category: true,
+      category: { select: CATEGORY_SELECT_BASE },
     },
   })
 }
@@ -402,8 +426,9 @@ export async function getCartWithProducts(lines: { productId: string; variantId?
   if (!lines.length) return []
   const products = await db.product.findMany({
     where: { id: { in: lines.map((l) => l.productId) } },
-    include: {
-      images: { orderBy: { position: 'asc' }, take: 1 },
+    select: {
+      ...PRODUCT_SELECT_BASE,
+      images: { orderBy: { position: 'asc' }, take: 1, select: { id: true, url: true, altText: true, position: true, productId: true } },
       variants: true,
     },
   })
