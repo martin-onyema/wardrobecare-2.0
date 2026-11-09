@@ -497,6 +497,9 @@ model Order {
   // WhatsApp
   whatsappSentAt  DateTime?
 
+  // SMS log — every Termii send attempt for this order
+  smsLogs         SmsLog[]
+
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
 
@@ -1841,4 +1844,40 @@ model PSFulfilment {
   exchangeUntil48 DateTime?
   exchangeUntil24 DateTime?
   createdAt       DateTime @default(now())
+}
+
+// ============================================================
+// SMS LOG — every Termii send attempt (success or failure)
+// ============================================================
+// The previous SMS sender logged to console only, so missed SMS
+// notifications were invisible to the store owner. This model
+// records each attempt: who triggered it, what payload was sent,
+// what Termii returned, and any error string. Surfaced in the
+// admin Notifications area for self-diagnosis.
+model SmsLog {
+  id           String   @id @default(cuid())
+  // What triggered the SMS (NEW_ORDER, PAYMENT_SUCCESS, MANUAL_TEST, etc.)
+  reason       String
+  // Optional link back to the order, if the SMS was order-related
+  orderId      String?
+  order        Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  // Recipient phone (normalised to international format, e.g. 2348012345678)
+  recipient    String
+  // The SMS body that was sent (truncated for storage)
+  message      String
+  // Send result
+  ok           Boolean  @default(false)
+  // Provider error code or short failure reason ("not-configured", "termii-401", etc.)
+  error        String?
+  // Raw provider response, if we got one (truncated)
+  providerResponse String?
+  // Resolved sender — env var name or "AdminSettings.supportPhone"
+  // so admins can see how the phone was chosen
+  recipientSource String? // "TERMII_TO" | "AdminSettings.supportPhone" | "AdminSettings.whatsappNumber" | "manual"
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([ok])
+  @@index([reason])
+  @@index([orderId])
 }

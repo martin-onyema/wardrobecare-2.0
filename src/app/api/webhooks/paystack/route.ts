@@ -230,6 +230,7 @@ async function handleChargeSuccess(data: any) {
           paymentMethod: payment.order.paymentMethod,
         },
         receiptSettings?.supportPhone,
+        payment.orderId,
       )
     } catch (smsErr: any) {
       console.error('[sms] webhook payment notification error:', smsErr?.message)

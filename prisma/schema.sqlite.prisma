@@ -495,6 +495,9 @@ model Order {
   // WhatsApp
   whatsappSentAt  DateTime?
 
+  // SMS log — every Termii send attempt for this order
+  smsLogs         SmsLog[]
+
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
 
@@ -1722,4 +1725,26 @@ model PSFulfilment {
   exchangeUntil48 DateTime?
   exchangeUntil24 DateTime?
   createdAt       DateTime @default(now())
+}
+
+// ============================================================
+// SMS LOG — every Termii send attempt (success or failure)
+// ============================================================
+model SmsLog {
+  id           String   @id @default(cuid())
+  reason       String
+  orderId      String?
+  order        Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  recipient    String
+  message      String
+  ok           Boolean  @default(false)
+  error        String?
+  providerResponse String?
+  recipientSource String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([ok])
+  @@index([reason])
+  @@index([orderId])
 }

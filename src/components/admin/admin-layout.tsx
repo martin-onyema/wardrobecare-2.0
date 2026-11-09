@@ -126,6 +126,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'System',
     items: [
       { label: 'Notifications', href: '/admin/notifications', icon: BellRing, permission: 'notification.view' },
+      { label: 'SMS Diagnostic', href: '/admin/notifications/sms', icon: BellRing, permission: 'notification.view' },
       { label: 'Audit Log', href: '/admin/audit', icon: ScrollText, permission: 'audit.view' },
       { label: 'Staff', href: '/admin/staff', icon: UserCog, permission: 'staff.manage' },
       { label: 'CMS', href: '/admin/cms', icon: Layers, permission: 'cms.manage' },

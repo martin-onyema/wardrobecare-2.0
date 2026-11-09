@@ -297,6 +297,7 @@ export async function createOrder(formData: FormData | Record<string, any>): Pro
         paymentMethod: order.paymentMethod,
       },
       settings?.supportPhone,
+      order.id,
     )
   } catch (e: any) {
     console.error('[sms] order notification error:', e?.message)
