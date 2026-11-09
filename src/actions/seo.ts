@@ -19,6 +19,9 @@ import { db } from '@/lib/db'
 import { requireStaff, requireSuperAdmin, roleHasPermission } from '@/lib/permissions'
 import { getCurrentStaffUser } from '@/lib/session'
 import { redirect } from 'next/navigation'
+// Resilient Prisma select constants — list only pre-existing columns so
+// queries work whether or not the SEO Manager migration has been applied.
+import { PRODUCT_SELECT_BASE, CATEGORY_SELECT_BASE } from '@/lib/queries'
 import {
   fillTemplate,
   getTemplate,
@@ -171,7 +174,10 @@ export async function saveSeoAction(input: SaveSeoInput): Promise<SaveSeoResult>
   } else if (input.type === 'product') {
     const existing = await db.product.findUnique({
       where: { id: input.id },
-      include: { images: { orderBy: { position: 'asc' }, take: 1 } },
+      select: {
+        ...PRODUCT_SELECT_BASE,
+        images: { orderBy: { position: 'asc' }, take: 1, select: { id: true, url: true, altText: true, position: true, productId: true } },
+      },
     })
     if (!existing) return { ok: false, error: 'Product not found.' }
 
@@ -359,7 +365,13 @@ export async function fillFromTemplateAction(input: {
     if (tpl.introTemplate && !r.seoIntroText) { data.seoIntroText = fillTemplate(tpl.introTemplate, input.name); filledCount++ }
     if (filledCount > 0) await db.category.update({ where: { id: input.id }, data })
   } else if (input.type === 'product') {
-    const r = await db.product.findUnique({ where: { id: input.id }, include: { images: { orderBy: { position: 'asc' }, take: 1 } } })
+    const r = await db.product.findUnique({
+      where: { id: input.id },
+      select: {
+        ...PRODUCT_SELECT_BASE,
+        images: { orderBy: { position: 'asc' }, take: 1, select: { id: true, url: true, altText: true, position: true, productId: true } },
+      },
+    })
     if (!r) return { ok: false, error: 'Product not found.' }
     const data: any = {}
     if (!r.seoTitle) { data.seoTitle = fillTemplate(tpl.titleTemplate, input.name); filledCount++ }
@@ -453,7 +465,12 @@ export async function applyTemplatesToAllAction(): Promise<{ ok: true; filledCou
         }
       }
     } else if (type === 'product') {
-      const rows = await db.product.findMany({ include: { images: { orderBy: { position: 'asc' }, take: 1 } } })
+      const rows = await db.product.findMany({
+        select: {
+          ...PRODUCT_SELECT_BASE,
+          images: { orderBy: { position: 'asc' }, take: 1, select: { id: true, url: true, altText: true, position: true, productId: true } },
+        },
+      })
       for (const r of rows) {
         const data: any = {}
         if (!r.seoTitle) data.seoTitle = fillTemplate(tpl.titleTemplate, r.name)

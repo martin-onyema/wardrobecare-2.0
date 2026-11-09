@@ -588,7 +588,13 @@ export async function adminCreateProduct(input: Record<string, any>) {
           })),
         },
       },
-      include: { images: true, variants: true },
+      // Use explicit select to avoid fetching the new SEO columns
+      // (seoH1, noindex, inSitemap) that may not exist on the DB yet.
+      select: {
+        ...PRODUCT_SELECT_BASE,
+        images: { select: { id: true, url: true, altText: true, position: true, productId: true } },
+        variants: true,
+      },
     })
 
     // Audit log
@@ -625,10 +631,16 @@ export async function adminUpdateProduct(id: string, input: Record<string, any>)
   }
   const data = parsed.data
   try {
-    // Fetch existing for audit diff
+    // Fetch existing for audit diff — use explicit select to avoid fetching
+    // the new SEO columns (seoH1, noindex, inSitemap) that may not exist on
+    // the production DB yet (migration not applied).
     const before = await db.product.findUnique({
       where: { id },
-      include: { images: true, variants: true },
+      select: {
+        ...PRODUCT_SELECT_BASE,
+        images: { select: { id: true, url: true, altText: true, position: true, productId: true } },
+        variants: true,
+      },
     })
     if (!before) {
       return { ok: false, error: 'Product not found' }

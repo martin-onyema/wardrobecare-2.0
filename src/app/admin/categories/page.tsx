@@ -3,6 +3,7 @@ import { Plus, Star, MoreHorizontal } from 'lucide-react'
 import { requireAdmin } from '@/lib/session'
 import { getMyPermissionCodes } from '@/lib/permissions'
 import { db } from '@/lib/db'
+import { CATEGORY_SELECT_BASE } from '@/lib/queries'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -45,7 +46,8 @@ export default async function AdminCategoriesPage({
         }
       : undefined,
     orderBy: [{ parentId: 'asc' }, { order: 'asc' }],
-    include: {
+    select: {
+      ...CATEGORY_SELECT_BASE,
       parent: { select: { name: true, slug: true } },
       _count: { select: { products: true, children: true } },
     },
