@@ -1,6 +1,6 @@
 {
   "node": {
-    "70dcffbba0d433289cabbeaeebbbd10c2eef4fa4ec": {
+    "705fecd7b49c5f94cdfbeea5bd885195b3ede10605": {
       "workers": {
         "app/admin/services/enquiries/[id]/page": {
           "moduleId": 267185,
@@ -15,7 +15,7 @@
       "exportedName": "adminUpdateServiceEnquiryStatus",
       "filename": "src/actions/admin.ts"
     },
-    "607727f023859dea195256e0d43688c14f719a6c49": {
+    "6014333791d3f3f44b9f5e8ec30d2ccdac6097995f": {
       "workers": {
         "app/admin/services/enquiries/[id]/page": {
           "moduleId": 267185,

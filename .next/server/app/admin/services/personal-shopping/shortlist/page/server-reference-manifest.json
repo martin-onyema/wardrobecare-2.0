@@ -1,6 +1,6 @@
 {
   "node": {
-    "60fa09cce79dacaa850e7becc7cc0901db5c3d676c": {
+    "60c708c2f0d732e2411683e1d1246ad8f2cce88afd": {
       "workers": {
         "app/admin/services/personal-shopping/shortlist/page": {
           "moduleId": 589078,
@@ -15,7 +15,7 @@
       "exportedName": "adminAddPSItem",
       "filename": "src/actions/personal-shopping-workflow.ts"
     },
-    "40c73b5fd673d4117d3f07f4945043a63f1f8b5e9c": {
+    "40221ec94c9a33dd37bb2b1fa4dbf6fb0021b7eba4": {
       "workers": {
         "app/admin/services/personal-shopping/shortlist/page": {
           "moduleId": 589078,
@@ -30,7 +30,7 @@
       "exportedName": "adminRemovePSItem",
       "filename": "src/actions/personal-shopping-workflow.ts"
     },
-    "405921da6c9376288128c8aa805894f5f8e61a03d6": {
+    "403b2fe775e7b18319b9865e748739ba59ff70573a": {
       "workers": {
         "app/admin/services/personal-shopping/shortlist/page": {
           "moduleId": 589078,
@@ -45,7 +45,7 @@
       "exportedName": "adminSendShortlist",
       "filename": "src/actions/personal-shopping-workflow.ts"
     },
-    "703068c3d43d5ffc24d9c19769a453243a8ccff44f": {
+    "706a576de2d1fdb737386d3156239c91307b69b76b": {
       "workers": {
         "app/admin/services/personal-shopping/shortlist/page": {
           "moduleId": 589078,
@@ -60,7 +60,7 @@
       "exportedName": "adminRecordItemDecision",
       "filename": "src/actions/personal-shopping-workflow.ts"
     },
-    "404b14887614e9b7565f49912a0a59a2078dcecb19": {
+    "40c8687bf2a67dad4e28e910a97d832503108527e8": {
       "workers": {
         "app/admin/services/personal-shopping/shortlist/page": {
           "moduleId": 589078,

@@ -1073,6 +1073,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/api/seo/redirect-lookup/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/seo/redirect-lookup">> = Specific
+  const handler = {} as typeof import("../../src/app/api/seo/redirect-lookup/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/api/settings/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/settings">> = Specific

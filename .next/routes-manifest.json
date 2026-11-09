@@ -650,6 +650,12 @@
       "namedRegex": "^/api/chat(?:/)?$"
     },
     {
+      "page": "/api/seo/redirect-lookup",
+      "regex": "^/api/seo/redirect\\-lookup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/seo/redirect\\-lookup(?:/)?$"
+    },
+    {
       "page": "/api/settings",
       "regex": "^/api/settings(?:/)?$",
       "routeKeys": {},

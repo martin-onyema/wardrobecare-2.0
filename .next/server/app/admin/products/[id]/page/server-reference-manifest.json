@@ -1,6 +1,6 @@
 {
   "node": {
-    "40379efc435bd2d973995867b0412bf416d7c594c8": {
+    "40d4c0c54ec4ed95a1150b89602cbe4ae996ec16bc": {
       "workers": {
         "app/admin/products/[id]/page": {
           "moduleId": 994036,
@@ -15,7 +15,7 @@
       "exportedName": "adminCreateProduct",
       "filename": "src/actions/store.ts"
     },
-    "60e39b6dcdf867119dde054e517e13a744fa5fc050": {
+    "600e6d005450b8ae5df322b0ac08da71622c38abac": {
       "workers": {
         "app/admin/products/[id]/page": {
           "moduleId": 994036,
@@ -30,7 +30,7 @@
       "exportedName": "adminUpdateProduct",
       "filename": "src/actions/store.ts"
     },
-    "403e405516722a184b2fc0f2ba82fef6e96bcc943e": {
+    "407adad775fee4d7d9a79054b3886701a14096bcac": {
       "workers": {
         "app/admin/products/[id]/page": {
           "moduleId": 994036,
@@ -45,7 +45,7 @@
       "exportedName": "adminDeleteProduct",
       "filename": "src/actions/store.ts"
     },
-    "40edeedc4685b3c4c021bf15ddea50c4540e216846": {
+    "40e9438eee94d4b517b5cd87e594ec2046768d0a07": {
       "workers": {
         "app/admin/products/[id]/page": {
           "moduleId": 994036,
@@ -60,7 +60,7 @@
       "exportedName": "adminUploadProductImage",
       "filename": "src/actions/supabase.ts"
     },
-    "406fa67110d4bb6082f5139d3b5c9d3635bc063e66": {
+    "40033657cd681337272a2815c4661619a475013603": {
       "workers": {
         "app/admin/products/[id]/page": {
           "moduleId": 994036,

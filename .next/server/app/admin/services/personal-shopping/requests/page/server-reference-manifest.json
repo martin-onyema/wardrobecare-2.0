@@ -1,6 +1,6 @@
 {
   "node": {
-    "603139b5c7bedecd171f0d28f6922fbf27b59e1693": {
+    "6048ab4d6a933cdb6a03db7c7df9e4ad1c9057cdd6": {
       "workers": {
         "app/admin/services/personal-shopping/requests/page": {
           "moduleId": 711263,
@@ -15,7 +15,7 @@
       "exportedName": "adminAssignPSStylist",
       "filename": "src/actions/personal-shopping-workflow.ts"
     },
-    "40b1bfdd98f3dc799e20a4a576c6aab33a1a493801": {
+    "405b7250bf221369ec1d5da3a482d396744ba59762": {
       "workers": {
         "app/admin/services/personal-shopping/requests/page": {
           "moduleId": 711263,

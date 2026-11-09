@@ -86,6 +86,7 @@
   "/api/chat/route": "/api/chat",
   "/api/products/[id]/route": "/api/products/[id]",
   "/api/route": "/api",
+  "/api/seo/redirect-lookup/route": "/api/seo/redirect-lookup",
   "/api/settings/route": "/api/settings",
   "/api/webhooks/paystack/route": "/api/webhooks/paystack",
   "/bottoms/page": "/bottoms",

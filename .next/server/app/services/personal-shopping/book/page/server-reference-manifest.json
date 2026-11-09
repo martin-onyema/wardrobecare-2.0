@@ -1,6 +1,6 @@
 {
   "node": {
-    "4020bde95b73e6a99ea172ff5f447caa0b075235ee": {
+    "405c6de1a59770286fe3a793cfea1e05929205c051": {
       "workers": {
         "app/services/personal-shopping/book/page": {
           "moduleId": 817334,
@@ -15,7 +15,7 @@
       "exportedName": "subscribeToNewsletter",
       "filename": "src/actions/store.ts"
     },
-    "4060737634237ee3f836cda47a2b002f88588a5488": {
+    "40cab45da40e9b2eef7123b0e1bc455f43a3233913": {
       "workers": {
         "app/services/personal-shopping/book/page": {
           "moduleId": 817334,
@@ -30,7 +30,7 @@
       "exportedName": "createPersonalShoppingRequest",
       "filename": "src/actions/personal-shopping-customer.ts"
     },
-    "40d91993f5d1a7aab015b0cb42799974540605e971": {
+    "40460d5169af761e6beb93f046e28dc596bd4700f8": {
       "workers": {
         "app/services/personal-shopping/book/page": {
           "moduleId": 817334,
@@ -45,7 +45,7 @@
       "exportedName": "initializePSPayment",
       "filename": "src/actions/personal-shopping-customer.ts"
     },
-    "4015924a12d3e610fb9ca2d2164055723db758468c": {
+    "40bf7d0cd8309912100d39ae9b1b6d8284d0f57e5a": {
       "workers": {
         "app/services/personal-shopping/book/page": {
           "moduleId": 817334,

@@ -1,6 +1,6 @@
 {
   "node": {
-    "40933e2142942c43b7bc4018f8511fcb923c476b31": {
+    "40b6505cf6539d724f8de4355d0d0b5d5eaa4acdc4": {
       "workers": {
         "app/admin/brands/[id]/page": {
           "moduleId": 845884,
@@ -15,7 +15,7 @@
       "exportedName": "adminCreateBrand",
       "filename": "src/actions/admin.ts"
     },
-    "60b31a7f9dc16e423323461e0af03c1cc81675e168": {
+    "6073a41d76f0adfae368aa84b29c1b79cf70b0f36a": {
       "workers": {
         "app/admin/brands/[id]/page": {
           "moduleId": 845884,
@@ -30,7 +30,7 @@
       "exportedName": "adminUpdateBrand",
       "filename": "src/actions/admin.ts"
     },
-    "40110a55404f4ea9e88061c713512adf78e4e34310": {
+    "40da6670cbf2e91c4cbb14aa2366504491f70ced04": {
       "workers": {
         "app/admin/brands/[id]/page": {
           "moduleId": 845884,

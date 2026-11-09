@@ -1,6 +1,6 @@
 {
   "node": {
-    "402e4fae4fb7e1dfc8d0a0cea76dd68216b37ad15b": {
+    "40c9bc3eb695c9efd88f120a1a1fc3b7e539882700": {
       "workers": {
         "app/admin/notifications/page": {
           "moduleId": 130251,
@@ -15,7 +15,7 @@
       "exportedName": "adminMarkNotificationRead",
       "filename": "src/actions/admin.ts"
     },
-    "00c97c22ade63e0145cbe3a16228962ee7470c7405": {
+    "009b48431f3b2aa06eebf194252c0704db137dae8a": {
       "workers": {
         "app/admin/notifications/page": {
           "moduleId": 130251,
@@ -30,7 +30,7 @@
       "exportedName": "adminMarkAllNotificationsRead",
       "filename": "src/actions/admin.ts"
     },
-    "4019efd32acfc31ce1f48ee4f109bdd726293055a7": {
+    "407cc1996acb38a6eb58663cc68f5f303dff70df18": {
       "workers": {
         "app/admin/notifications/page": {
           "moduleId": 130251,
