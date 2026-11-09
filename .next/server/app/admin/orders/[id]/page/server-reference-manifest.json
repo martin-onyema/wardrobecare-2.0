@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60d1d107d64d2ca8a15b023b1af6de815ecdad9db6": {
+      "workers": {
+        "app/admin/orders/[id]/page": {
+          "moduleId": 869284,
+          "async": false,
+          "exportedName": "adminUpdateOrderTracking",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/orders/[id]/page": "action-browser"
+      },
+      "exportedName": "adminUpdateOrderTracking",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

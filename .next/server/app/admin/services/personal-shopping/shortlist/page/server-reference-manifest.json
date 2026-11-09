@@ -1,0 +1,80 @@
+{
+  "node": {
+    "6099bb813f632bd1b7ad6b19d2b597f738d07f2bd1": {
+      "workers": {
+        "app/admin/services/personal-shopping/shortlist/page": {
+          "moduleId": 589078,
+          "async": false,
+          "exportedName": "adminAddPSItem",
+          "filename": "src/actions/personal-shopping-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/personal-shopping/shortlist/page": "action-browser"
+      },
+      "exportedName": "adminAddPSItem",
+      "filename": "src/actions/personal-shopping-workflow.ts"
+    },
+    "40c5f5f9ffae2b45f95257128075331cd8abfb3ab7": {
+      "workers": {
+        "app/admin/services/personal-shopping/shortlist/page": {
+          "moduleId": 589078,
+          "async": false,
+          "exportedName": "adminRemovePSItem",
+          "filename": "src/actions/personal-shopping-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/personal-shopping/shortlist/page": "action-browser"
+      },
+      "exportedName": "adminRemovePSItem",
+      "filename": "src/actions/personal-shopping-workflow.ts"
+    },
+    "40f4394503548e3f45b68bc67d29b3cb341219cc3a": {
+      "workers": {
+        "app/admin/services/personal-shopping/shortlist/page": {
+          "moduleId": 589078,
+          "async": false,
+          "exportedName": "adminSendShortlist",
+          "filename": "src/actions/personal-shopping-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/personal-shopping/shortlist/page": "action-browser"
+      },
+      "exportedName": "adminSendShortlist",
+      "filename": "src/actions/personal-shopping-workflow.ts"
+    },
+    "702254d52eb5d16a8725815eb58564f287400d906b": {
+      "workers": {
+        "app/admin/services/personal-shopping/shortlist/page": {
+          "moduleId": 589078,
+          "async": false,
+          "exportedName": "adminRecordItemDecision",
+          "filename": "src/actions/personal-shopping-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/personal-shopping/shortlist/page": "action-browser"
+      },
+      "exportedName": "adminRecordItemDecision",
+      "filename": "src/actions/personal-shopping-workflow.ts"
+    },
+    "4054171ae22a907df84305ff2ecfc2afbeb276308c": {
+      "workers": {
+        "app/admin/services/personal-shopping/shortlist/page": {
+          "moduleId": 589078,
+          "async": false,
+          "exportedName": "adminApproveChoices",
+          "filename": "src/actions/personal-shopping-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/personal-shopping/shortlist/page": "action-browser"
+      },
+      "exportedName": "adminApproveChoices",
+      "filename": "src/actions/personal-shopping-workflow.ts"
+    }
+  },
+  "edge": {}
+}

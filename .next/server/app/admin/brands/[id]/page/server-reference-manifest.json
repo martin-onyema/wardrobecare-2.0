@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40c98ea0a11a41ce6fdd4ab70dc0bcbad4ebf98cb7": {
+      "workers": {
+        "app/admin/brands/[id]/page": {
+          "moduleId": 845884,
+          "async": false,
+          "exportedName": "adminCreateBrand",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/brands/[id]/page": "action-browser"
+      },
+      "exportedName": "adminCreateBrand",
+      "filename": "src/actions/admin.ts"
+    },
+    "60868a3a877ed7ab1ddd7634279b44db61597b757d": {
+      "workers": {
+        "app/admin/brands/[id]/page": {
+          "moduleId": 845884,
+          "async": false,
+          "exportedName": "adminUpdateBrand",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/brands/[id]/page": "action-browser"
+      },
+      "exportedName": "adminUpdateBrand",
+      "filename": "src/actions/admin.ts"
+    },
+    "409a16edc1971d314fc95f4be99065c190f567f29f": {
+      "workers": {
+        "app/admin/brands/[id]/page": {
+          "moduleId": 845884,
+          "async": false,
+          "exportedName": "adminDeleteBrand",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/brands/[id]/page": "action-browser"
+      },
+      "exportedName": "adminDeleteBrand",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

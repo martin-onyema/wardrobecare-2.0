@@ -1,0 +1,20 @@
+{
+  "node": {
+    "409a16edc1971d314fc95f4be99065c190f567f29f": {
+      "workers": {
+        "app/admin/brands/page": {
+          "moduleId": 566302,
+          "async": false,
+          "exportedName": "adminDeleteBrand",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/brands/page": "action-browser"
+      },
+      "exportedName": "adminDeleteBrand",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

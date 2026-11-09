@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../.next-internal/server/app/admin/reviews/page/actions.js%20%28server%20actions%20loader%29"],"sourcesContent":["export {adminModerateReview as '70b906935ff60486597a7559c2ab4728e08fdf904d'} from 'ACTIONS_MODULE0'\n"],"names":[],"mappings":"wCAAA,IAAA,EAAA,EAAA,CAAA,CAAA"}

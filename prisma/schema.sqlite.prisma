@@ -72,6 +72,10 @@ model User {
   personalShoppingRequests      PersonalShoppingRequest[] @relation("PersonalShoppingUser")
   personalShoppingAsStylist     PersonalShoppingRequest[] @relation("PersonalShoppingStylist")
 
+  // SEO Manager
+  redirectsCreated   Redirect[]   @relation("RedirectAuthor")
+  seoAuditLogsAuthored SeoAuditLog[] @relation("SeoAuditLogAuthor")
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -201,6 +205,12 @@ model Category {
   seoTitle       String?
   seoDescription String?
   seoKeywords    String?
+  // SEO Manager additions — additive, default to indexed + in sitemap
+  seoH1          String?
+  seoIntroText   String?
+  seoOgImage     String?
+  noindex        Boolean  @default(false)
+  inSitemap      Boolean  @default(true)
 
   products    Product[]
 
@@ -269,6 +279,10 @@ model Product {
   seoKeywords     String?
   canonicalUrl    String?
   ogImage         String?
+  // SEO Manager additions — additive, default to indexed + in sitemap
+  seoH1           String?
+  noindex         Boolean  @default(false)
+  inSitemap       Boolean  @default(true)
   // Status
   status          ProductStatus    @default(ACTIVE)
 
@@ -1747,4 +1761,68 @@ model SmsLog {
   @@index([ok])
   @@index([reason])
   @@index([orderId])
+}
+
+// ============================================================
+// SEO MANAGER — overrides for static pages/services, redirects, templates, audit log
+// ============================================================
+
+model SeoOverride {
+  id            String   @id @default(cuid())
+  route         String   @unique
+  contentType   String
+  name          String
+  seoTitle      String?
+  seoDescription String?
+  h1            String?
+  introText     String?
+  ogImage       String?
+  noindex       Boolean  @default(false)
+  inSitemap     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([contentType])
+  @@index([noindex])
+  @@index([inSitemap])
+}
+
+model Redirect {
+  id          String   @id @default(cuid())
+  fromPath    String   @unique
+  toPath      String
+  statusCode  Int      @default(308)
+  note        String?
+  createdById String?
+  createdBy   User?    @relation("RedirectAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([fromPath])
+  @@index([toPath])
+}
+
+model SeoTemplate {
+  id                  String   @id @default(cuid())
+  contentType         String   @unique
+  titleTemplate       String?
+  descriptionTemplate String?
+  introTemplate       String?
+  altTemplate         String?
+  updatedAt           DateTime @updatedAt
+}
+
+model SeoAuditLog {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String
+  fieldName   String
+  oldValue    String?
+  newValue    String?
+  changedById String?
+  changedBy   User?    @relation("SeoAuditLogAuthor", fields: [changedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([changedById])
+  @@index([createdAt])
 }

@@ -1,0 +1,95 @@
+{
+  "node": {
+    "400f2a178ed78933a6844bc6cdc01be1953ec8531c": {
+      "workers": {
+        "app/admin/services/consultations/fees/page": {
+          "moduleId": 93847,
+          "async": false,
+          "exportedName": "adminSaveFees",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/fees/page": "action-browser"
+      },
+      "exportedName": "adminSaveFees",
+      "filename": "src/actions/consultations-workflow.ts"
+    },
+    "40499f65c0729c4351bd171dd23ab7af5fbe647696": {
+      "workers": {
+        "app/admin/services/consultations/fees/page": {
+          "moduleId": 93847,
+          "async": false,
+          "exportedName": "adminCreatePromoCode",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/fees/page": "action-browser"
+      },
+      "exportedName": "adminCreatePromoCode",
+      "filename": "src/actions/consultations-workflow.ts"
+    },
+    "40b39ff8fc7fc57afbf22725d29a9c30bd49a3fdca": {
+      "workers": {
+        "app/admin/services/consultations/fees/page": {
+          "moduleId": 93847,
+          "async": false,
+          "exportedName": "adminTogglePromoCode",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/fees/page": "action-browser"
+      },
+      "exportedName": "adminTogglePromoCode",
+      "filename": "src/actions/consultations-workflow.ts"
+    },
+    "40ca9261cf9b4296872567ff441f20ecdddb560578": {
+      "workers": {
+        "app/admin/services/consultations/fees/page": {
+          "moduleId": 93847,
+          "async": false,
+          "exportedName": "adminDeletePromoCode",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/fees/page": "action-browser"
+      },
+      "exportedName": "adminDeletePromoCode",
+      "filename": "src/actions/consultations-workflow.ts"
+    },
+    "402d6ce6e4bf32c2a3cbdb5e3e4dd5bf7c08c9c925": {
+      "workers": {
+        "app/admin/services/consultations/fees/page": {
+          "moduleId": 93847,
+          "async": false,
+          "exportedName": "adminCreateDiscountRule",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/fees/page": "action-browser"
+      },
+      "exportedName": "adminCreateDiscountRule",
+      "filename": "src/actions/consultations-workflow.ts"
+    },
+    "401eaf23aea602577e104c09b01c0aa86733f5414f": {
+      "workers": {
+        "app/admin/services/consultations/fees/page": {
+          "moduleId": 93847,
+          "async": false,
+          "exportedName": "adminToggleDiscountRule",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/fees/page": "action-browser"
+      },
+      "exportedName": "adminToggleDiscountRule",
+      "filename": "src/actions/consultations-workflow.ts"
+    }
+  },
+  "edge": {}
+}

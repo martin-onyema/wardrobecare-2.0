@@ -1,0 +1,35 @@
+{
+  "node": {
+    "40eb63ea713d628c23c4175b1d5e6857d69b2eab96": {
+      "workers": {
+        "app/admin/seo/edit/[type]/[id]/page": {
+          "moduleId": 459207,
+          "async": false,
+          "exportedName": "saveSeoAction",
+          "filename": "src/actions/seo.ts"
+        }
+      },
+      "layer": {
+        "app/admin/seo/edit/[type]/[id]/page": "action-browser"
+      },
+      "exportedName": "saveSeoAction",
+      "filename": "src/actions/seo.ts"
+    },
+    "407234780160da3373df594ef450fabab73a2dc56b": {
+      "workers": {
+        "app/admin/seo/edit/[type]/[id]/page": {
+          "moduleId": 459207,
+          "async": false,
+          "exportedName": "fillFromTemplateAction",
+          "filename": "src/actions/seo.ts"
+        }
+      },
+      "layer": {
+        "app/admin/seo/edit/[type]/[id]/page": "action-browser"
+      },
+      "exportedName": "fillFromTemplateAction",
+      "filename": "src/actions/seo.ts"
+    }
+  },
+  "edge": {}
+}

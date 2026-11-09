@@ -1,0 +1,20 @@
+{
+  "node": {
+    "40a9dc0ed98d206077613f648cb388cee793d8b3fb": {
+      "workers": {
+        "app/account/profiles/page": {
+          "moduleId": 907076,
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/account/profiles/page": "action-browser"
+      },
+      "exportedName": "subscribeToNewsletter",
+      "filename": "src/actions/store.ts"
+    }
+  },
+  "edge": {}
+}

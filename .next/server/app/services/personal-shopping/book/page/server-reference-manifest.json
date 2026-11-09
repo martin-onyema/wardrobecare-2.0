@@ -1,0 +1,65 @@
+{
+  "node": {
+    "40a9dc0ed98d206077613f648cb388cee793d8b3fb": {
+      "workers": {
+        "app/services/personal-shopping/book/page": {
+          "moduleId": 817334,
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/services/personal-shopping/book/page": "action-browser"
+      },
+      "exportedName": "subscribeToNewsletter",
+      "filename": "src/actions/store.ts"
+    },
+    "408eb892b59fd3bc37b3d9f84fc323c8c7650f5dd2": {
+      "workers": {
+        "app/services/personal-shopping/book/page": {
+          "moduleId": 817334,
+          "async": false,
+          "exportedName": "createPersonalShoppingRequest",
+          "filename": "src/actions/personal-shopping-customer.ts"
+        }
+      },
+      "layer": {
+        "app/services/personal-shopping/book/page": "action-browser"
+      },
+      "exportedName": "createPersonalShoppingRequest",
+      "filename": "src/actions/personal-shopping-customer.ts"
+    },
+    "40e058ad2e686821cc14f76925ad2b1f740a641a65": {
+      "workers": {
+        "app/services/personal-shopping/book/page": {
+          "moduleId": 817334,
+          "async": false,
+          "exportedName": "initializePSPayment",
+          "filename": "src/actions/personal-shopping-customer.ts"
+        }
+      },
+      "layer": {
+        "app/services/personal-shopping/book/page": "action-browser"
+      },
+      "exportedName": "initializePSPayment",
+      "filename": "src/actions/personal-shopping-customer.ts"
+    },
+    "4058ff7e666f83b9e734e9a0755ef6c0d9448079e8": {
+      "workers": {
+        "app/services/personal-shopping/book/page": {
+          "moduleId": 817334,
+          "async": false,
+          "exportedName": "getPSAvailableSlots",
+          "filename": "src/actions/personal-shopping-customer.ts"
+        }
+      },
+      "layer": {
+        "app/services/personal-shopping/book/page": "action-browser"
+      },
+      "exportedName": "getPSAvailableSlots",
+      "filename": "src/actions/personal-shopping-customer.ts"
+    }
+  },
+  "edge": {}
+}

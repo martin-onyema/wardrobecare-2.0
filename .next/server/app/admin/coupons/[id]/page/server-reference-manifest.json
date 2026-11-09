@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40a9ac4281e606f2c7552ad1d47a346b21dd54f21a": {
+      "workers": {
+        "app/admin/coupons/[id]/page": {
+          "moduleId": 148160,
+          "async": false,
+          "exportedName": "adminCreateCoupon",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/coupons/[id]/page": "action-browser"
+      },
+      "exportedName": "adminCreateCoupon",
+      "filename": "src/actions/admin.ts"
+    },
+    "605573abf9b2b4131ceb0dd9c397380fe4e3358dac": {
+      "workers": {
+        "app/admin/coupons/[id]/page": {
+          "moduleId": 148160,
+          "async": false,
+          "exportedName": "adminUpdateCoupon",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/coupons/[id]/page": "action-browser"
+      },
+      "exportedName": "adminUpdateCoupon",
+      "filename": "src/actions/admin.ts"
+    },
+    "40bcc4b49f94403619e46388f90a928730e1ef1bd9": {
+      "workers": {
+        "app/admin/coupons/[id]/page": {
+          "moduleId": 148160,
+          "async": false,
+          "exportedName": "adminDeleteCoupon",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/coupons/[id]/page": "action-browser"
+      },
+      "exportedName": "adminDeleteCoupon",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

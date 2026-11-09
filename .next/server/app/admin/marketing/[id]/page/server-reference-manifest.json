@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40ae6f4b1ed3ba401a9e353648baab09a6dbbda83b": {
+      "workers": {
+        "app/admin/marketing/[id]/page": {
+          "moduleId": 516488,
+          "async": false,
+          "exportedName": "adminCreateCampaign",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/marketing/[id]/page": "action-browser"
+      },
+      "exportedName": "adminCreateCampaign",
+      "filename": "src/actions/admin.ts"
+    },
+    "605a2468543c0e3ae07ccecd31fcd4be32b2f61e47": {
+      "workers": {
+        "app/admin/marketing/[id]/page": {
+          "moduleId": 516488,
+          "async": false,
+          "exportedName": "adminUpdateCampaign",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/marketing/[id]/page": "action-browser"
+      },
+      "exportedName": "adminUpdateCampaign",
+      "filename": "src/actions/admin.ts"
+    },
+    "402c3e609785c1b6f0b7952aecd7c97d424391b200": {
+      "workers": {
+        "app/admin/marketing/[id]/page": {
+          "moduleId": 516488,
+          "async": false,
+          "exportedName": "adminDeleteCampaign",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/marketing/[id]/page": "action-browser"
+      },
+      "exportedName": "adminDeleteCampaign",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,35 @@
+{
+  "node": {
+    "40b265ba55309e23ed26b5a506daa6855faafddd03": {
+      "workers": {
+        "app/admin/categories/page": {
+          "moduleId": 423176,
+          "async": false,
+          "exportedName": "adminDeleteCategory",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/categories/page": "action-browser"
+      },
+      "exportedName": "adminDeleteCategory",
+      "filename": "src/actions/admin.ts"
+    },
+    "608d0ed57b4f500adb6b18f6b27054e0595ea0850f": {
+      "workers": {
+        "app/admin/categories/page": {
+          "moduleId": 423176,
+          "async": false,
+          "exportedName": "adminReorderCategory",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/categories/page": "action-browser"
+      },
+      "exportedName": "adminReorderCategory",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

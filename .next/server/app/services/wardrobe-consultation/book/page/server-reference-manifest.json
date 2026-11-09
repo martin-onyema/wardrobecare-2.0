@@ -1,0 +1,65 @@
+{
+  "node": {
+    "40a9dc0ed98d206077613f648cb388cee793d8b3fb": {
+      "workers": {
+        "app/services/wardrobe-consultation/book/page": {
+          "moduleId": 584161,
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/book/page": "action-browser"
+      },
+      "exportedName": "subscribeToNewsletter",
+      "filename": "src/actions/store.ts"
+    },
+    "40a4d159bd181512d9a5a2968627f2a5e02c233666": {
+      "workers": {
+        "app/services/wardrobe-consultation/book/page": {
+          "moduleId": 584161,
+          "async": false,
+          "exportedName": "holdConsultationSlot",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/book/page": "action-browser"
+      },
+      "exportedName": "holdConsultationSlot",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40f405041612499983983e610e500f4c6abf19506d": {
+      "workers": {
+        "app/services/wardrobe-consultation/book/page": {
+          "moduleId": 584161,
+          "async": false,
+          "exportedName": "initializeConsultationPayment",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/book/page": "action-browser"
+      },
+      "exportedName": "initializeConsultationPayment",
+      "filename": "src/actions/consultations.ts"
+    },
+    "40ac7dc66ba9d71153cc30b702189acded181c6d9c": {
+      "workers": {
+        "app/services/wardrobe-consultation/book/page": {
+          "moduleId": 584161,
+          "async": false,
+          "exportedName": "getConsultationSlotsTaken",
+          "filename": "src/actions/consultations.ts"
+        }
+      },
+      "layer": {
+        "app/services/wardrobe-consultation/book/page": "action-browser"
+      },
+      "exportedName": "getConsultationSlotsTaken",
+      "filename": "src/actions/consultations.ts"
+    }
+  },
+  "edge": {}
+}

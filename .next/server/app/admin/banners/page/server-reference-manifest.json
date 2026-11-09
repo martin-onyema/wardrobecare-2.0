@@ -1,0 +1,20 @@
+{
+  "node": {
+    "4001d609c6dfb0d842c0b3d4f1507e4badf7fbd7bd": {
+      "workers": {
+        "app/admin/banners/page": {
+          "moduleId": 574409,
+          "async": false,
+          "exportedName": "adminDeleteBanner",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/banners/page": "action-browser"
+      },
+      "exportedName": "adminDeleteBanner",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

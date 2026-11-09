@@ -1,0 +1,20 @@
+{
+  "node": {
+    "405ba11a2514bd3306df7dc7c55618d1d52cd193a1": {
+      "workers": {
+        "app/admin/shipping/new/page": {
+          "moduleId": 790692,
+          "async": false,
+          "exportedName": "adminCreateShippingZone",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/shipping/new/page": "action-browser"
+      },
+      "exportedName": "adminCreateShippingZone",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

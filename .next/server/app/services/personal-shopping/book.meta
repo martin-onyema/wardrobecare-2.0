@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/services/layout,_N_T_/services/personal-shopping/layout,_N_T_/services/personal-shopping/book/layout,_N_T_/services/personal-shopping/book/page,_N_T_/services/personal-shopping/book"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/services/personal-shopping/book/__PAGE__",
+    "/services/personal-shopping/book",
+    "/services/personal-shopping",
+    "/services",
+    "/_index",
+    "/_head"
+  ]
+}

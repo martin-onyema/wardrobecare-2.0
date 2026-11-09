@@ -1,0 +1,12 @@
+User-Agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /api
+Disallow: /cart
+Disallow: /checkout
+Disallow: /track-order
+Disallow: /gift-card/checkout
+Disallow: /*/book
+
+Sitemap: https://wardrobecare.com.ng/sitemap.xml

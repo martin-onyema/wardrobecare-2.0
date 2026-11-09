@@ -1,8 +1,1 @@
-{
-  "/account/bookings/page": "app/account/bookings/page.js",
-  "/page": "app/page.js",
-  "/services/personal-shopping/book/page": "app/services/personal-shopping/book/page.js",
-  "/services/personal-shopping/confirmed/page": "app/services/personal-shopping/confirmed/page.js",
-  "/services/wardrobe-consultation/book/page": "app/services/wardrobe-consultation/book/page.js",
-  "/services/wardrobe-consultation/confirmed/page": "app/services/wardrobe-consultation/confirmed/page.js"
-}
+{}

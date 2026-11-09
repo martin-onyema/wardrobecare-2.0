@@ -1,0 +1,50 @@
+{
+  "node": {
+    "701d576da2af1645390ff1c9612fb4731534805a69": {
+      "workers": {
+        "app/admin/services/consultations/calendar/page": {
+          "moduleId": 459900,
+          "async": false,
+          "exportedName": "adminBlockSlot",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/calendar/page": "action-browser"
+      },
+      "exportedName": "adminBlockSlot",
+      "filename": "src/actions/consultations-workflow.ts"
+    },
+    "60054209ca3a238736d38148056b7ccd4f468ad49d": {
+      "workers": {
+        "app/admin/services/consultations/calendar/page": {
+          "moduleId": 459900,
+          "async": false,
+          "exportedName": "adminUnblockSlot",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/calendar/page": "action-browser"
+      },
+      "exportedName": "adminUnblockSlot",
+      "filename": "src/actions/consultations-workflow.ts"
+    },
+    "40aa7b9a8b51f330f0ac1cc0fac831ddae79af7474": {
+      "workers": {
+        "app/admin/services/consultations/calendar/page": {
+          "moduleId": 459900,
+          "async": false,
+          "exportedName": "adminSaveAvailability",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/calendar/page": "action-browser"
+      },
+      "exportedName": "adminSaveAvailability",
+      "filename": "src/actions/consultations-workflow.ts"
+    }
+  },
+  "edge": {}
+}

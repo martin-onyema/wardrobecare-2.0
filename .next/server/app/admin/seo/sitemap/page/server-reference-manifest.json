@@ -1,0 +1,20 @@
+{
+  "node": {
+    "0050288b1b80f2265d73d12b88ec779f6c422a306a": {
+      "workers": {
+        "app/admin/seo/sitemap/page": {
+          "moduleId": 450619,
+          "async": false,
+          "exportedName": "regenerateSitemapAction",
+          "filename": "src/actions/seo.ts"
+        }
+      },
+      "layer": {
+        "app/admin/seo/sitemap/page": "action-browser"
+      },
+      "exportedName": "regenerateSitemapAction",
+      "filename": "src/actions/seo.ts"
+    }
+  },
+  "edge": {}
+}

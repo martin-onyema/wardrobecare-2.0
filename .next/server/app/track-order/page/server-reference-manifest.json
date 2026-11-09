@@ -1,0 +1,35 @@
+{
+  "node": {
+    "4054ddf0023cb15b13a25d598a3de034e9648d5aaa": {
+      "workers": {
+        "app/track-order/page": {
+          "moduleId": 361210,
+          "async": false,
+          "exportedName": "trackOrder",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/track-order/page": "action-browser"
+      },
+      "exportedName": "trackOrder",
+      "filename": "src/actions/store.ts"
+    },
+    "40a9dc0ed98d206077613f648cb388cee793d8b3fb": {
+      "workers": {
+        "app/track-order/page": {
+          "moduleId": 361210,
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/track-order/page": "action-browser"
+      },
+      "exportedName": "subscribeToNewsletter",
+      "filename": "src/actions/store.ts"
+    }
+  },
+  "edge": {}
+}

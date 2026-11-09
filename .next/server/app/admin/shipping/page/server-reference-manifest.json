@@ -1,0 +1,80 @@
+{
+  "node": {
+    "60ed0d2a54ce8ad6e93bd10014c50072667f5e1403": {
+      "workers": {
+        "app/admin/shipping/page": {
+          "moduleId": 909270,
+          "async": false,
+          "exportedName": "adminUpdateShippingZone",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/shipping/page": "action-browser"
+      },
+      "exportedName": "adminUpdateShippingZone",
+      "filename": "src/actions/admin.ts"
+    },
+    "4044a9a4615a4011e994fc9813bc8cfc4da7b393a3": {
+      "workers": {
+        "app/admin/shipping/page": {
+          "moduleId": 909270,
+          "async": false,
+          "exportedName": "adminDeleteShippingZone",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/shipping/page": "action-browser"
+      },
+      "exportedName": "adminDeleteShippingZone",
+      "filename": "src/actions/admin.ts"
+    },
+    "40c6eaf489050d83666820d9b63394802cf19d5530": {
+      "workers": {
+        "app/admin/shipping/page": {
+          "moduleId": 909270,
+          "async": false,
+          "exportedName": "adminCreateShippingMethod",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/shipping/page": "action-browser"
+      },
+      "exportedName": "adminCreateShippingMethod",
+      "filename": "src/actions/admin.ts"
+    },
+    "6098eadb7f4a46f8a120792f3f913ed33b80719706": {
+      "workers": {
+        "app/admin/shipping/page": {
+          "moduleId": 909270,
+          "async": false,
+          "exportedName": "adminUpdateShippingMethod",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/shipping/page": "action-browser"
+      },
+      "exportedName": "adminUpdateShippingMethod",
+      "filename": "src/actions/admin.ts"
+    },
+    "40707ad0f91fc46900aee0ed089ac30a479fe96af7": {
+      "workers": {
+        "app/admin/shipping/page": {
+          "moduleId": 909270,
+          "async": false,
+          "exportedName": "adminDeleteShippingMethod",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/shipping/page": "action-browser"
+      },
+      "exportedName": "adminDeleteShippingMethod",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

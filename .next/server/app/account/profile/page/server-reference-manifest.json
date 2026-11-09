@@ -1,0 +1,35 @@
+{
+  "node": {
+    "40a9dc0ed98d206077613f648cb388cee793d8b3fb": {
+      "workers": {
+        "app/account/profile/page": {
+          "moduleId": 139740,
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/account/profile/page": "action-browser"
+      },
+      "exportedName": "subscribeToNewsletter",
+      "filename": "src/actions/store.ts"
+    },
+    "40dfe471f440568fd331546ae51ed0716aefb712bd": {
+      "workers": {
+        "app/account/profile/page": {
+          "moduleId": 139740,
+          "async": false,
+          "exportedName": "updateProfile",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/account/profile/page": "action-browser"
+      },
+      "exportedName": "updateProfile",
+      "filename": "src/actions/store.ts"
+    }
+  },
+  "edge": {}
+}

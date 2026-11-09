@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40a9dc0ed98d206077613f648cb388cee793d8b3fb": {
+      "workers": {
+        "app/account/addresses/page": {
+          "moduleId": 103100,
+          "async": false,
+          "exportedName": "subscribeToNewsletter",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/account/addresses/page": "action-browser"
+      },
+      "exportedName": "subscribeToNewsletter",
+      "filename": "src/actions/store.ts"
+    },
+    "40e966898bc3287c84bb9fc80d4993f4209b8bef3e": {
+      "workers": {
+        "app/account/addresses/page": {
+          "moduleId": 103100,
+          "async": false,
+          "exportedName": "saveAddress",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/account/addresses/page": "action-browser"
+      },
+      "exportedName": "saveAddress",
+      "filename": "src/actions/store.ts"
+    },
+    "40ea99e11894c10ec24a31874865cc10f27a4c751c": {
+      "workers": {
+        "app/account/addresses/page": {
+          "moduleId": 103100,
+          "async": false,
+          "exportedName": "deleteAddress",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/account/addresses/page": "action-browser"
+      },
+      "exportedName": "deleteAddress",
+      "filename": "src/actions/store.ts"
+    }
+  },
+  "edge": {}
+}

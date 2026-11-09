@@ -1,0 +1,20 @@
+{
+  "node": {
+    "40bcc4b49f94403619e46388f90a928730e1ef1bd9": {
+      "workers": {
+        "app/admin/coupons/page": {
+          "moduleId": 552985,
+          "async": false,
+          "exportedName": "adminDeleteCoupon",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/coupons/page": "action-browser"
+      },
+      "exportedName": "adminDeleteCoupon",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

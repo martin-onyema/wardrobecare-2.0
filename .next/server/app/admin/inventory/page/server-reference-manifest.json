@@ -1,0 +1,20 @@
+{
+  "node": {
+    "404221c8465b941993c6e643fea173b680c3bf3d56": {
+      "workers": {
+        "app/admin/inventory/page": {
+          "moduleId": 185751,
+          "async": false,
+          "exportedName": "adminAdjustInventory",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/inventory/page": "action-browser"
+      },
+      "exportedName": "adminAdjustInventory",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,20 @@
+{
+  "node": {
+    "40ac47b2c1ca511745c76beddba0f86e69986b2e02": {
+      "workers": {
+        "app/checkout/page": {
+          "moduleId": 923634,
+          "async": false,
+          "exportedName": "createOrder",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/checkout/page": "action-browser"
+      },
+      "exportedName": "createOrder",
+      "filename": "src/actions/store.ts"
+    }
+  },
+  "edge": {}
+}

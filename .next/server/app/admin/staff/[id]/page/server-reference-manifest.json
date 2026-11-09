@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40454aa17048d14bb3531260a0f281d0cc03c2a2b0": {
+      "workers": {
+        "app/admin/staff/[id]/page": {
+          "moduleId": 696319,
+          "async": false,
+          "exportedName": "adminCreateStaff",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/staff/[id]/page": "action-browser"
+      },
+      "exportedName": "adminCreateStaff",
+      "filename": "src/actions/admin.ts"
+    },
+    "60bdb2cb1d2732f3e8516b8348da0a3afd473c40b8": {
+      "workers": {
+        "app/admin/staff/[id]/page": {
+          "moduleId": 696319,
+          "async": false,
+          "exportedName": "adminUpdateStaff",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/staff/[id]/page": "action-browser"
+      },
+      "exportedName": "adminUpdateStaff",
+      "filename": "src/actions/admin.ts"
+    },
+    "40e303f213360f8434400501092cd95bd205a0c05a": {
+      "workers": {
+        "app/admin/staff/[id]/page": {
+          "moduleId": 696319,
+          "async": false,
+          "exportedName": "adminDeleteStaff",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/staff/[id]/page": "action-browser"
+      },
+      "exportedName": "adminDeleteStaff",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

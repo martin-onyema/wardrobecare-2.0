@@ -1,0 +1,35 @@
+{
+  "node": {
+    "703f0fde976f53fcc847faf886e151b2ed341e3e8e": {
+      "workers": {
+        "app/admin/services/enquiries/[id]/page": {
+          "moduleId": 267185,
+          "async": false,
+          "exportedName": "adminUpdateServiceEnquiryStatus",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/enquiries/[id]/page": "action-browser"
+      },
+      "exportedName": "adminUpdateServiceEnquiryStatus",
+      "filename": "src/actions/admin.ts"
+    },
+    "60199438a6e987673e4636ef3f7dbe74fa57cf1cc8": {
+      "workers": {
+        "app/admin/services/enquiries/[id]/page": {
+          "moduleId": 267185,
+          "async": false,
+          "exportedName": "adminAssignServiceEnquiry",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/enquiries/[id]/page": "action-browser"
+      },
+      "exportedName": "adminAssignServiceEnquiry",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

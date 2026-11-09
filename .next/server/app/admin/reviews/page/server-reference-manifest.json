@@ -1,0 +1,20 @@
+{
+  "node": {
+    "70b906935ff60486597a7559c2ab4728e08fdf904d": {
+      "workers": {
+        "app/admin/reviews/page": {
+          "moduleId": 754468,
+          "async": false,
+          "exportedName": "adminModerateReview",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/reviews/page": "action-browser"
+      },
+      "exportedName": "adminModerateReview",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

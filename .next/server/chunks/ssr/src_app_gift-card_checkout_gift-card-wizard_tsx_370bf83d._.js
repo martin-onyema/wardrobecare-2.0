@@ -1,0 +1,3 @@
+module.exports=[499034,a=>{"use strict";var b=a.i(187924);function c(){return(0,b.jsxs)("div",{className:"mx-auto max-w-md px-6 py-16 text-center",children:[(0,b.jsx)("p",{className:"text-xs uppercase tracking-[0.3em] text-neutral-500",children:"Wardrobecare"}),(0,b.jsx)("h1",{className:"mt-4 text-3xl font-semibold",children:"Gift Cards"}),(0,b.jsx)("p",{className:"mt-3 text-sm text-neutral-600",children:"Wardrobecare gift cards are launching soon. Please check back shortly."})]})}a.s(["GiftCardWizard",()=>c,"default",0,c])}];
+
+//# sourceMappingURL=src_app_gift-card_checkout_gift-card-wizard_tsx_370bf83d._.js.map

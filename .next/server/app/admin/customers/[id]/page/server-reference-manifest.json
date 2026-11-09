@@ -1,0 +1,35 @@
+{
+  "node": {
+    "70e36ca11eaf08234a8c80aaf5efa5788eeb35360c": {
+      "workers": {
+        "app/admin/customers/[id]/page": {
+          "moduleId": 844147,
+          "async": false,
+          "exportedName": "adminCreateCustomerNote",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/customers/[id]/page": "action-browser"
+      },
+      "exportedName": "adminCreateCustomerNote",
+      "filename": "src/actions/admin.ts"
+    },
+    "40625ce658bf1c51cad07bd030fb264290ea67e7f0": {
+      "workers": {
+        "app/admin/customers/[id]/page": {
+          "moduleId": 844147,
+          "async": false,
+          "exportedName": "adminDeleteCustomerNote",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/customers/[id]/page": "action-browser"
+      },
+      "exportedName": "adminDeleteCustomerNote",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

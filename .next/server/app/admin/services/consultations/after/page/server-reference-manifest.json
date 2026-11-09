@@ -1,0 +1,50 @@
+{
+  "node": {
+    "4094029b1434ee4d3c00db99c802e5399c9dc389ed": {
+      "workers": {
+        "app/admin/services/consultations/after/page": {
+          "moduleId": 744045,
+          "async": false,
+          "exportedName": "adminSendSummary",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/after/page": "action-browser"
+      },
+      "exportedName": "adminSendSummary",
+      "filename": "src/actions/consultations-workflow.ts"
+    },
+    "4064d3d62cbbc2bd470d059732be621337f73006ba": {
+      "workers": {
+        "app/admin/services/consultations/after/page": {
+          "moduleId": 744045,
+          "async": false,
+          "exportedName": "adminMarkPersonalShoppingBrief",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/after/page": "action-browser"
+      },
+      "exportedName": "adminMarkPersonalShoppingBrief",
+      "filename": "src/actions/consultations-workflow.ts"
+    },
+    "40ff775a5b61f0c281e6efce4857e5ec07ede1669b": {
+      "workers": {
+        "app/admin/services/consultations/after/page": {
+          "moduleId": 744045,
+          "async": false,
+          "exportedName": "adminBookReturnVisit",
+          "filename": "src/actions/consultations-workflow.ts"
+        }
+      },
+      "layer": {
+        "app/admin/services/consultations/after/page": "action-browser"
+      },
+      "exportedName": "adminBookReturnVisit",
+      "filename": "src/actions/consultations-workflow.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,80 @@
+{
+  "node": {
+    "4041ae8d6f07934a5e13cfd31c306a8cce6cc9d642": {
+      "workers": {
+        "app/admin/products/new/page": {
+          "moduleId": 995089,
+          "async": false,
+          "exportedName": "adminCreateProduct",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/admin/products/new/page": "action-browser"
+      },
+      "exportedName": "adminCreateProduct",
+      "filename": "src/actions/store.ts"
+    },
+    "600f6b51fe4b239d8ab030f8e183384ab321d81c7d": {
+      "workers": {
+        "app/admin/products/new/page": {
+          "moduleId": 995089,
+          "async": false,
+          "exportedName": "adminUpdateProduct",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/admin/products/new/page": "action-browser"
+      },
+      "exportedName": "adminUpdateProduct",
+      "filename": "src/actions/store.ts"
+    },
+    "40ff33a6e5e66af18e5d976012838775610fe30ad0": {
+      "workers": {
+        "app/admin/products/new/page": {
+          "moduleId": 995089,
+          "async": false,
+          "exportedName": "adminDeleteProduct",
+          "filename": "src/actions/store.ts"
+        }
+      },
+      "layer": {
+        "app/admin/products/new/page": "action-browser"
+      },
+      "exportedName": "adminDeleteProduct",
+      "filename": "src/actions/store.ts"
+    },
+    "400f19124d56baaf3ddb413e465dc88894dd9a5f71": {
+      "workers": {
+        "app/admin/products/new/page": {
+          "moduleId": 995089,
+          "async": false,
+          "exportedName": "adminUploadProductImage",
+          "filename": "src/actions/supabase.ts"
+        }
+      },
+      "layer": {
+        "app/admin/products/new/page": "action-browser"
+      },
+      "exportedName": "adminUploadProductImage",
+      "filename": "src/actions/supabase.ts"
+    },
+    "40a785f926b107b073109222ac7dc85377c2378f04": {
+      "workers": {
+        "app/admin/products/new/page": {
+          "moduleId": 995089,
+          "async": false,
+          "exportedName": "adminRestoreProduct",
+          "filename": "src/actions/supabase.ts"
+        }
+      },
+      "layer": {
+        "app/admin/products/new/page": "action-browser"
+      },
+      "exportedName": "adminRestoreProduct",
+      "filename": "src/actions/supabase.ts"
+    }
+  },
+  "edge": {}
+}

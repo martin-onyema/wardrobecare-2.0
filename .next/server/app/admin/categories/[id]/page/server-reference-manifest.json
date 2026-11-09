@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40368f6d656e613a2ded5ceae9857024694ff4ca85": {
+      "workers": {
+        "app/admin/categories/[id]/page": {
+          "moduleId": 818503,
+          "async": false,
+          "exportedName": "adminCreateCategory",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/categories/[id]/page": "action-browser"
+      },
+      "exportedName": "adminCreateCategory",
+      "filename": "src/actions/admin.ts"
+    },
+    "6030fd3c5493a431157e21a1ee378654a7e0bdc6ab": {
+      "workers": {
+        "app/admin/categories/[id]/page": {
+          "moduleId": 818503,
+          "async": false,
+          "exportedName": "adminUpdateCategory",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/categories/[id]/page": "action-browser"
+      },
+      "exportedName": "adminUpdateCategory",
+      "filename": "src/actions/admin.ts"
+    },
+    "40b265ba55309e23ed26b5a506daa6855faafddd03": {
+      "workers": {
+        "app/admin/categories/[id]/page": {
+          "moduleId": 818503,
+          "async": false,
+          "exportedName": "adminDeleteCategory",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/categories/[id]/page": "action-browser"
+      },
+      "exportedName": "adminDeleteCategory",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

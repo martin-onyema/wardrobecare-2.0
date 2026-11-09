@@ -6,6 +6,7 @@ import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { ServiceEnquiryForm } from '@/components/services/service-enquiry-form'
 import { SERVICES, getServiceBySlug, getRelatedServices } from '@/lib/services-data'
+import { getSeoOverride } from '@/lib/seo'
 import {
   ArrowRight,
   ArrowUpRight,
@@ -30,22 +31,31 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const service = getServiceBySlug(slug)
   if (!service) return { title: 'Service Not Found' }
 
+  // Pull any admin-defined SEO override for this route
+  const ov = await getSeoOverride(`/services/${service.slug}`).catch(() => null)
+
+  const title = ov?.seoTitle ?? `${service.name} — Wardrobecare Services`
+  const description = ov?.seoDescription ?? service.tagline
+  const ogImage = ov?.ogImage ?? service.image
+
   return {
-    title: `${service.name} — Wardrobecare Services`,
-    description: service.tagline,
+    title,
+    description,
     alternates: { canonical: `/services/${service.slug}` },
     openGraph: {
-      title: `${service.name} — Wardrobecare`,
-      description: service.tagline,
+      title,
+      description,
       type: 'website',
-      images: [{ url: service.image, alt: service.imageAlt }],
+      images: [{ url: ogImage, alt: service.imageAlt }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${service.name} — Wardrobecare`,
-      description: service.tagline,
-      images: [service.image],
+      title,
+      description,
+      images: [ogImage],
     },
+    // Coming-soon services and explicitly noindex'd services are hidden from Google
+    robots: (ov?.noindex ?? service.comingSoon) ? { index: false, follow: false } : { index: true, follow: true },
   }
 }
 

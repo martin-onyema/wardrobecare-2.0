@@ -1,0 +1,3 @@
+{
+  "/admin/services/consultations/after/page": "app/admin/services/consultations/after/page.js"
+}

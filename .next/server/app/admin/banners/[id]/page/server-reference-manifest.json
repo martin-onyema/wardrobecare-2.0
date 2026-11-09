@@ -1,0 +1,50 @@
+{
+  "node": {
+    "409e6868d121dae47a3685d2afba63c46e6b0643d4": {
+      "workers": {
+        "app/admin/banners/[id]/page": {
+          "moduleId": 155854,
+          "async": false,
+          "exportedName": "adminCreateBanner",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/banners/[id]/page": "action-browser"
+      },
+      "exportedName": "adminCreateBanner",
+      "filename": "src/actions/admin.ts"
+    },
+    "6097f1a2fa3a975c7843a9a717d3f98b4406cd0cea": {
+      "workers": {
+        "app/admin/banners/[id]/page": {
+          "moduleId": 155854,
+          "async": false,
+          "exportedName": "adminUpdateBanner",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/banners/[id]/page": "action-browser"
+      },
+      "exportedName": "adminUpdateBanner",
+      "filename": "src/actions/admin.ts"
+    },
+    "4001d609c6dfb0d842c0b3d4f1507e4badf7fbd7bd": {
+      "workers": {
+        "app/admin/banners/[id]/page": {
+          "moduleId": 155854,
+          "async": false,
+          "exportedName": "adminDeleteBanner",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/banners/[id]/page": "action-browser"
+      },
+      "exportedName": "adminDeleteBanner",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

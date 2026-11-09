@@ -1,0 +1,3 @@
+module.exports=[267185,a=>{"use strict";var b=a.i(394531);a.s([],238320),a.i(238320),a.s(["60199438a6e987673e4636ef3f7dbe74fa57cf1cc8",()=>b.adminAssignServiceEnquiry,"703f0fde976f53fcc847faf886e151b2ed341e3e8e",()=>b.adminUpdateServiceEnquiryStatus],267185)},307825,a=>{a.v(b=>Promise.all(["server/chunks/ssr/[root-of-the-server]__b6aa55c3._.js","server/chunks/ssr/_9260cfa1._.js"].map(b=>a.l(b))).then(()=>b(557634)))},767016,a=>{a.v(a=>Promise.resolve().then(()=>a(872849)))},59092,a=>{a.v(b=>Promise.all(["server/chunks/ssr/[root-of-the-server]__f0a44c82._.js"].map(b=>a.l(b))).then(()=>b(31664)))}];
+
+//# sourceMappingURL=_8b541f3e._.js.map

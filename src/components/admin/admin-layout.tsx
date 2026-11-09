@@ -37,6 +37,7 @@ import {
   ClipboardList,
   CalendarCheck,
   ShoppingBag,
+  Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
@@ -127,6 +128,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Notifications', href: '/admin/notifications', icon: BellRing, permission: 'notification.view' },
       { label: 'SMS Diagnostic', href: '/admin/notifications/sms', icon: BellRing, permission: 'notification.view' },
+      { label: 'SEO Manager', href: '/admin/seo', icon: Search, permission: 'notification.view' },
       { label: 'Audit Log', href: '/admin/audit', icon: ScrollText, permission: 'audit.view' },
       { label: 'Staff', href: '/admin/staff', icon: UserCog, permission: 'staff.manage' },
       { label: 'CMS', href: '/admin/cms', icon: Layers, permission: 'cms.manage' },

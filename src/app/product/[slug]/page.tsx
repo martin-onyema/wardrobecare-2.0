@@ -41,6 +41,8 @@ export async function generateMetadata({ params }: { params: Params }) {
       description,
       images: ogImage ? [ogImage] : product.images.map((img) => img.url),
     },
+    // Honour the SEO Manager's noindex setting
+    robots: product.noindex ? { index: false, follow: false } : { index: true, follow: true },
   }
 }
 

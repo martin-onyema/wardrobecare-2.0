@@ -1,0 +1,20 @@
+{
+  "node": {
+    "402c3e609785c1b6f0b7952aecd7c97d424391b200": {
+      "workers": {
+        "app/admin/marketing/page": {
+          "moduleId": 878755,
+          "async": false,
+          "exportedName": "adminDeleteCampaign",
+          "filename": "src/actions/admin.ts"
+        }
+      },
+      "layer": {
+        "app/admin/marketing/page": "action-browser"
+      },
+      "exportedName": "adminDeleteCampaign",
+      "filename": "src/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}
