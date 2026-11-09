@@ -1,6 +1,6 @@
 {
   "node": {
-    "4052e0a847736e31758f31cb9192068fdb64d99d7b": {
+    "40233ef22fcec78bf7cf66cb2816e9a7b99cfdbc90": {
       "workers": {
         "app/services/[slug]/page": {
           "moduleId": "[project]/.next-internal/server/app/services/[slug]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/store.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
@@ -15,7 +15,7 @@
       "exportedName": "subscribeToNewsletter",
       "filename": "src/actions/store.ts"
     },
-    "40e2ccbcfe74340ebd8505024a39a06428d75db0df": {
+    "4072971b3c5000a45bb874e16018a2df80bf35d6cb": {
       "workers": {
         "app/services/[slug]/page": {
           "moduleId": "[project]/.next-internal/server/app/services/[slug]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/store.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",

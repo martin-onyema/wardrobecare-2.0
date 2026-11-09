@@ -1535,6 +1535,68 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/db.ts [app-client] (ecmascript)");
 ;
+// ============================================================
+// CATALOGUE QUERIES
+// ============================================================
+/**
+ * Pre-existing Category columns only — used in explicit `select` to avoid
+ * fetching the new SEO Manager columns (seoH1, seoIntroText, seoOgImage,
+ * noindex, inSitemap) that may not exist on the production DB yet.
+ *
+ * Without this, `db.category.findUnique({ include: { ... } })` would emit
+ * `SELECT * FROM Category` which fails on a DB that hasn't had the SEO
+ * migration applied. With explicit `select`, Prisma only fetches the
+ * columns listed here.
+ */ const CATEGORY_SELECT_BASE = {
+    id: true,
+    name: true,
+    slug: true,
+    description: true,
+    parentId: true,
+    image: true,
+    order: true,
+    featured: true,
+    active: true,
+    seoTitle: true,
+    seoDescription: true,
+    seoKeywords: true
+};
+const CATEGORY_SELECT_WITH_PARENT = {
+    ...CATEGORY_SELECT_BASE,
+    parent: {
+        select: {
+            name: true
+        }
+    }
+};
+/**
+ * Pre-existing Product columns only — same rationale as above.
+ */ const PRODUCT_SELECT_BASE = {
+    id: true,
+    name: true,
+    slug: true,
+    description: true,
+    sku: true,
+    price: true,
+    salePrice: true,
+    costPrice: true,
+    currency: true,
+    categoryId: true,
+    brandId: true,
+    tags: true,
+    featured: true,
+    published: true,
+    rating: true,
+    reviewCount: true,
+    outOfStock: true,
+    freeShipping: true,
+    seoTitle: true,
+    seoDescription: true,
+    seoKeywords: true,
+    canonicalUrl: true,
+    ogImage: true,
+    status: true
+};
 async function getCategories() {
     return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["db"].category.findMany({
         where: {
@@ -1584,7 +1646,8 @@ async function getHubData(rootSlug, groups) {
                 where: {
                     slug: sub.slug
                 },
-                include: {
+                select: {
+                    ...CATEGORY_SELECT_BASE,
                     products: {
                         where: {
                             published: true
@@ -1598,12 +1661,18 @@ async function getHubData(rootSlug, groups) {
                             }
                         ],
                         take: 4,
-                        include: {
+                        select: {
+                            ...PRODUCT_SELECT_BASE,
                             images: {
                                 orderBy: {
                                     position: 'asc'
                                 },
-                                take: 1
+                                take: 1,
+                                select: {
+                                    url: true,
+                                    altText: true,
+                                    position: true
+                                }
                             }
                         }
                     }

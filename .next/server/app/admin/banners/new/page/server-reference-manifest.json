@@ -1,6 +1,6 @@
 {
   "node": {
-    "40390a338301e8f49fd7f4eabcc534a0971b54f871": {
+    "40aa390832acee9bb5b1a5dad2a2c35dbda450c759": {
       "workers": {
         "app/admin/banners/new/page": {
           "moduleId": 120118,
@@ -15,7 +15,7 @@
       "exportedName": "adminCreateBanner",
       "filename": "src/actions/admin.ts"
     },
-    "609c16f705d84d74020444dc59f90ef0ef60168e0e": {
+    "6093d256fd9986a329a8dbca71aeddac977d7d2142": {
       "workers": {
         "app/admin/banners/new/page": {
           "moduleId": 120118,
@@ -30,7 +30,7 @@
       "exportedName": "adminUpdateBanner",
       "filename": "src/actions/admin.ts"
     },
-    "408a5cc6727e06602f24eaa8c0f37989fbbbb60889": {
+    "401ad45b419cba882e0903e0a96a6fb5e03486795b": {
       "workers": {
         "app/admin/banners/new/page": {
           "moduleId": 120118,

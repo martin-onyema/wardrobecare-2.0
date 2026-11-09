@@ -1,11 +1,1 @@
-{
-  "version": 4,
-  "routes": {},
-  "dynamicRoutes": {},
-  "notFoundRoutes": [],
-  "preview": {
-    "previewModeId": "ced6d647a8b84629bacd80002a254fc5",
-    "previewModeSigningKey": "c43c3c326037eeabf996c8a2fe452ab824d59acdb1a574e7c0341e348d146968",
-    "previewModeEncryptionKey": "e484bf7c86bdc2e6437a1606bd9070efdca8d6d7bbecc0b36f57a484bf73e1d6"
-  }
-}
+{"version":4,"routes":{"/services/wardrobe-consultation":{},"/services/personal-shopping":{},"/services/outfit-gifting":{},"/services/traditional-wear-consultation":{},"/services/amendments-alterations":{}},"dynamicRoutes":{"/services/[slug]":{"dataRoute":null,"dataRouteRegex":null,"fallback":null,"fallbackRevalidate":false,"fallbackSourceRoute":"/services/[slug]","routeRegex":"^\\/services\\/([^/]+?)(?:\\/)?$","allowHeader":[]}},"notFoundRoutes":[],"preview":{"previewModeId":"3934925db53ec97c94282b9ae3f24131","previewModeSigningKey":"4a713bb6b0ca706f64e519ba8a2f3f71b87573ce521d366af7d6c1e536f2ca01","previewModeEncryptionKey":"f461d8d5d05cf05d84b45a5d1153b58d83b9666ea47a69e5c6eb923502026255"}}

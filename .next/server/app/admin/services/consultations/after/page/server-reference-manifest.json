@@ -1,6 +1,6 @@
 {
   "node": {
-    "409d7fe333d1dc1055010eeb7e7090c934aece31b8": {
+    "40117c1bf14615e2d3756f0779cd1fa0b3c0a23e3c": {
       "workers": {
         "app/admin/services/consultations/after/page": {
           "moduleId": 744045,
@@ -15,7 +15,7 @@
       "exportedName": "adminSendSummary",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "400a9fe48979c0469159e18ffc8b1fba6fc4ea0a0a": {
+    "402d3c2e88e0d019f90d28204884a4f3c1abf09ca7": {
       "workers": {
         "app/admin/services/consultations/after/page": {
           "moduleId": 744045,
@@ -30,7 +30,7 @@
       "exportedName": "adminMarkPersonalShoppingBrief",
       "filename": "src/actions/consultations-workflow.ts"
     },
-    "40119efc8ec0b10efc7cb199bb16b10519bb8e6fb0": {
+    "40a5afb0fc162d813947c2e22284c551751a67d865": {
       "workers": {
         "app/admin/services/consultations/after/page": {
           "moduleId": 744045,

@@ -1,6 +1,6 @@
 {
   "node": {
-    "6020b11109b4e1c13fd7c3b9f7b90ec768da8eca0b": {
+    "6004bf3b304be9d027578b61c6199f9a0e5860ebba": {
       "workers": {
         "app/admin/products/page": {
           "moduleId": 105589,
@@ -15,7 +15,7 @@
       "exportedName": "adminBulkProductAction",
       "filename": "src/actions/admin.ts"
     },
-    "009b48431f3b2aa06eebf194252c0704db137dae8a": {
+    "00ceb26633c5c93baf8f0f672a26479426de39e1c2": {
       "workers": {
         "app/admin/products/page": {
           "moduleId": 105589,
@@ -30,7 +30,7 @@
       "exportedName": "adminMarkAllNotificationsRead",
       "filename": "src/actions/admin.ts"
     },
-    "40c9bc3eb695c9efd88f120a1a1fc3b7e539882700": {
+    "4034916db822c3cc6460374ce94700bd50a8b2ed49": {
       "workers": {
         "app/admin/products/page": {
           "moduleId": 105589,
@@ -45,7 +45,7 @@
       "exportedName": "adminMarkNotificationRead",
       "filename": "src/actions/admin.ts"
     },
-    "407cc1996acb38a6eb58663cc68f5f303dff70df18": {
+    "403d3996a2dd241ac9e720b18f1f77a553bbab7512": {
       "workers": {
         "app/admin/products/page": {
           "moduleId": 105589,
@@ -60,7 +60,7 @@
       "exportedName": "adminDeleteNotification",
       "filename": "src/actions/admin.ts"
     },
-    "400fc66671f7e93b8edc2f1f0c69048905290b8f09": {
+    "40ce0c018e991df7eedfc29c230e54cfd27b2356a6": {
       "workers": {
         "app/admin/products/page": {
           "moduleId": 105589,

@@ -1,6 +1,6 @@
 {
   "node": {
-    "60f87273fa4cdc37120c1038701da1283add97f343": {
+    "601aa2696bd4551324b7f39e2233a21f8779364845": {
       "workers": {
         "app/admin/shipping/page": {
           "moduleId": 909270,
@@ -15,7 +15,7 @@
       "exportedName": "adminUpdateShippingZone",
       "filename": "src/actions/admin.ts"
     },
-    "40ab539eb11ba0985a63790024388aa7cf186cb545": {
+    "40b433e896d64f0fb44fc128f5b2188b8da2bcbc93": {
       "workers": {
         "app/admin/shipping/page": {
           "moduleId": 909270,
@@ -30,7 +30,7 @@
       "exportedName": "adminDeleteShippingZone",
       "filename": "src/actions/admin.ts"
     },
-    "40097e3200c08763eec2896948ddcbf36b2618cf47": {
+    "40ed507bb0791994f9f0c7f7ed96ebe97d4ddfed0d": {
       "workers": {
         "app/admin/shipping/page": {
           "moduleId": 909270,
@@ -45,7 +45,7 @@
       "exportedName": "adminCreateShippingMethod",
       "filename": "src/actions/admin.ts"
     },
-    "607a60382d9788b03b09b61f5ee8420dff4dc7e156": {
+    "6092ccaad7e7dcd403072f4253cfb8fa2f6638eb33": {
       "workers": {
         "app/admin/shipping/page": {
           "moduleId": 909270,
@@ -60,7 +60,7 @@
       "exportedName": "adminUpdateShippingMethod",
       "filename": "src/actions/admin.ts"
     },
-    "40f714c603988daaaccc121f1aa057814f565de487": {
+    "405572578d05f281dd38af02346052d00ad2c2c747": {
       "workers": {
         "app/admin/shipping/page": {
           "moduleId": 909270,

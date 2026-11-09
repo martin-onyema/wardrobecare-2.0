@@ -1,3 +1,5 @@
-[00:00:01.636] Server  WARN    ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-[00:00:01.724] Server  LOG     ✓ Ready in 1545ms
-[00:00:23.250] Server  LOG     ○ Compiling /about ...
+[00:00:00.853] Server  WARN    ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[00:00:00.952] Server  LOG     ✓ Ready in 746ms
+[00:00:18.227] Server  LOG     prisma:error "\nInvalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__[\"db\"].redirect.findUnique()` invocation in\n/home/z/my-project/.next/dev/server/chunks/[root-of-the-server]__fc55eb3e._.js:109:162\n\n  106     });\n  107 }\n  108 try {\n→ 109     const redirect = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__[\"db\"].redirect.findUnique(\nThe table `main.Redirect` does not exist in the current database."
+[00:00:18.229] Server  WARN    [redirect-lookup] could not query Redirect table: "\nInvalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5"
+[00:00:21.266] Server  LOG     ○ Compiling /services/[slug] ...

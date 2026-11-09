@@ -1,6 +1,6 @@
 {
   "node": {
-    "408a5cc6727e06602f24eaa8c0f37989fbbbb60889": {
+    "401ad45b419cba882e0903e0a96a6fb5e03486795b": {
       "workers": {
         "app/admin/banners/page": {
           "moduleId": 574409,

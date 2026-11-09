@@ -1,6 +1,6 @@
 {
   "node": {
-    "405c6de1a59770286fe3a793cfea1e05929205c051": {
+    "40a46cfe3dcd403483e2f6f9c4d4b769ea54da55c7": {
       "workers": {
         "app/account/register/page": {
           "moduleId": 835795,
@@ -15,7 +15,7 @@
       "exportedName": "subscribeToNewsletter",
       "filename": "src/actions/store.ts"
     },
-    "40f00cefe6bc3f4a77d565027f096be03aed3ced4c": {
+    "4052fe8c559624730012d3bd79b63f601c678ddf1d": {
       "workers": {
         "app/account/register/page": {
           "moduleId": 835795,

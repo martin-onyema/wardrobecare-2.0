@@ -1,6 +1,6 @@
 {
   "node": {
-    "409b5b24de0590a025216cfdb41c6a10bcf4907a26": {
+    "40e7b33d95cf65c0aac597d48b631c1c4ddb1c0cb6": {
       "workers": {
         "app/admin/seo/edit/[type]/[id]/page": {
           "moduleId": 459207,
@@ -15,7 +15,7 @@
       "exportedName": "saveSeoAction",
       "filename": "src/actions/seo.ts"
     },
-    "40443afc07afebd9def8c1ddf3220734d34320d9fb": {
+    "40f4f65bd0e027e5ecc82f92c7792d4164ee4c3129": {
       "workers": {
         "app/admin/seo/edit/[type]/[id]/page": {
           "moduleId": 459207,

@@ -1,6 +1,6 @@
 {
   "node": {
-    "40433a9b51164272c3fc31e95ef3b299ceee21b2af": {
+    "4002495f45469913abad39066fa54bf0bf57ccba90": {
       "workers": {
         "app/admin/seo/redirects/page": {
           "moduleId": 654402,
@@ -15,7 +15,7 @@
       "exportedName": "addRedirectAction",
       "filename": "src/actions/seo.ts"
     },
-    "406f13a6017778427337157b16fd4edb9368bb67ba": {
+    "406bb0316e3259f62e9d6a61187d9121a85849b5e2": {
       "workers": {
         "app/admin/seo/redirects/page": {
           "moduleId": 654402,
