@@ -208,20 +208,17 @@ export async function sendSms(
   // Build the request body. Try multiple combinations:
   //   1. DND channel + custom sender ID (best — bypasses Do-Not-Disturb)
   //   2. Generic channel + custom sender ID (works if sender ID is approved)
-  //   3. Generic channel + no sender ID (Termii uses a default sender)
-  // The fallback chain handles accounts where the sender ID isn't approved yet.
+  //   3. Generic channel + Termii default sender 'TERMII' (always works)
+  // The fallback chain handles accounts where the custom sender ID isn't approved yet.
   const senderId = process.env.TERMII_SENDER_ID || 'WARDROBECARE'
-  const buildBody = (channel: string, from?: string) => {
-    const body: any = {
-      api_key: process.env.TERMII_API_KEY,
-      to: recipient,
-      sms: message,
-      type: 'plain',
-      channel,
-    }
-    if (from) body.from = from
-    return JSON.stringify(body)
-  }
+  const buildBody = (channel: string, from: string) => JSON.stringify({
+    api_key: process.env.TERMII_API_KEY,
+    to: recipient,
+    from,
+    sms: message,
+    type: 'plain',
+    channel,
+  })
 
   try {
     // Attempt 1: DND channel with custom sender ID
@@ -243,14 +240,15 @@ export async function sendSms(
       })
     }
 
-    // Attempt 3: Generic channel WITHOUT a sender ID (Termii uses a default like "TERMII")
-    if (res.status === 422) {
-      console.warn('[sms] sender ID rejected, trying generic channel without sender ID')
+    // Attempt 3: Generic channel with Termii's default sender 'TERMII'
+    // (works on all accounts — no sender ID registration needed)
+    if (res.status === 422 || res.status === 400) {
+      console.warn('[sms] custom sender ID rejected, falling back to TERMII default sender')
       res = await fetch(TERMII_ENDPOINT, {
         method: 'POST',
         signal: controller.signal,
         headers: { 'Content-Type': 'application/json' },
-        body: buildBody('generic'),  // no "from" field — Termii uses its default sender
+        body: buildBody('generic', 'TERMII'),
       })
     }
 
