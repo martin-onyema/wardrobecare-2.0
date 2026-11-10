@@ -205,22 +205,42 @@ export async function sendSms(
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), SMS_TIMEOUT_MS)
 
+  // Build the request body — try DND channel first (for transactional bypass),
+  // fall back to 'generic' channel if the sender ID isn't approved for DND.
+  const buildBody = (channel: string) => JSON.stringify({
+    api_key: process.env.TERMII_API_KEY,
+    to: recipient,
+    from: process.env.TERMII_SENDER_ID || 'WARDROBECARE',
+    sms: message,
+    type: 'plain',
+    channel,
+  })
+
   try {
-    const res = await fetch(TERMII_ENDPOINT, {
+    // First attempt: DND channel (bypasses Do-Not-Disturb for transactional SMS)
+    let res = await fetch(TERMII_ENDPOINT, {
       method: 'POST',
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        api_key: process.env.TERMII_API_KEY,
-        to: recipient,
-        from: process.env.TERMII_SENDER_ID || 'WARDROBECARE',
-        sms: message,
-        type: 'plain',
-        channel: 'dnd', // DND route for transactional messages — bypasses Do-Not-Disturb
-      }),
+      body: buildBody('dnd'),
     })
+
+    // If DND channel fails with 422 (sender ID not approved for DND route),
+    // retry with the 'generic' channel which works with any approved sender ID.
+    if (res.status === 422) {
+      const dndBody = await res.text().catch(() => '')
+      console.warn(`[sms] termii DND channel rejected (422), retrying with generic channel: ${dndBody.slice(0, 200)}`)
+      res = await fetch(TERMII_ENDPOINT, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: buildBody('generic'),
+      })
+    }
 
     if (!res.ok) {
       const body = await res.text().catch(() => '')
