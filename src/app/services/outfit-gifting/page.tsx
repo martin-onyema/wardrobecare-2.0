@@ -207,7 +207,7 @@ export default function OutfitGiftingPage() {
                 </p>
                 <div className="mt-9 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <a
-                    href="#book"
+                    href="/services/outfit-gifting/book"
                     className="group inline-flex items-center gap-3 bg-foreground text-background px-8 py-4 text-[11px] uppercase tracking-[0.2em] hover:bg-foreground/90 transition-colors"
                   >
                     Plan a Gift
