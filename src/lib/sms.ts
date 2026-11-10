@@ -205,40 +205,52 @@ export async function sendSms(
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), SMS_TIMEOUT_MS)
 
-  // Build the request body — try DND channel first (for transactional bypass),
-  // fall back to 'generic' channel if the sender ID isn't approved for DND.
-  const buildBody = (channel: string) => JSON.stringify({
-    api_key: process.env.TERMII_API_KEY,
-    to: recipient,
-    from: process.env.TERMII_SENDER_ID || 'WARDROBECARE',
-    sms: message,
-    type: 'plain',
-    channel,
-  })
+  // Build the request body. Try multiple combinations:
+  //   1. DND channel + custom sender ID (best — bypasses Do-Not-Disturb)
+  //   2. Generic channel + custom sender ID (works if sender ID is approved)
+  //   3. Generic channel + no sender ID (Termii uses a default sender)
+  // The fallback chain handles accounts where the sender ID isn't approved yet.
+  const senderId = process.env.TERMII_SENDER_ID || 'WARDROBECARE'
+  const buildBody = (channel: string, from?: string) => {
+    const body: any = {
+      api_key: process.env.TERMII_API_KEY,
+      to: recipient,
+      sms: message,
+      type: 'plain',
+      channel,
+    }
+    if (from) body.from = from
+    return JSON.stringify(body)
+  }
 
   try {
-    // First attempt: DND channel (bypasses Do-Not-Disturb for transactional SMS)
+    // Attempt 1: DND channel with custom sender ID
     let res = await fetch(TERMII_ENDPOINT, {
       method: 'POST',
       signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: buildBody('dnd'),
+      headers: { 'Content-Type': 'application/json' },
+      body: buildBody('dnd', senderId),
     })
 
-    // If DND channel fails with 422 (sender ID not approved for DND route),
-    // retry with the 'generic' channel which works with any approved sender ID.
+    // Attempt 2: Generic channel with custom sender ID
     if (res.status === 422) {
-      const dndBody = await res.text().catch(() => '')
-      console.warn(`[sms] termii DND channel rejected (422), retrying with generic channel: ${dndBody.slice(0, 200)}`)
+      console.warn('[sms] DND channel rejected, trying generic channel with sender ID')
       res = await fetch(TERMII_ENDPOINT, {
         method: 'POST',
         signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: buildBody('generic'),
+        headers: { 'Content-Type': 'application/json' },
+        body: buildBody('generic', senderId),
+      })
+    }
+
+    // Attempt 3: Generic channel WITHOUT a sender ID (Termii uses a default like "TERMII")
+    if (res.status === 422) {
+      console.warn('[sms] sender ID rejected, trying generic channel without sender ID')
+      res = await fetch(TERMII_ENDPOINT, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: buildBody('generic'),  // no "from" field — Termii uses its default sender
       })
     }
 
