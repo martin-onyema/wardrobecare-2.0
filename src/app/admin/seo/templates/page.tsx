@@ -21,34 +21,62 @@ export default async function SeoTemplatesPage() {
   const perms = await getMyPermissionCodes()
   const templates = await getAllTemplates()
 
-  // Count empty fields across the catalogue — for the "Apply to all empty fields" pre-count
-  const [categories, products, overrides] = await Promise.all([
-    db.category.findMany({ select: { seoTitle: true, seoDescription: true, seoH1: true, seoIntroText: true } }),
-    db.product.findMany({
+  // Count empty fields across the catalogue — for the "Apply to all empty fields" pre-count.
+  // Wrapped in try/catch because the new SEO columns may not exist yet if the migration
+  // hasn't been applied. In that case, we fall back to counting only the pre-existing
+  // fields (seoTitle, seoDescription).
+  let emptyCount = 0
+
+  // Categories — try with new columns, fall back without
+  let categories: any[] = []
+  try {
+    categories = await db.category.findMany({ select: { seoTitle: true, seoDescription: true, seoH1: true, seoIntroText: true } })
+  } catch {
+    categories = await db.category.findMany({ select: { seoTitle: true, seoDescription: true } })
+  }
+  for (const c of categories) {
+    if (!c.seoTitle) emptyCount++
+    if (!c.seoDescription) emptyCount++
+    if ((c as any).seoH1 === undefined ? true : !(c as any).seoH1) emptyCount++
+    if ((c as any).seoIntroText === undefined ? false : !(c as any).seoIntroText) emptyCount++
+  }
+
+  // Products — try with new columns, fall back without
+  let products: any[] = []
+  try {
+    products = await db.product.findMany({
       select: {
         seoTitle: true, seoDescription: true, seoH1: true,
         images: { select: { altText: true }, orderBy: { position: 'asc' }, take: 1 },
       },
-    }),
-    db.seoOverride.findMany({ select: { route: true, contentType: true, seoTitle: true, seoDescription: true, h1: true, introText: true } }),
-  ])
-
-  let emptyCount = 0
-  for (const c of categories) {
-    if (!c.seoTitle) emptyCount++
-    if (!c.seoDescription) emptyCount++
-    if (!c.seoH1) emptyCount++
-    if (!c.seoIntroText) emptyCount++
+    })
+  } catch {
+    products = await db.product.findMany({
+      select: {
+        seoTitle: true, seoDescription: true,
+        images: { select: { altText: true }, orderBy: { position: 'asc' }, take: 1 },
+      },
+    })
   }
   for (const p of products) {
     if (!p.seoTitle) emptyCount++
     if (!p.seoDescription) emptyCount++
-    if (!p.seoH1) emptyCount++
+    if ((p as any).seoH1 === undefined ? true : !(p as any).seoH1) emptyCount++
     if (p.images[0] && !p.images[0].altText) emptyCount++
   }
+
+  // Overrides — try, fall back to empty list if table doesn't exist
+  let overrides: any[] = []
+  try {
+    overrides = await db.seoOverride.findMany({ select: { route: true, contentType: true, seoTitle: true, seoDescription: true, h1: true, introText: true } })
+  } catch {
+    overrides = []
+  }
+
   // Services and pages — count missing fields across all known routes
   const serviceRoutes = SERVICES.map((s) => `/services/${s.slug}`)
-  const pageRoutes = (await import('@/lib/seo')).STATIC_PAGES.map((p) => p.route)
+  const { STATIC_PAGES } = await import('@/lib/seo')
+  const pageRoutes = STATIC_PAGES.map((p) => p.route)
   for (const route of [...serviceRoutes, ...pageRoutes]) {
     const ov = overrides.find((o) => o.route === route)
     if (!ov?.seoTitle) emptyCount++

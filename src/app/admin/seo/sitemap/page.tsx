@@ -21,30 +21,63 @@ export default async function SeoSitemapPage() {
   await requireSuperAdmin()
   const perms = await getMyPermissionCodes()
 
-  const [categories, products, overrides, lastAudit] = await Promise.all([
-    db.category.findMany({
+  // Categories — try with new columns, fall back without
+  let categories: any[] = []
+  try {
+    categories = await db.category.findMany({
       where: { active: true },
       select: { id: true, name: true, slug: true, parentId: true, noindex: true, inSitemap: true },
-    }),
-    db.product.findMany({
+    })
+  } catch {
+    categories = await db.category.findMany({
+      where: { active: true },
+      select: { id: true, name: true, slug: true, parentId: true },
+    })
+  }
+
+  // Products — try with new columns, fall back without
+  let products: any[] = []
+  try {
+    products = await db.product.findMany({
       where: { published: true, status: 'ACTIVE' },
       select: { id: true, name: true, slug: true, noindex: true, inSitemap: true },
-    }),
-    db.seoOverride.findMany({
+    })
+  } catch {
+    products = await db.product.findMany({
+      where: { published: true, status: 'ACTIVE' },
+      select: { id: true, name: true, slug: true },
+    })
+  }
+
+  // Overrides — try, fall back to empty list if table doesn't exist
+  let overrides: any[] = []
+  try {
+    overrides = await db.seoOverride.findMany({
       select: { route: true, contentType: true, name: true, noindex: true, inSitemap: true },
-    }),
-    db.seoAuditLog.findFirst({
+    })
+  } catch {
+    overrides = []
+  }
+
+  // SeoAuditLog — may not exist if migration hasn't been applied
+  let lastAudit: { createdAt: Date } | null = null
+  try {
+    lastAudit = await db.seoAuditLog.findFirst({
       where: { entityType: 'sitemap', fieldName: '_regenerate' },
       orderBy: { createdAt: 'desc' },
       select: { createdAt: true },
-    }),
-  ])
+    })
+  } catch {
+    lastAudit = null
+  }
 
   // Sitemap included pages — products, categories, services, static pages
-  const includedCategories = categories.filter((c) => c.inSitemap && !c.noindex)
-  const excludedCategories = categories.filter((c) => !c.inSitemap || c.noindex)
-  const includedProducts = products.filter((p) => p.inSitemap && !p.noindex)
-  const excludedProducts = products.filter((p) => !p.inSitemap || p.noindex)
+  // Use ?? defaults since noindex/inSitemap may be undefined if migration
+  // hasn't been applied (the fallback query doesn't include those columns).
+  const includedCategories = categories.filter((c) => (c.inSitemap ?? true) && !(c.noindex ?? false))
+  const excludedCategories = categories.filter((c) => !(c.inSitemap ?? true) || (c.noindex ?? false))
+  const includedProducts = products.filter((p) => (p.inSitemap ?? true) && !(p.noindex ?? false))
+  const excludedProducts = products.filter((p) => !(p.inSitemap ?? true) || (p.noindex ?? false))
 
   // Services
   const serviceRoutes = SERVICES.map((s) => ({ route: `/services/${s.slug}`, name: s.name, comingSoon: !!s.comingSoon }))

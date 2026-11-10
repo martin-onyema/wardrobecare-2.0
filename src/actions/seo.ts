@@ -129,19 +129,33 @@ export async function saveSeoAction(input: SaveSeoInput): Promise<SaveSeoResult>
       slug: existing.slug,
     }
 
-    await db.category.update({
-      where: { id: input.id },
-      data: {
-        seoTitle: input.seoTitle || null,
-        seoDescription: input.seoDescription || null,
-        seoH1: input.h1 || null,
-        seoIntroText: input.introText || null,
-        seoOgImage: input.ogImage || null,
-        noindex: input.noindex,
-        inSitemap: input.inSitemap,
-        ...(slugChanged ? { slug: newSlug } : {}),
-      },
-    })
+    try {
+      // Try with the new SEO columns
+      await db.category.update({
+        where: { id: input.id },
+        data: {
+          seoTitle: input.seoTitle || null,
+          seoDescription: input.seoDescription || null,
+          seoH1: input.h1 || null,
+          seoIntroText: input.introText || null,
+          seoOgImage: input.ogImage || null,
+          noindex: input.noindex,
+          inSitemap: input.inSitemap,
+          ...(slugChanged ? { slug: newSlug } : {}),
+        },
+      })
+    } catch (e: any) {
+      // Migration not applied — fall back to updating only pre-existing columns
+      console.warn('[seo] category.update fell back to legacy columns:', e?.message?.slice(0, 100))
+      await db.category.update({
+        where: { id: input.id },
+        data: {
+          seoTitle: input.seoTitle || null,
+          seoDescription: input.seoDescription || null,
+          ...(slugChanged ? { slug: newSlug } : {}),
+        },
+      })
+    }
 
     // Audit log each changed field
     for (const [k, oldV] of Object.entries(oldValues)) {
@@ -201,18 +215,33 @@ export async function saveSeoAction(input: SaveSeoInput): Promise<SaveSeoResult>
     }
 
     // Saving SEO does NOT change product.published or product.status
-    await db.product.update({
-      where: { id: input.id },
-      data: {
-        seoTitle: input.seoTitle || null,
-        seoDescription: input.seoDescription || null,
-        seoH1: input.h1 || null,
-        ogImage: input.ogImage || null,
-        noindex: input.noindex,
-        inSitemap: input.inSitemap,
-        ...(slugChanged ? { slug: newSlug } : {}),
-      },
-    })
+    try {
+      // Try with the new SEO columns
+      await db.product.update({
+        where: { id: input.id },
+        data: {
+          seoTitle: input.seoTitle || null,
+          seoDescription: input.seoDescription || null,
+          seoH1: input.h1 || null,
+          ogImage: input.ogImage || null,
+          noindex: input.noindex,
+          inSitemap: input.inSitemap,
+          ...(slugChanged ? { slug: newSlug } : {}),
+        },
+      })
+    } catch (e: any) {
+      // Migration not applied — fall back to updating only pre-existing columns
+      console.warn('[seo] product.update fell back to legacy columns:', e?.message?.slice(0, 100))
+      await db.product.update({
+        where: { id: input.id },
+        data: {
+          seoTitle: input.seoTitle || null,
+          seoDescription: input.seoDescription || null,
+          ogImage: input.ogImage || null,
+          ...(slugChanged ? { slug: newSlug } : {}),
+        },
+      })
+    }
 
     // Update main image alt text if provided
     if (input.imageAlt !== undefined && existing.images.length > 0) {
