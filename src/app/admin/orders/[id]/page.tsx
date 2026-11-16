@@ -178,17 +178,40 @@ export default async function AdminOrderDetailPage({
                 {order.items.map((it) => (
                   <TableRow key={it.id}>
                     <TableCell className="pl-6">
-                      <div className="flex flex-col">
-                        <span className="font-medium">{it.productName}</span>
-                        {it.productSlug && (
-                          <Link
-                            href={`/shop/${it.productSlug}`}
-                            className="text-xs text-muted-foreground hover:underline font-mono"
-                            target="_blank"
-                          >
-                            {it.productSlug}
-                          </Link>
+                      <div className="flex items-center gap-3">
+                        {it.productImage ? (
+                          <img
+                            src={it.productImage}
+                            alt={it.productName}
+                            className="h-12 w-12 rounded-md object-cover border border-border"
+                          />
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-md border border-border bg-muted text-[10px] text-muted-foreground">
+                            No img
+                          </div>
                         )}
+                        <div className="flex flex-col">
+                          {it.productSlug ? (
+                            <Link
+                              href={`/product/${it.productSlug}`}
+                              className="font-medium text-foreground hover:underline underline-offset-2"
+                              target="_blank"
+                            >
+                              {it.productName}
+                            </Link>
+                          ) : (
+                            <span className="font-medium">{it.productName}</span>
+                          )}
+                          {it.productSlug && (
+                            <Link
+                              href={`/product/${it.productSlug}`}
+                              className="text-xs text-muted-foreground hover:underline font-mono"
+                              target="_blank"
+                            >
+                              {it.productSlug}
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="text-sm">{it.size ?? '—'}</TableCell>
