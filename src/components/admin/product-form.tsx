@@ -540,11 +540,43 @@ export function ProductForm({
                   >
                     <div className="md:col-span-2 flex flex-col gap-1.5">
                       <Label className="text-xs text-muted-foreground">Size</Label>
-                      <Input
+                      <select
                         value={v.size}
                         onChange={(e) => updateVariant(i, 'size', e.target.value)}
-                        placeholder="M"
-                      />
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="">No size</option>
+                        <optgroup label="Clothing">
+                          <option value="XS">XS</option>
+                          <option value="S">S</option>
+                          <option value="M">M</option>
+                          <option value="L">L</option>
+                          <option value="XL">XL</option>
+                          <option value="XXL">XXL</option>
+                          <option value="3XL">3XL</option>
+                        </optgroup>
+                        <optgroup label="Shoes">
+                          <option value="40">40</option>
+                          <option value="41">41</option>
+                          <option value="42">42</option>
+                          <option value="43">43</option>
+                          <option value="44">44</option>
+                          <option value="45">45</option>
+                          <option value="46">46</option>
+                        </optgroup>
+                        <optgroup label="Trousers">
+                          <option value="30">30</option>
+                          <option value="32">32</option>
+                          <option value="34">34</option>
+                          <option value="36">36</option>
+                          <option value="38">38</option>
+                          <option value="40">40</option>
+                        </optgroup>
+                        <optgroup label="Other">
+                          <option value="One Size">One Size</option>
+                          <option value="Free Size">Free Size</option>
+                        </optgroup>
+                      </select>
                     </div>
                     <div className="md:col-span-3 flex flex-col gap-1.5">
                       <Label className="text-xs text-muted-foreground">Variant SKU</Label>
