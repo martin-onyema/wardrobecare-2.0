@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "z-cdn.chatglm.cn" },
       { protocol: "https", hostname: "dpvkzrtxnoccprryerds.supabase.co" },
       { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "wardrobecare.com.ng" },
+      { protocol: "https", hostname: "*.wardrobecare.com.ng" },
     ],
     formats: ["image/avif", "image/webp"],
   },
