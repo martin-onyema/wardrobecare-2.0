@@ -77,6 +77,10 @@ model User {
   redirectsCreated   Redirect[]   @relation("RedirectAuthor")
   seoAuditLogsAuthored SeoAuditLog[] @relation("SeoAuditLogAuthor")
 
+  // Sales & Campaigns
+  salesCreated   Sale[]      @relation("SaleCreatedBy")
+  saleEvents     SaleEvent[] @relation("SaleEventActor")
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -299,6 +303,7 @@ model Product {
   reviews         Review[]
   bundles        BundleItem[]
   campaignItems   CampaignProduct[]
+  saleItems       SaleItem[]
 
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
@@ -1025,6 +1030,139 @@ model CampaignProduct {
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([campaignId, productId])
+}
+
+// ============================================================
+// SALES & CAMPAIGN MANAGEMENT SYSTEM
+// ============================================================
+
+enum SaleKind {
+  CAMPAIGN    // Timed sale with start/end
+  CLEARANCE   // No end date
+}
+
+enum SaleStatus {
+  DRAFT
+  PENDING
+  SCHEDULED
+  LIVE
+  ENDED
+}
+
+model Sale {
+  id              String    @id @default(cuid())
+  name            String
+  kind            SaleKind  @default(CAMPAIGN)
+  status          SaleStatus @default(DRAFT)
+  startsAt        DateTime
+  endsAt          DateTime?
+  endedAt         DateTime?
+  // Discount
+  defaultPct      Int       @default(10)
+  // Homepage
+  home            Boolean   @default(true)
+  pins            String?   // JSON array of up to 2 productIds
+  allowFlawOnHome Boolean   @default(false)
+  countdown       Boolean   @default(true)
+  // Rules
+  bundleSavingOnSale Boolean @default(false)
+  blockPromoCodes Boolean   @default(true)
+  // Display
+  headline        String?
+  subheadline    String?
+  announcement   String?
+  // Approval
+  sentBackNote   String?
+  // Revision (optimistic concurrency)
+  revision       Int       @default(1)
+  // Audit
+  createdById    String?
+  createdBy       User?     @relation("SaleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  // Relations
+  items           SaleItem[]
+  events          SaleEvent[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@index([kind])
+  @@index([startsAt])
+  @@index([endsAt])
+}
+
+model SaleItem {
+  id          String   @id @default(cuid())
+  saleId      String
+  productId   String
+  // Per-product discount (overrides sale.defaultPct)
+  pct         Int?
+  // Deal reason
+  reasonId    String?
+  reason      String?   // snapshot of reason label at assignment time
+  note        String?   // flaw description (min 15 chars for MINOR_FLAW)
+  flawPhotoUrl String?  // uploaded photo showing the flaw
+  // Calculated (cached for display)
+  normalPrice Float?
+  salePrice   Float?
+  // Relations
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([saleId, productId])
+  @@index([saleId])
+  @@index([productId])
+}
+
+model SaleEvent {
+  id          String   @id @default(cuid())
+  saleId      String
+  text        String   // human-readable event description
+  actorId     String?
+  actor       User?    @relation("SaleEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([saleId])
+  @@index([createdAt])
+}
+
+// ─── Deal Settings (singleton) ──────────────────────────────────────────────
+model DealSettings {
+  id              String   @id @default(cuid())
+  roundTo         Int      @default(50)     // round prices to nearest ₦50
+  minPercent      Int      @default(5)      // minimum discount %
+  maxPercent      Int      @default(70)    // maximum discount %
+  ownerOnlyAbove  Int      @default(50)    // discounts above this need owner
+  homeMinItems    Int      @default(3)     // min items to show homepage band
+  homeMaxCards    Int      @default(4)     // max product cards on homepage
+  countdownHours Int      @default(72)    // show countdown when < 72h left
+  urgentHours     Int      @default(24)    // red countdown when < 24h left
+  updatedAt       DateTime @updatedAt
+}
+
+// ─── Deal Reason ─────────────────────────────────────────────────────────────
+enum DealReasonType {
+  INFO          // Old Stock, Older Design, Discontinued
+  MINOR_FLAW    // requires note + photo
+  FINAL_CLEARANCE
+}
+
+enum DealReturnRule {
+  STANDARD         // 48h/24h exchange
+  FLAW_DISCLOSED   // wrong size/item exchanged; disclosed flaw is not a defect
+  FINAL_SALE       // no exchange
+}
+
+model DealReason {
+  id          String   @id @default(cuid())
+  label       String   @unique
+  type        DealReasonType
+  returnRule  DealReturnRule @default(STANDARD)
+  defaultText String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model ProductBundle {
